@@ -14,11 +14,14 @@ function normalizeBaseUrl(raw: string): string {
 }
 
 export function getApiBaseUrl(): string {
+  const fallback = "https://tacit-backend-pvvm.onrender.com";
+
   const fromEnv =
     (import.meta as any)?.env?.VITE_API_BASE_URL ??
     (import.meta as any)?.env?.VITE_API_URL ??
     "";
-  return normalizeBaseUrl(String(fromEnv));
+
+  return normalizeBaseUrl(String(fromEnv || fallback));
 }
 
 export function createApiClient(opts: ApiClientOptions = {}) {
