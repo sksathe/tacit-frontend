@@ -14,7 +14,7 @@ function normalizeBaseUrl(raw: string): string {
 }
 
 export function getApiBaseUrl(): string {
-  const fallback = "https://tacit-backend-pvvm.onrender.com";
+  const fallback = "https://tacit-backend-puvm.onrender.com";
 
   const fromEnv =
     (import.meta as any)?.env?.VITE_API_BASE_URL ??
