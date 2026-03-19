@@ -17,6 +17,7 @@ export function ScheduleSessionModal({ open, onClose }: ScheduleSessionModalProp
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
+  const [meetingMode, setMeetingMode] = useState<"phone" | "web">("phone");
   const [formData, setFormData] = useState({
     sessionTitle: "",
     sessionDate: "",
@@ -24,6 +25,7 @@ export function ScheduleSessionModal({ open, onClose }: ScheduleSessionModalProp
     sessionDuration: "",
     inviteeEmail: "",
     sessionNotes: "",
+    meetingUrl: "",
   });
 
   const { user } = useAuth();
@@ -67,6 +69,7 @@ export function ScheduleSessionModal({ open, onClose }: ScheduleSessionModalProp
     if (!selectedAgent || !formData.sessionTitle || !formData.sessionDate || !formData.sessionTime || !formData.sessionDuration || !formData.inviteeEmail) {
       return;
     }
+    if (meetingMode === "web" && !formData.meetingUrl.trim()) return;
 
     if (!user) {
       toast({
@@ -118,13 +121,15 @@ export function ScheduleSessionModal({ open, onClose }: ScheduleSessionModalProp
               role: selectedAgentData.role,
               persona: selectedAgentData.persona,
               description: selectedAgentData.description,
-              descriptionContinued: selectedAgentData.descriptionContinued,
+              // Map new background field to legacy descriptionContinued for backend/email templates
+              descriptionContinued: selectedAgentData.background,
               specialties: selectedAgentData.specialties,
             },
           }
         : {};
 
-      const data = await apiClient.requestJson<any>("/api/meetings", {
+      const endpoint = meetingMode === "web" ? "/api/web-meetings" : "/api/meetings";
+      const data = await apiClient.requestJson<any>(endpoint, {
         method: "POST",
         token: session.access_token,
         body: JSON.stringify({
@@ -134,6 +139,7 @@ export function ScheduleSessionModal({ open, onClose }: ScheduleSessionModalProp
           scheduled_start_at: scheduledStartAt,
           scheduled_end_at: scheduledEndAt,
           invitees,
+          ...(meetingMode === "web" ? { meeting_url: formData.meetingUrl.trim() } : {}),
           ...agentPayload,
         }),
       });
@@ -159,6 +165,7 @@ export function ScheduleSessionModal({ open, onClose }: ScheduleSessionModalProp
       setSelectedAgent(null);
       setSearchQuery("");
       setIsSearchFocused(false);
+      setMeetingMode("phone");
       setFormData({
         sessionTitle: "",
         sessionDate: "",
@@ -166,6 +173,7 @@ export function ScheduleSessionModal({ open, onClose }: ScheduleSessionModalProp
         sessionDuration: "",
         inviteeEmail: "",
         sessionNotes: "",
+        meetingUrl: "",
       });
     } catch (error: any) {
       console.error("Error scheduling session:", error);
@@ -184,6 +192,8 @@ export function ScheduleSessionModal({ open, onClose }: ScheduleSessionModalProp
     if (!open) {
       setSearchQuery("");
       setIsSearchFocused(false);
+      setMeetingMode("phone");
+      setFormData((prev) => ({ ...prev, meetingUrl: "" }));
     }
   }, [open]);
 
@@ -210,6 +220,31 @@ export function ScheduleSessionModal({ open, onClose }: ScheduleSessionModalProp
         <p className="text-muted-foreground mb-8 text-center text-base">
         Pick an agent, set a time, and we’ll send the invitee a calendar invite with a dedicated phone number and access code.
         </p>
+
+        <div className="mb-6 flex flex-wrap items-center justify-center gap-2">
+          <button
+            type="button"
+            onClick={() => setMeetingMode("phone")}
+            className={`rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
+              meetingMode === "phone"
+                ? "bg-primary text-primary-foreground"
+                : "bg-black/30 text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            Phone session
+          </button>
+          <button
+            type="button"
+            onClick={() => setMeetingMode("web")}
+            className={`rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
+              meetingMode === "web"
+                ? "bg-primary text-primary-foreground"
+                : "bg-black/30 text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            Web meeting (Zoom/Meet)
+          </button>
+        </div>
 
         {/* Netflix-style Search Bar */}
         <div ref={searchRef} className="relative mb-8">
@@ -286,6 +321,22 @@ export function ScheduleSessionModal({ open, onClose }: ScheduleSessionModalProp
         </div>
 
         <form onSubmit={handleSubmit} className="mt-8">
+          {meetingMode === "web" && (
+            <div className="mb-6">
+              <label htmlFor="meetingUrl" className="block text-primary font-semibold mb-2 text-[0.95rem]">
+                Meeting Link
+              </label>
+              <input
+                type="url"
+                id="meetingUrl"
+                value={formData.meetingUrl}
+                onChange={(e) => setFormData({ ...formData, meetingUrl: e.target.value })}
+                placeholder="Paste Zoom/Google Meet link"
+                required
+                className="w-full bg-input border-2 border-primary/30 rounded-lg px-4 py-3 text-foreground text-base transition-all focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+              />
+            </div>
+          )}
           <div className="mb-6">
             <label htmlFor="scheduleSessionTitle" className="block text-primary font-semibold mb-2 text-[0.95rem]">
               Meeting Title

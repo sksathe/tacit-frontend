@@ -18,7 +18,7 @@ export interface TacitAgent {
   /** Full description paragraph */
   description: string;
   /** Second paragraph or continuation */
-  descriptionContinued?: string;
+  background?: string;
   /** Bullet list of specialties */
   specialties: string[];
   /** Keywords for search (name, tagline, role, description, specialties) */
@@ -26,7 +26,7 @@ export interface TacitAgent {
 }
 
 export const TACIT_AGENTS: TacitAgent[] = [
-  {
+ /* {
     id: "rachael",
     name: "Rachel",
     tagline: "Finance Strategy Expert",
@@ -152,5 +152,138 @@ export const TACIT_AGENTS: TacitAgent[] = [
       "KPI",
       "dashboard",
     ],
+  },*/
+  {
+    id: "sage",
+    name: "SAGE",
+    tagline: "Strategic Analysis & Guided Extraction",
+    icon: "🧠",
+    image: `${import.meta.env.BASE_URL}images/sage.png`,
+    role: "AI Strategy & Discovery Partner",
+    persona: "Analytical • Structured • Insight-driven",
+    description: "SAGE helps teams uncover how their business actually works. It facilitates structured discovery conversations to map processes, identify inefficiencies, and capture critical operational knowledge that is often undocumented.",
+    background: "Through guided questioning and analytical reasoning, SAGE extracts institutional knowledge from stakeholders and transforms it into clear insights, structured documentation, and actionable next steps.",
+    specialties: [
+      "Business process discovery",
+      "Operational workflow mapping",
+      "Technology stack assessment",
+      "Stakeholder alignment conversations",
+      "Future state planning",
+      "Knowledge capture and synthesis"
+    ],
+    keywords: [
+      "sage",
+      "strategy",
+      "business discovery",
+      "process mapping",
+      "consulting",
+      "analysis",
+      "workflow discovery",
+      "stakeholder analysis",
+      "technology assessment",
+      "future state planning"
+    ]
   },
+  {
+    id: "aria",
+    name: "ARIA",
+    tagline: "Advisor Registration & Integration Assistant",
+    icon: "🤝",
+    image: `${import.meta.env.BASE_URL}images/aria.png`,
+    role: "AI Client Onboarding Specialist",
+    persona: "Professional • Empathetic • Detail-oriented",
+    description: "ARIA specializes in onboarding conversations with financial advisors and clients. It helps gather compliance information, understand practice structure, and guide new participants through complex onboarding workflows.",
+    background: "Former McKinsey Senior Consultant with 12 years in digital transformation. PhD in Organizational Psychology from Stanford. Certified in Design Thinking and Systems Mapping. Published thought leader on knowledge extraction methodologies.",
+    specialties: [
+      "Financial advisor onboarding",
+      "Compliance documentation collection",
+      "Practice structure assessment",
+      "Technology onboarding discussions",
+      "Client relationship discovery",
+      "Operational readiness preparation"
+    ],
+    keywords: [
+      "aria",
+      "advisor onboarding",
+      "client onboarding",
+      "financial advisor",
+      "wealth management",
+      "compliance intake",
+      "practice setup",
+      "registration",
+      "integration",
+      "advisor workflows"
+    ]
+  },
+  {
+    id: "mason",
+    name: "MASON",
+    tagline: "Managed Agreement & SaaS Operations Navigator",
+    icon: "📑",
+    image: `${import.meta.env.BASE_URL}images/mason.png`,
+    role: "AI Contract & Operations Advisor",
+    persona: "Methodical • Precise • Operational",
+    description: "MASON helps organizations navigate complex agreements, operational contracts, and SaaS implementation workflows. It facilitates structured conversations around contracts, pricing models, service agreements, and operational requirements.",
+    background: "By guiding stakeholders through contract reviews and operational planning discussions, MASON ensures that important details are documented clearly and that organizations can move from negotiation to implementation smoothly.",
+    specialties: [
+      "Contract and agreement review",
+      "Redline negotiation preparation",
+      "SaaS onboarding discussions",
+      "Financial onboarding coordination",
+      "Vendor relationship planning",
+      "Renewal and contract lifecycle management"
+    ],
+    keywords: [
+      "mason",
+      "contracts",
+      "agreement review",
+      "vendor negotiations",
+      "saas onboarding",
+      "contract lifecycle",
+      "renewals",
+      "financial onboarding",
+      "legal workflow",
+      "operations"
+    ]
+  },
+  {
+    id: "lexa",
+    name: "Clara",
+    tagline: "Contract Intelligence & Revenue Recognition Expert",
+    icon: "📄",
+    image: `${import.meta.env.BASE_URL}images/clara.png`,
+    role: "AI Contract Intelligence Partner",
+    persona: "Analytical • Detail-oriented • Compliance-driven • Financially-aware • Structured thinker",
+    description:
+      "Clara is an AI-powered contract intelligence agent designed to extract, interpret, and structure complex customer contracts into actionable business data. She understands nuanced legal and financial language across order forms, MSAs, and amendments, transforming unstructured documents into clean, system-ready outputs.",
+    background:
+      "From identifying billing terms and subscription schedules to mapping obligations into revenue recognition timelines, Clara ensures every contract is parsed with precision and aligned with compliance policies. She bridges the gap between legal documents and operational systems like Salesforce and DriveTrain.",
+    specialties: [
+      "PDF Contract Parsing (Order Forms, MSAs, Amendments)",
+      "Table Extraction with Formatting Preservation (Merged Cells, Multi-line Fields)",
+      "Clause-Level Understanding (Billing Terms, Renewal, Termination)",
+      "Field Mapping to Structured Schemas (Customer, Pricing, Terms)",
+      "Revenue Recognition Modeling (ASC 606 / IFRS 15 alignment)",
+      "Multi-contract Type Handling with Schema Variability",
+      "Confidence Scoring & Validation Layers",
+      "Integration-ready Outputs (Salesforce, DriveTrain)"
+    ],
+    keywords: [
+      "contract parsing",
+      "pdf to structured data",
+      "rev rec",
+      "revenue recognition",
+      "salesforce integration",
+      "drivetrain finance",
+      "order form extraction",
+      "legal document ai",
+      "table extraction",
+      "contract intelligence",
+      "financial compliance",
+      "asc 606",
+      "ifrs 15",
+      "subscription contracts",
+      "billing terms extraction"
+    ]
+  }
 ];

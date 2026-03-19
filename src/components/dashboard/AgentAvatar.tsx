@@ -3,7 +3,7 @@ import { useState } from "react";
 
 interface AgentAvatarProps {
   agent: TacitAgent;
-  size?: "sm" | "md" | "lg";
+  size?: "sm" | "md" | "lg" | "xl";
 }
 
 export function AgentAvatar({ agent, size = "md" }: AgentAvatarProps) {
@@ -12,9 +12,13 @@ export function AgentAvatar({ agent, size = "md" }: AgentAvatarProps) {
   const sizeClasses =
     size === "sm"
       ? "w-8 h-8"
+      : size === "xl"
+      ? "w-20 h-20"
       : size === "lg"
       ? "w-14 h-14"
       : "w-10 h-10";
+
+  const iconClasses = size === "xl" ? "text-3xl" : "text-xl";
 
   const showImage = agent.image && !failed;
 
@@ -28,7 +32,7 @@ export function AgentAvatar({ agent, size = "md" }: AgentAvatarProps) {
           onError={() => setFailed(true)}
         />
       ) : (
-        <span className="text-xl" aria-hidden>
+        <span className={iconClasses} aria-hidden>
           {agent.icon}
         </span>
       )}

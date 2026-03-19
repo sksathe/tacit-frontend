@@ -4,7 +4,7 @@ import Features from "@/components/sections/Features";
 import HowItWorks from "@/components/sections/HowItWorks";
 import Demos from "@/components/sections/Demos";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Brain, Users, Zap } from "lucide-react";
+import { ArrowRight, Brain, FileText, Users, Zap } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const Index = () => {
@@ -48,6 +48,16 @@ const Index = () => {
               >
                 <Users className="mr-2 h-5 w-5" />
                 Browse Knowledge Library
+              </Button>
+
+              <Button
+                size="lg"
+                variant="secondary"
+                className="h-12 rounded-lg px-8 text-base font-semibold sm:min-w-[220px]"
+                onClick={() => navigate("/contract-revrec")}
+              >
+                <FileText className="mr-2 h-5 w-5" />
+                Contract Rev Rec POC
               </Button>
             </div>
 

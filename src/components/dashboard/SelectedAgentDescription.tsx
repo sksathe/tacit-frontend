@@ -63,11 +63,14 @@ export function SelectedAgentDescription({ agent, onClear, compact }: SelectedAg
           </div>
 
           <div className="space-y-2">
-            <p className="font-medium text-foreground text-sm">Description:</p>
-            <p className="text-muted-foreground text-sm leading-relaxed">{agent.description}</p>
-            {agent.descriptionContinued && (
-              <p className="text-muted-foreground text-sm leading-relaxed">{agent.descriptionContinued}</p>
+            {agent.background && (
+              <>
+                <p className="font-medium text-foreground text-sm">Background:</p>
+                <p className="text-muted-foreground text-sm leading-relaxed">{agent.background}</p>
+              </>
             )}
+            <p className="font-medium text-foreground text-sm mt-3">Description:</p>
+            <p className="text-muted-foreground text-sm leading-relaxed">{agent.description}</p>
           </div>
 
           <div className="space-y-2">

@@ -14,14 +14,27 @@ function normalizeBaseUrl(raw: string): string {
 }
 
 export function getApiBaseUrl(): string {
-  const fallback = "https://tacit-backend-puvm.onrender.com";
-
   const fromEnv =
     (import.meta as any)?.env?.VITE_API_BASE_URL ??
     (import.meta as any)?.env?.VITE_API_URL ??
     "";
 
-  return normalizeBaseUrl(String(fromEnv || fallback));
+  // 1. Explicit env var wins (Render prod, custom setups, etc.)
+  if (String(fromEnv || "").trim()) {
+    return normalizeBaseUrl(String(fromEnv));
+  }
+
+  // 2. Local dev convenience: if frontend is running on localhost, default to local backend
+  if (typeof window !== "undefined") {
+    const origin = window.location.origin;
+    if (origin.startsWith("http://localhost") || origin.startsWith("http://127.0.0.1")) {
+      return normalizeBaseUrl("http://localhost:3001");
+    }
+  }
+
+  // 3. Fallback to Render backend URL
+  const fallback = "https://tacit-backend-puvm.onrender.com";
+  return normalizeBaseUrl(fallback);
 }
 
 export function createApiClient(opts: ApiClientOptions = {}) {

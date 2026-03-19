@@ -3,10 +3,15 @@ import { Brain, Menu } from "lucide-react";
 import { useState } from "react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
-const Header = () => {
+type HeaderProps = {
+  fullWidth?: boolean;
+};
+
+const Header = ({ fullWidth = false }: HeaderProps) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const navigation = [
+    { name: "Contract Rev Rec POC", href: "/contract-revrec", isExternal: false },
     { name: "Product", href: "#features", isExternal: false },
     { name: "How it Works", href: "#how-it-works", isExternal: false },
     { name: "Login / Signup", href: "/login", isExternal: false },
@@ -14,7 +19,11 @@ const Header = () => {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95">
-      <div className="container flex h-[4.5rem] items-center justify-between px-4">
+      <div
+        className={`flex h-[4.5rem] items-center justify-between px-4 sm:px-6 xl:px-8 2xl:px-10 ${
+          fullWidth ? "w-full" : "container"
+        }`}
+      >
         <div className="flex items-center space-x-2">
           <Brain className="h-7 w-7 text-primary" />
           <span className="text-xl font-bold tracking-tight bg-gradient-primary bg-clip-text text-transparent">

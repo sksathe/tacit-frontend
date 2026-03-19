@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
-import { ArrowRight, Play, Brain } from "lucide-react";
+import { ArrowRight, Play, Brain, FileText } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 
@@ -121,6 +121,15 @@ const Hero = () => {
               >
                 <Play className="mr-2 h-5 w-5" />
                 Listen to Tacit Demos
+              </Button>
+              <Button
+                size="lg"
+                variant="secondary"
+                className="h-12 rounded-lg px-8 text-base font-semibold sm:min-w-[220px]"
+                onClick={() => navigate("/contract-revrec")}
+              >
+                <FileText className="mr-2 h-5 w-5" />
+                Contract Rev Rec POC
               </Button>
             </div>
 
