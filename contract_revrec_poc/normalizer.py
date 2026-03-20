@@ -107,6 +107,34 @@ def _extract_po_number(text: str) -> str:
 
   return ""
 
+def _extract_contract_id(text: str) -> str:
+  """
+  Best-effort deterministic extraction for contract identifiers.
+  This is a fallback for cases where the LLM returns an empty `contract_header.contract_id`.
+  """
+  if not text:
+    return ""
+
+  patterns = [
+    # Common formats: "Order Form No. 12", "Order No. 2", "Order Form #: 2"
+    r"\border\s*(?:form\s*)?(?:no\.?|number|#)\s*[:\-]?\s*([A-Za-z0-9][A-Za-z0-9\-_/\.]{0,64})",
+    # Some docs use "Contract ID"
+    r"\bcontract\s*id\s*[:\-]?\s*([A-Za-z0-9][A-Za-z0-9\-_/\.]{0,64})",
+  ]
+
+  for pat in patterns:
+    m = re.search(pat, text, flags=re.IGNORECASE)
+    if not m:
+      continue
+    candidate = (m.group(1) or "").strip().strip(".,;:").strip()
+    if not candidate:
+      continue
+    if re.fullmatch(r"[_\-.]{2,}", candidate):
+      continue
+    return candidate
+
+  return ""
+
 
 def _infer_po_required_from_text(raw_text: str, table_text: str) -> str:
   source = "\n".join([raw_text or "", table_text or ""]).strip()
@@ -173,6 +201,10 @@ def normalize_canonical_contract(
   for k, v in list(ch.items()):
     if isinstance(v, str):
       ch[k] = normalize_text_field(v)
+
+  # Fallback: if the LLM failed to populate contract_id, try to parse it directly.
+  if not ch.get("contract_id"):
+    ch["contract_id"] = _extract_contract_id(raw_text or "")
 
   ct = contract_dict.get("commercial_terms", {})
   for k, v in list(ct.items()):

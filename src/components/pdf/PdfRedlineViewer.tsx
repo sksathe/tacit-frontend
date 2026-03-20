@@ -29,6 +29,30 @@ function normalizeQuery(s: string): string {
     .toLowerCase();
 }
 
+function escapeRegExp(s: string): string {
+  return String(s).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function isExactTokenMatch(normItemText: string, q: string): boolean {
+  if (!normItemText || !q) return false;
+  if (normItemText === q) return true;
+
+  // For numeric values, prevent substring matches like `5000` matching `15000`.
+  const isNumeric = /^[0-9]+(?:\.[0-9]+)?$/.test(q);
+  if (isNumeric) {
+    const escaped = escapeRegExp(q);
+    // Only consider "token boundaries" as non-digit chars.
+    // This allows punctuation like '.' to be treated as a boundary while blocking digit neighbors.
+    const re = new RegExp(`(^|[^0-9])${escaped}([^0-9]|$)`);
+    return re.test(normItemText);
+  }
+
+  // For general text, require non-alphanumeric boundaries to avoid partial substring matches.
+  const escaped = escapeRegExp(q);
+  const re = new RegExp(`(^|[^a-z0-9])${escaped}([^a-z0-9]|$)`, "i");
+  return re.test(normItemText);
+}
+
 export function PdfRedlineViewer({
   fileUrl,
   query,
@@ -236,8 +260,8 @@ export function PdfRedlineViewer({
       const norm = normalizeQuery(str);
       if (!norm) continue;
 
-      // Match partials for robustness.
-      if (!(norm.includes(q) || q.includes(norm) || norm === q)) continue;
+      // Exact (boundary-aware) match to avoid substring highlights (e.g. `5000` vs `15000`).
+      if (!isExactTokenMatch(norm, q)) continue;
 
       // Approximate rectangle from item transform:
       // item.transform = [a, b, c, d, e, f]
