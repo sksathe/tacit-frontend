@@ -4,6 +4,14 @@ import { apiClient } from "@/lib/apiClient";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -11,13 +19,66 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, ChevronRight, CloudUpload, Download, FileText, Maximize2, PencilLine, RefreshCcw, Save, Sparkles, Undo2, UploadCloud } from "lucide-react";
+import { ArrowLeft, ChevronRight, CloudUpload, Download, FileText, Maximize2, PencilLine, RefreshCcw, Save, Settings2, Sparkles, Undo2, UploadCloud } from "lucide-react";
 import { PdfRedlineViewer } from "@/components/pdf/PdfRedlineViewer";
 import { TACIT_AGENTS } from "@/data/agents";
 
 export default function ContractRevRecPOC() {
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  const DEFAULT_CANONICAL_SCHEMA_HINT_JSON = useMemo(
+    () =>
+      JSON.stringify(
+        {
+          contract_header: {
+            contract_id: "",
+            customer_name: "",
+            vendor: "",
+            order_form_type: "",
+            agreement_reference: "",
+            effective_date: "",
+            subscription_start_date: "",
+            subscription_end_date: "",
+            term_months: null,
+            currency: "",
+          },
+          commercial_terms: {
+            billing_frequency: "",
+            payment_terms: "",
+            renewal_terms: "",
+            opt_out_terms: "",
+            invoice_schedule: "",
+            po_required: "",
+            po_number: "",
+          },
+          line_items: [
+            {
+              source_section: "",
+              category: "",
+              description: "",
+              user_type: "",
+              quantity: null,
+              unit_price: null,
+              pricing_model: "",
+              pricing: [{ period_label: "Year 1", amount: 0 }],
+              fee_type: "",
+              included: false,
+              notes: "",
+            },
+          ],
+          totals: [{ label: "", period_label: "", amount: 0 }],
+          parsing_metadata: {
+            contract_type_guess: "",
+            confidence_notes: [],
+            unmapped_sections: [],
+          },
+        },
+        null,
+        2,
+      ),
+    [],
+  );
 
   const [files, setFiles] = useState<File[]>([]);
   const [selectedSourceId, setSelectedSourceId] = useState<string | null>(null); // e.g. "file-0" or "pasted"
@@ -34,13 +95,17 @@ export default function ContractRevRecPOC() {
   const [isExportingExcel, setIsExportingExcel] = useState(false);
 
   const [pdfHighlightQuery, setPdfHighlightQuery] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<"summary" | "header" | "terms" | "lines" | "totals">("summary");
+  const [activeTab, setActiveTab] = useState<"lines" | "summary" | "terms">("lines");
   const processingIntervalRef = useRef<number | null>(null);
   const [activeProcessStep, setActiveProcessStep] = useState(0);
   const [isLineItemsModalOpen, setIsLineItemsModalOpen] = useState(false);
   const [isLineItemsEditMode, setIsLineItemsEditMode] = useState(false);
+  const [selectedExpandedRowIndex, setSelectedExpandedRowIndex] = useState<number | null>(null);
   const [lineItemRows, setLineItemRows] = useState<Array<Record<string, string>>>([]);
   const [savedLineItemRows, setSavedLineItemRows] = useState<Array<Record<string, string>>>([]);
+  const [extractedDataColumns, setExtractedDataColumns] = useState<string[]>([]);
+  const [isColumnSettingsOpen, setIsColumnSettingsOpen] = useState(false);
+  const [draftExtractedDataColumns, setDraftExtractedDataColumns] = useState<string[]>([]);
 
   const personaAgent = useMemo(
     () =>
@@ -52,6 +117,18 @@ export default function ContractRevRecPOC() {
   useEffect(() => {
     setPersonaImageFailed(false);
   }, [personaAgent?.image]);
+
+  // Optional per-run LLM configuration for the server-side contract extraction pipeline.
+  const [llmExtraInstructions, setLlmExtraInstructions] = useState<string>("");
+  const [schemaHintMode, setSchemaHintMode] = useState<"default" | "override">("default");
+  const [schemaHintOverride, setSchemaHintOverride] = useState<string>("");
+
+  useEffect(() => {
+    // When the user switches to custom schema, show the current canonical schema so they can edit it.
+    if (schemaHintMode === "override" && !schemaHintOverride.trim()) {
+      setSchemaHintOverride(DEFAULT_CANONICAL_SCHEMA_HINT_JSON);
+    }
+  }, [schemaHintMode, schemaHintOverride, DEFAULT_CANONICAL_SCHEMA_HINT_JSON]);
 
   const processSteps = [
     "Extracting document content",
@@ -530,16 +607,6 @@ export default function ContractRevRecPOC() {
   }, [excelResult]);
 
   const normalizedContract = excelResult?.normalized_contract ?? null;
-  const headerTableRows = useMemo(
-    () =>
-      normalizedContract
-        ? Object.entries(normalizedContract.contract_header ?? {}).map(([k, v]) => ({
-            key: k,
-            value: v === null || v === undefined ? "" : String(v),
-          }))
-        : [],
-    [normalizedContract],
-  );
 
   const commercialTableRows = useMemo(
     () =>
@@ -551,6 +618,61 @@ export default function ContractRevRecPOC() {
         : [],
     [normalizedContract],
   );
+
+  useEffect(() => {
+    if (!lineItemHeaders.length) {
+      setExtractedDataColumns([]);
+      return;
+    }
+
+    setExtractedDataColumns((prev) => {
+      // First-load defaults requested by product: customer/subscription window/price/product.
+      const preferredDefaultOrder = [
+        "Customer_Name",
+        "Contract Start Date",
+        "Contract End Date",
+        "Price",
+        "Product",
+      ];
+
+      if (!prev.length) {
+        const defaults = preferredDefaultOrder.filter((h) => lineItemHeaders.includes(h)).slice(0, 5);
+        if (defaults.length >= 1) {
+          if (defaults.length === 5) return defaults;
+          const used = new Set(defaults);
+          for (const h of lineItemHeaders) {
+            if (used.has(h)) continue;
+            defaults.push(h);
+            used.add(h);
+            if (defaults.length === 5) break;
+          }
+          return defaults;
+        }
+      }
+
+      const next: string[] = [];
+      const used = new Set<string>();
+
+      // Keep previous selections when they still exist in the new header set.
+      for (const h of prev) {
+        if (lineItemHeaders.includes(h) && !used.has(h)) {
+          next.push(h);
+          used.add(h);
+        }
+        if (next.length === 5) break;
+      }
+
+      // Fill remaining slots with available headers (up to 5 columns total).
+      for (const h of lineItemHeaders) {
+        if (used.has(h)) continue;
+        next.push(h);
+        used.add(h);
+        if (next.length === 5) break;
+      }
+
+      return next;
+    });
+  }, [lineItemHeaders]);
 
   const activeSourceLabel = useMemo(() => {
     if (selectedSourceId?.startsWith("file-")) {
@@ -664,6 +786,15 @@ export default function ContractRevRecPOC() {
       const fd = new FormData();
       fd.append("file", selectedFile);
 
+      const extra = llmExtraInstructions.trim();
+      if (extra) fd.append("llmExtraInstructions", extra);
+
+      fd.append("schemaHintMode", schemaHintMode);
+      if (schemaHintMode === "override") {
+        const override = schemaHintOverride.trim();
+        if (override) fd.append("schemaHintOverride", override);
+      }
+
       const res = await apiClient.request("/api/contracts/process", { method: "POST", body: fd });
       const json = (await res.json()) as { error?: string; ok?: boolean };
 
@@ -722,6 +853,25 @@ export default function ContractRevRecPOC() {
         header,
       )
     );
+  }
+
+  function toggleDraftExtractedDataColumn(header: string, checked: boolean) {
+    setDraftExtractedDataColumns((prev) => {
+      if (checked) {
+        if (prev.includes(header)) return prev;
+        if (prev.length >= 5) return prev;
+        return [...prev, header];
+      }
+      // Keep at least one visible column.
+      if (prev.length <= 1) return prev;
+      return prev.filter((h) => h !== header);
+    });
+  }
+
+  function applyDraftExtractedDataColumns() {
+    if (!draftExtractedDataColumns.length) return;
+    setExtractedDataColumns(draftExtractedDataColumns);
+    setIsColumnSettingsOpen(false);
   }
 
   async function exportExcelWithCurrentEdits() {
@@ -797,7 +947,7 @@ export default function ContractRevRecPOC() {
               <span className="sr-only">Back</span>
             </Button>
             <div className="space-y-0.5">
-              <h1 className="text-2xl font-bold tracking-tight text-primary sm:text-[1.7rem]">Contract Automation Studio</h1>
+              <h1 className="text-2xl font-bold tracking-tight text-primary sm:text-[1.7rem]">Tacit Automation Studio</h1>
               <p className="text-sm text-muted-foreground">
                 Load executed contracts, run the MetricStream extractor, and review normalized contract data with Excel export.
               </p>
@@ -809,14 +959,34 @@ export default function ContractRevRecPOC() {
               variant="default"
               className="bg-gradient-primary"
               onClick={() => {
+                // Reset to initial page state
+                if (processingIntervalRef.current !== null) {
+                  window.clearInterval(processingIntervalRef.current);
+                  processingIntervalRef.current = null;
+                }
+                setFiles([]);
+                setSelectedSourceId(null);
+                setPastedText("");
+                setPreviewUrl(null);
                 setExcelResult(null);
                 setExcelUrl(null);
                 setPdfHighlightQuery(null);
+                setActiveTab("lines");
+                setActiveProcessStep(0);
+                setIsProcessing(false);
                 setIsLineItemsModalOpen(false);
                 setIsLineItemsEditMode(false);
                 setIsExportingExcel(false);
+                setSelectedExpandedRowIndex(null);
+                setLineItemRows([]);
+                setSavedLineItemRows([]);
+                setExtractedDataColumns([]);
+                setDraftExtractedDataColumns([]);
+                setIsColumnSettingsOpen(false);
+                setLlmExtraInstructions("");
+                setSchemaHintMode("default");
+                setSchemaHintOverride("");
               }}
-              disabled={isProcessing}
             >
               Start Over
             </Button>
@@ -896,7 +1066,18 @@ export default function ContractRevRecPOC() {
           <Card className="relative overflow-hidden border-primary/25 bg-card/60 shadow-[0_0_0_1px_hsl(var(--primary)/0.12)]">
             {isInitialLoadState && (
               <CardHeader className="items-start pb-4">
-                <CardTitle className="text-lg">Load Source Documents</CardTitle>
+                <CardTitle className="w-full text-lg flex items-center justify-between gap-2">
+                  <span>Automation Workspace</span>
+                  <span className="text-xs font-medium text-muted-foreground flex items-center gap-1">
+                    Extractor
+                    <ChevronRight className="h-3 w-3" />
+                    Contract Data
+                  </span>
+                </CardTitle>
+                <div className="mt-2 inline-flex rounded-full border border-primary/35 bg-primary/10 px-2.5 py-1 text-[0.62rem] font-semibold uppercase tracking-[0.12em] text-primary/90">
+                  Step 1 · Load Source Document
+                </div>
+                <div className="text-base font-semibold">Load Source Documents</div>
               </CardHeader>
             )}
             <CardContent className="space-y-5 transition-all duration-300 w-full">
@@ -937,23 +1118,6 @@ export default function ContractRevRecPOC() {
                       <iframe src={previewUrl} title="Selected document preview" className="h-full w-full border-0" />
                     )}
                   </div>
-                  <div className="flex items-center justify-between gap-3 pt-3">
-                    <div className="text-xs text-muted-foreground truncate">{selectedFile.name}</div>
-                    <label className="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground cursor-pointer shadow-md hover:shadow-lg transition-smooth">
-                      <span>Add more</span>
-                      <input
-                        type="file"
-                        accept=".pdf,.doc,.docx,.txt,.md"
-                        multiple
-                        className="hidden"
-                        onChange={(e) => {
-                          const list = Array.from(e.target.files ?? []);
-                          setFiles(list);
-                          if (list.length) setSelectedSourceId("file-0");
-                        }}
-                      />
-                    </label>
-                  </div>
                 </div>
               ) : (
                 <div
@@ -969,7 +1133,7 @@ export default function ContractRevRecPOC() {
                     PDF, DOCX, XLSX, CSV, TXT — up to 25MB each (POC limited by browser preview).
                   </div>
                   <div className="mt-4">
-                    <label className="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-xs font-semibold text-primary-foreground cursor-pointer shadow-md hover:shadow-lg transition-smooth">
+                    <label className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground cursor-pointer shadow-md hover:shadow-lg transition-smooth">
                       <span>Choose Files</span>
                       <input
                         type="file"
@@ -1069,23 +1233,25 @@ export default function ContractRevRecPOC() {
           {/* Right: Automation Workspace + results (only after a document is present) */}
           {(files.length > 0 || !!pastedText || !!excelResult) && (
             <Card className="h-fit border-border/70 bg-card/60 xl:sticky xl:top-24">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-lg flex items-center justify-between">
-                  <span>Automation Workspace</span>
-                  <span className="text-xs font-medium text-muted-foreground flex items-center gap-1">
-                    Extractor
-                    <ChevronRight className="h-3 w-3" />
-                    Contract Data
-                  </span>
-                </CardTitle>
-                <CardDescription className="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
-                  <span>Run the MetricStream contract extractor to structure this order form.</span>
-                  <span className="hidden lg:inline-flex rounded-full border border-border/70 bg-background/60 px-3 py-1 text-[0.7rem] font-medium text-muted-foreground">
-                    Current document: <span className="ml-1 text-foreground truncate max-w-[180px]">{activeSourceLabel}</span>
-                  </span>
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4 xl:max-h-[calc(100vh-10.5rem)] xl:overflow-y-auto xl:pr-1">
+              {!excelResult && (
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg flex items-center justify-between">
+                    <span>Automation Workspace</span>
+                    <span className="text-xs font-medium text-muted-foreground flex items-center gap-1">
+                      Extractor
+                      <ChevronRight className="h-3 w-3" />
+                      Contract Data
+                    </span>
+                  </CardTitle>
+                  <CardDescription className="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
+                    <span>Run the MetricStream contract extractor to structure this order form.</span>
+                    <span className="hidden lg:inline-flex rounded-full border border-border/70 bg-background/60 px-3 py-1 text-[0.7rem] font-medium text-muted-foreground">
+                      Current document: <span className="ml-1 text-foreground truncate max-w-[180px]">{activeSourceLabel}</span>
+                    </span>
+                  </CardDescription>
+                </CardHeader>
+              )}
+              <CardContent className={`space-y-4 xl:max-h-[calc(100vh-10.5rem)] xl:overflow-y-auto xl:pr-1 ${excelResult ? "pt-4" : ""}`}>
                 {isProcessing && (
                   <div className="space-y-3">
                     <div className="flex items-center justify-between gap-3">
@@ -1134,20 +1300,76 @@ export default function ContractRevRecPOC() {
                   </div>
                 )}
 
+                {!isProcessing && !excelResult && selectedFile && (
+                  <div className="rounded-2xl border border-primary/25 bg-card/55 p-5 space-y-4">
+                    <div className="space-y-1">
+                      <div className="inline-flex rounded-full border border-primary/35 bg-primary/10 px-2.5 py-1 text-[0.62rem] font-semibold uppercase tracking-[0.12em] text-primary/90">
+                        Step 2 · Configure LLM Prompt
+                      </div>
+                      <div className="text-sm font-semibold text-foreground">LLM Extraction Settings (optional)</div>
+                      <div className="text-xs text-muted-foreground">
+                        Adds extra prompt guidance and optionally overrides the schema-example hint used by OpenAI.
+                      </div>
+                    </div>
+
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <div className="text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-muted-foreground/90">
+                          Extra prompt instructions
+                        </div>
+                        <Textarea
+                          value={llmExtraInstructions}
+                          onChange={(e) => setLlmExtraInstructions(e.target.value)}
+                          placeholder="Task: Extract structured business and financial data from this customer contract/order form PDF."
+                          className="min-h-[100px] resize-y"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <div className="text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-muted-foreground/90">
+                          Schema hint mode
+                        </div>
+                        <select
+                          value={schemaHintMode}
+                          onChange={(e) => setSchemaHintMode(e.target.value as "default" | "override")}
+                          className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                        >
+                          <option value="default">Default schema</option>
+                          <option value="override">Custom schema</option>
+                        </select>
+                      </div>
+
+                      {schemaHintMode === "override" && (
+                        <div className="space-y-2">
+                          <div className="text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-muted-foreground/90">
+                          Custom schema JSON (edit)
+                          </div>
+                          <Textarea
+                            value={schemaHintOverride}
+                            onChange={(e) => setSchemaHintOverride(e.target.value)}
+                            className="min-h-[160px] font-mono text-xs"
+                          />
+                          <div className="text-[0.7rem] text-muted-foreground">
+                            Backend will ignore overrides that don’t match the canonical key structure.
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
                 {!isProcessing && !excelResult && (
                   <div className="rounded-2xl border border-dashed border-border/70 bg-muted/10 p-8 text-center">
-                    <FileText className="h-6 w-6 mx-auto mb-3 opacity-70" />
-                    <div className="text-sm text-muted-foreground">Ready when you are.</div>
                     <div className="mt-4 flex justify-center">
                       <Button
                         onClick={processContract}
                         disabled={!selectedFile || isProcessing}
-                        className="bg-gradient-primary"
+                        className="h-12 px-8 text-base font-semibold bg-gradient-primary"
                       >
                         {isProcessing ? (
-                          <RefreshCcw className="h-4 w-4 mr-2 animate-spin" />
+                          "Processing..."
                         ) : (
-                          <CloudUpload className="h-4 w-4 mr-2" />
+                          ""
                         )}
                         Process Information
                       </Button>
@@ -1169,7 +1391,8 @@ export default function ContractRevRecPOC() {
                       </div>
                       <Button
                         type="button"
-                        variant="outline"
+                        variant="default"
+                        className="bg-gradient-primary"
                         onClick={exportExcelWithCurrentEdits}
                         disabled={!excelResult || isExportingExcel}
                       >
@@ -1182,23 +1405,16 @@ export default function ContractRevRecPOC() {
                       </Button>
                     </div>
 
-                    <div className="h-2 rounded-full bg-muted overflow-hidden">
-                      <div className="h-full w-full bg-primary/80" />
-                    </div>
-
-                    <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="w-full">
-                      <TabsList className="grid h-auto w-full grid-cols-2 gap-1 p-1 xl:grid-cols-4">
+                    <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "lines" | "summary" | "terms")} className="w-full">
+                      <TabsList className="grid h-auto w-full grid-cols-3 gap-1 p-1">
+                        <TabsTrigger value="lines" className="px-2 text-[0.72rem] sm:text-xs md:text-sm">
+                          Extracted Data
+                        </TabsTrigger>
                         <TabsTrigger value="summary" className="px-2 text-[0.72rem] sm:text-xs md:text-sm">
                           Summary
                         </TabsTrigger>
-                        <TabsTrigger value="header" className="px-2 text-[0.72rem] sm:text-xs md:text-sm">
-                          Header
-                        </TabsTrigger>
                         <TabsTrigger value="terms" className="px-2 text-[0.72rem] sm:text-xs md:text-sm">
                           Terms
-                        </TabsTrigger>
-                        <TabsTrigger value="lines" className="px-2 text-[0.72rem] sm:text-xs md:text-sm">
-                          Line Items
                         </TabsTrigger>
                       </TabsList>
 
@@ -1232,35 +1448,6 @@ export default function ContractRevRecPOC() {
                           </button>
                         );
                       })}
-                    </div>
-                  </TabsContent>
-
-                  <TabsContent value="header" className="mt-4">
-                    <div className="rounded-lg border overflow-hidden">
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead className="w-[220px]">Field</TableHead>
-                            <TableHead>Value</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {headerTableRows.map((row) => (
-                            <TableRow key={row.key}>
-                              <TableCell className="font-medium">{row.key}</TableCell>
-                              <TableCell className="text-muted-foreground">
-                                <button
-                                  type="button"
-                                  className="text-left w-full"
-                                  onClick={() => setPdfHighlightQuery(row.value)}
-                                >
-                                  {row.value || <span className="opacity-60">—</span>}
-                                </button>
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
                     </div>
                   </TabsContent>
 
@@ -1298,9 +1485,9 @@ export default function ContractRevRecPOC() {
                       <div className="space-y-4 rounded-xl border border-border/70 bg-background/40 p-4">
                         <div className="flex flex-wrap items-center justify-between gap-3">
                           <div>
-                            <div className="text-sm font-semibold">Line Items Summary</div>
+                            <div className="text-sm font-semibold">Extracted Data</div>
                             <div className="text-xs text-muted-foreground">
-                              Review the generated Excel snapshot below, then open the full table for detailed review and edits.
+                              Configure up to 5 visible columns, then click any cell value to redline it in the PDF.
                             </div>
                           </div>
                           <Button type="button" className="bg-gradient-primary" onClick={() => setIsLineItemsModalOpen(true)}>
@@ -1309,48 +1496,101 @@ export default function ContractRevRecPOC() {
                           </Button>
                         </div>
 
-                        <div className="rounded-lg border border-border/60 bg-background/60 px-3 py-2.5">
-                          <div className="text-[0.65rem] font-semibold uppercase tracking-wide text-muted-foreground/90">Generated Excel Summary</div>
-                          <p className="mt-1.5 text-sm leading-relaxed text-foreground/90">{lineItemsSummary?.summaryText || "-"}</p>
+                        <div className="rounded-lg border border-border/60 bg-background/60 p-3">
+                          <div className="mb-2 flex items-center justify-between gap-2">
+                            <div className="text-[0.65rem] font-semibold uppercase tracking-wide text-muted-foreground/90">
+                              Visible columns ({extractedDataColumns.length}/5)
+                            </div>
+                            <DropdownMenu
+                              open={isColumnSettingsOpen}
+                              onOpenChange={(open) => {
+                                setIsColumnSettingsOpen(open);
+                                if (open) {
+                                  setDraftExtractedDataColumns(extractedDataColumns);
+                                }
+                              }}
+                            >
+                              <DropdownMenuTrigger asChild>
+                                <Button type="button" variant="outline" size="sm" className="h-8">
+                                  <Settings2 className="mr-1.5 h-3.5 w-3.5" />
+                                  Settings
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end" className="w-[270px] max-h-[420px] overflow-y-auto">
+                                <DropdownMenuLabel>Select up to 5 columns</DropdownMenuLabel>
+                                <DropdownMenuSeparator />
+                                <div className="px-2 pb-2 pt-1">
+                                  <Button
+                                    type="button"
+                                    size="sm"
+                                    className="w-full bg-gradient-primary"
+                                    disabled={!draftExtractedDataColumns.length}
+                                    onClick={applyDraftExtractedDataColumns}
+                                  >
+                                    Apply
+                                  </Button>
+                                </div>
+                                <DropdownMenuSeparator />
+                                {lineItemHeaders.map((header) => {
+                                  const isChecked = draftExtractedDataColumns.includes(header);
+                                  const disableUnchecked = !isChecked && draftExtractedDataColumns.length >= 5;
+                                  return (
+                                    <DropdownMenuCheckboxItem
+                                      key={`column-picker-${header}`}
+                                      checked={isChecked}
+                                      disabled={disableUnchecked}
+                                      onSelect={(e) => e.preventDefault()}
+                                      onCheckedChange={(checked) => toggleDraftExtractedDataColumn(header, Boolean(checked))}
+                                    >
+                                      {header}
+                                    </DropdownMenuCheckboxItem>
+                                  );
+                                })}
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </div>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-2 lg:grid-cols-4">
-                          {(lineItemsSummary?.stats ?? []).map((item) => (
-                            <div key={item.label} className="rounded-lg border border-border/60 bg-background/60 px-3 py-2">
-                              <div className="text-[0.65rem] font-semibold uppercase tracking-wide text-muted-foreground/90">{item.label}</div>
-                              <div className="mt-1 text-sm font-semibold">{item.value}</div>
-                            </div>
-                          ))}
+                        <div className="rounded-lg border border-border/60 bg-background/60 overflow-auto">
+                          <table className="w-full min-w-[760px] border-separate border-spacing-0 text-xs">
+                            <thead className="bg-background/80">
+                              <tr>
+                                {extractedDataColumns.map((header) => (
+                                  <th
+                                    key={`preview-head-${header}`}
+                                    className="whitespace-nowrap border-b border-border/70 px-3 py-2 text-left font-semibold text-muted-foreground"
+                                  >
+                                    {header}
+                                  </th>
+                                ))}
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {lineItemRows.map((row, rowIndex) => (
+                                <tr key={`preview-row-${rowIndex}`} className="odd:bg-background/25 even:bg-background/10">
+                                  {extractedDataColumns.map((header) => {
+                                    const value = row[header] ?? "";
+                                    const hasValue = String(value).trim().length > 0;
+                                    return (
+                                      <td key={`preview-cell-${rowIndex}-${header}`} className="border-b border-border/60 px-3 py-2 align-top text-foreground/90">
+                                        <button
+                                          type="button"
+                                          className="w-full text-left break-words leading-snug"
+                                          onClick={() => {
+                                            if (hasValue) setPdfHighlightQuery(String(value));
+                                          }}
+                                        >
+                                          {hasValue ? String(value) : <span className="opacity-60">—</span>}
+                                        </button>
+                                      </td>
+                                    );
+                                  })}
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
                         </div>
 
-                        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                          <div className="rounded-lg border border-border/60 bg-background/60 px-3 py-2">
-                            <div className="text-[0.65rem] font-semibold uppercase tracking-wide text-muted-foreground/90">Contract ID</div>
-                            <div className="mt-1 text-sm font-medium break-words">{lineItemsSummary?.contractId || "-"}</div>
-                          </div>
-                          <div className="rounded-lg border border-border/60 bg-background/60 px-3 py-2">
-                            <div className="text-[0.65rem] font-semibold uppercase tracking-wide text-muted-foreground/90">Customer</div>
-                            <div className="mt-1 text-sm font-medium break-words">{lineItemsSummary?.customer || "-"}</div>
-                          </div>
-                          <div className="rounded-lg border border-border/60 bg-background/60 px-3 py-2">
-                            <div className="text-[0.65rem] font-semibold uppercase tracking-wide text-muted-foreground/90">Coverage Window</div>
-                            <div className="mt-1 text-sm font-medium break-words">{lineItemsSummary?.coverageWindow || "-"}</div>
-                          </div>
-                          <div className="rounded-lg border border-border/60 bg-background/60 px-3 py-2">
-                            <div className="text-[0.65rem] font-semibold uppercase tracking-wide text-muted-foreground/90">Product Snapshot</div>
-                            <div className="mt-1 text-sm font-medium break-words">{lineItemsSummary?.productPreview || "-"}</div>
-                          </div>
-                          <div className="rounded-lg border border-border/60 bg-background/60 px-3 py-2">
-                            <div className="text-[0.65rem] font-semibold uppercase tracking-wide text-muted-foreground/90">Contract Value</div>
-                            <div className="mt-1 text-sm font-medium break-words">{lineItemsSummary?.contractValue || "-"}</div>
-                          </div>
-                          <div className="rounded-lg border border-border/60 bg-background/60 px-3 py-2">
-                            <div className="text-[0.65rem] font-semibold uppercase tracking-wide text-muted-foreground/90">Year 1 / Line Sum</div>
-                            <div className="mt-1 text-sm font-medium break-words">
-                              {lineItemsSummary?.year1Total || "-"} / {lineItemsSummary?.linePriceTotal || "-"}
-                            </div>
-                          </div>
-                        </div>
                       </div>
                     ) : (
                       <div className="text-sm text-muted-foreground">No line items extracted.</div>
@@ -1368,7 +1608,10 @@ export default function ContractRevRecPOC() {
           open={isLineItemsModalOpen}
           onOpenChange={(open) => {
             setIsLineItemsModalOpen(open);
-            if (!open) setIsLineItemsEditMode(false);
+            if (!open) {
+              setIsLineItemsEditMode(false);
+              setSelectedExpandedRowIndex(null);
+            }
           }}
         >
           <DialogContent className="flex h-[92vh] max-w-[96vw] flex-col gap-0 overflow-hidden p-0">
@@ -1429,19 +1672,42 @@ export default function ContractRevRecPOC() {
                       </thead>
                       <tbody>
                         {lineItemRows.map((row, rowIndex) => (
-                          <tr key={rowIndex} className="odd:bg-background/30 even:bg-background/10">
-                            <td className="sticky left-0 z-10 border-b border-r border-border/60 bg-background/95 px-3 py-2 align-top font-medium text-muted-foreground">
-                              {rowIndex + 1}
+                          <tr
+                            key={rowIndex}
+                            className={selectedExpandedRowIndex === rowIndex ? "bg-primary/8" : "odd:bg-background/30 even:bg-background/10"}
+                          >
+                            <td
+                              className={`sticky left-0 z-10 border-b border-r border-border/60 px-3 py-2 align-top font-medium ${
+                                selectedExpandedRowIndex === rowIndex
+                                  ? "bg-primary/20 text-primary border-primary/70 border-t border-l border-b-2"
+                                  : "bg-background/95 text-muted-foreground"
+                              }`}
+                            >
+                              <button
+                                type="button"
+                                className="w-full text-left"
+                                onClick={() => setSelectedExpandedRowIndex((prev) => (prev === rowIndex ? null : rowIndex))}
+                              >
+                                {rowIndex + 1}
+                              </button>
                             </td>
-                            {lineItemHeaders.map((header) => {
+                            {lineItemHeaders.map((header, colIndex) => {
                               const value = row[header] ?? "";
-                              const isHighlightable =
-                                header === "Product" ||
-                                header === "Price" ||
-                                header === "Contract_ID" ||
-                                header === "Customer_Name";
+                              const hasValue = String(value).trim().length > 0;
+                              const isSelectedRow = selectedExpandedRowIndex === rowIndex;
+                              const isFirstDataCol = colIndex === 0;
+                              const isLastDataCol = colIndex === lineItemHeaders.length - 1;
                               return (
-                                <td key={`${rowIndex}-${header}`} className="min-w-[170px] border-b border-border/60 p-2 align-top">
+                                <td
+                                  key={`${rowIndex}-${header}`}
+                                  className={`min-w-[170px] border-b border-border/60 p-2 align-top ${
+                                    isSelectedRow
+                                      ? `border-t border-primary/70 border-b-2 border-primary/70 ${
+                                          isFirstDataCol ? "border-l border-primary/70" : ""
+                                        } ${isLastDataCol ? "border-r border-primary/70" : ""}`
+                                      : ""
+                                  }`}
+                                >
                                   {isLineItemsEditMode ? (
                                     shouldUseTextarea(header, value) ? (
                                       <Textarea
@@ -1461,10 +1727,10 @@ export default function ContractRevRecPOC() {
                                       type="button"
                                       className="w-full text-left text-foreground break-words leading-snug"
                                       onClick={() => {
-                                        if (isHighlightable && value) setPdfHighlightQuery(value);
+                                        if (hasValue) setPdfHighlightQuery(String(value));
                                       }}
                                     >
-                                      {value || <span className="opacity-60">—</span>}
+                                      {hasValue ? String(value) : <span className="opacity-60">—</span>}
                                     </button>
                                   )}
                                 </td>

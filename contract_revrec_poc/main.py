@@ -43,6 +43,20 @@ def main() -> None:
   if not openai_api_key:
     raise RuntimeError("Missing OPENAI_API_KEY in environment. Copy .env.example to .env and set it.")
 
+  # Optional per-run prompt configuration (set by the backend for this POC).
+  extra_instructions_raw = os.getenv("LLM_EXTRA_INSTRUCTIONS", "").strip()
+  extra_instructions = extra_instructions_raw if extra_instructions_raw else None
+
+  schema_hint_override: Dict[str, Any] | None = None
+  schema_hint_override_raw = os.getenv("LLM_SCHEMA_HINT_OVERRIDE_JSON", "").strip()
+  if schema_hint_override_raw:
+    try:
+      parsed = json.loads(schema_hint_override_raw)
+      if isinstance(parsed, dict):
+        schema_hint_override = parsed
+    except Exception:
+      schema_hint_override = None
+
   # 1) PDF ingestion + extraction
   extracted = extract_document(
     str(input_path),
@@ -64,6 +78,8 @@ def main() -> None:
     debug_dir=debug_dir,
     max_retries=args.max_retries,
     max_text_chars=args.max_text_chars,
+    extra_instructions=extra_instructions,
+    schema_hint_override=schema_hint_override,
   )
   _write_json(debug_dir / "llm_output.json", llm_raw)
 
@@ -83,6 +99,8 @@ def main() -> None:
       model=args.llm_model,
       debug_dir=debug_dir,
       max_retries=2,
+      extra_instructions=extra_instructions,
+      schema_hint_override=schema_hint_override,
     )
     _write_json(debug_dir / "llm_output_repaired.json", repaired)
     validated = validate_canonical_contract(repaired)

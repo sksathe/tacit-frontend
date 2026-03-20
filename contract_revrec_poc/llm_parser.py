@@ -55,6 +55,36 @@ CANONICAL_SCHEMA_HINT: Dict[str, Any] = {
   },
 }
 
+def _schema_hint_matches_canonical_structure(override: Any, canonical: Any) -> bool:
+  """
+  Canonical-safe guard to prevent user-provided schema-hints from changing
+  the required output JSON keys.
+  """
+  if isinstance(canonical, dict):
+    if not isinstance(override, dict):
+      return False
+    canonical_keys = set(canonical.keys())
+    override_keys = set(override.keys())
+    if canonical_keys != override_keys:
+      return False
+    for k in canonical_keys:
+      if not _schema_hint_matches_canonical_structure(override[k], canonical[k]):
+        return False
+    return True
+
+  if isinstance(canonical, list):
+    if not isinstance(override, list):
+      return False
+    if len(canonical) == 0:
+      return True
+    # If override provides an empty list, we still consider the structure compatible.
+    if len(override) == 0:
+      return True
+    return _schema_hint_matches_canonical_structure(override[0], canonical[0])
+
+  # Scalar leaves: we don't enforce value types in the schema hint.
+  return True
+
 
 def _summarize_tables(tables: List[Dict[str, Any]], max_tables: int = 30, max_rows_per_table: int = 8) -> List[Dict[str, Any]]:
   out: List[Dict[str, Any]] = []
@@ -77,8 +107,15 @@ def _truncate_text(text: str, max_chars: int) -> str:
   return text[:max_chars] + "\n\n...[truncated]\n"
 
 
-def _build_user_prompt(extracted_text: str, tables: List[Dict[str, Any]]) -> str:
+def _build_user_prompt(
+  extracted_text: str,
+  tables: List[Dict[str, Any]],
+  *,
+  schema_hint: Dict[str, Any],
+  extra_instructions: Optional[str] = None,
+) -> str:
   tables_hint = _summarize_tables(tables)
+  additional = f"\nAdditional user instructions:\n{extra_instructions}\n" if extra_instructions else ""
   return (
     "You are a contract extraction engine.\n"
     "Task: Extract structured business and financial data from this customer contract/order form PDF.\n"
@@ -96,9 +133,10 @@ def _build_user_prompt(extracted_text: str, tables: List[Dict[str, Any]]) -> str
     "- Purchase Order / PO: detect whether a PO is required from contract language or checkbox sections. Map to commercial_terms.po_required as 'Y' or 'N' when explicit, else ''.\n"
     "- Extract PO number into commercial_terms.po_number only when clearly present; otherwise ''.\n"
     "- Fee type classification guidance: subscription/software/support(standalone) => recurring; included support without separate charge => included=true; implementation/setup/onboarding => one_time unless clearly recurring; credits/discounts => discount; otherwise => other.\n"
+    f"{additional}"
     "\n"
     "Canonical schema example (structure only):\n"
-    f"{json.dumps(CANONICAL_SCHEMA_HINT, ensure_ascii=False, indent=2)}\n"
+    f"{json.dumps(schema_hint, ensure_ascii=False, indent=2)}\n"
     "\n"
     "Extracted page-wise contract text:\n"
     f"{extracted_text}\n"
@@ -117,11 +155,31 @@ def parse_contract_with_openai(
   debug_dir: Optional[Path] = None,
   max_retries: int = 3,
   max_text_chars: int = 20000,
+  extra_instructions: Optional[str] = None,
+  schema_hint_override: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Any]:
+  schema_hint_for_prompt = CANONICAL_SCHEMA_HINT
+  if schema_hint_override is not None:
+    if _schema_hint_matches_canonical_structure(schema_hint_override, CANONICAL_SCHEMA_HINT):
+      schema_hint_for_prompt = schema_hint_override
+    else:
+      if debug_dir:
+        debug_dir.mkdir(parents=True, exist_ok=True)
+        (debug_dir / "schema_hint_override_rejected.json").write_text(
+          json.dumps(
+            {"reason": "Override does not match canonical key structure", "schema_hint_override": schema_hint_override},
+            ensure_ascii=False,
+            indent=2,
+          ),
+          encoding="utf-8",
+        )
+
   client = OpenAI(api_key=openai_api_key)
   user_text = _build_user_prompt(
     _truncate_text(extracted_text, max_text_chars),
     tables,
+    schema_hint=schema_hint_for_prompt,
+    extra_instructions=extra_instructions,
   )
 
   # JSON-only response to make parsing easier.
@@ -173,6 +231,8 @@ def repair_contract_json_with_openai(
   debug_dir: Optional[Path] = None,
   max_retries: int = 2,
   max_text_chars: int = 15000,
+  extra_instructions: Optional[str] = None,
+  schema_hint_override: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Any]:
   """
   Fallback path when the LLM output parses as JSON but fails schema validation.
@@ -181,13 +241,34 @@ def repair_contract_json_with_openai(
   client = OpenAI(api_key=openai_api_key)
   last_err: Optional[Exception] = None
 
+  schema_hint_for_prompt = CANONICAL_SCHEMA_HINT
+  if schema_hint_override is not None:
+    if _schema_hint_matches_canonical_structure(schema_hint_override, CANONICAL_SCHEMA_HINT):
+      schema_hint_for_prompt = schema_hint_override
+    else:
+      if debug_dir:
+        debug_dir.mkdir(parents=True, exist_ok=True)
+        (debug_dir / "schema_hint_override_rejected_repair.json").write_text(
+          json.dumps(
+            {"reason": "Override does not match canonical key structure", "schema_hint_override": schema_hint_override},
+            ensure_ascii=False,
+            indent=2,
+          ),
+          encoding="utf-8",
+        )
+
+  additional = f"\nAdditional user instructions:\n{extra_instructions}\n" if extra_instructions else ""
+
   # Keep the prompt focused to reduce token usage.
   base_user = (
     "You returned JSON that failed schema validation.\n"
     f"Validation error:\n{validation_error}\n\n"
     "Fix the JSON so it matches the canonical schema keys and types.\n"
     "Do not add extra top-level keys.\n"
-    "Return only valid JSON.\n"
+    "Return only valid JSON."
+    f"{additional}\n"
+    "\nCanonical schema example (structure only):\n"
+    f"{json.dumps(schema_hint_for_prompt, ensure_ascii=False, indent=2)}\n"
   )
 
   tables_hint = _summarize_tables(tables)

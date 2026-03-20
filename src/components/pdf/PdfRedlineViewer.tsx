@@ -207,15 +207,19 @@ export function PdfRedlineViewer({
       const pageNum = i + 1; // render order is sequential from 1..pagesToRender
       const rects = pageRects[pageNum] ?? [];
       for (const r of rects.slice(0, 8)) {
+        // Shift up slightly so the marker sits behind glyphs instead of under baseline.
+        const markerTop = Math.max(0, r.top - r.height * 0.58);
+        const markerHeight = Math.max(10, r.height * 1.2);
         const d = document.createElement("div");
         d.style.position = "absolute";
         d.style.left = `${r.left}px`;
-        d.style.top = `${r.top}px`;
+        d.style.top = `${markerTop}px`;
         d.style.width = `${r.width}px`;
-        d.style.height = `${r.height}px`;
-        d.style.background = "rgba(99, 102, 241, 0.18)"; // indigo-500/20
-        d.style.border = "1px solid rgba(99, 102, 241, 0.55)";
-        d.style.borderRadius = "6px";
+        d.style.height = `${markerHeight}px`;
+        d.style.background = "rgba(34, 197, 94, 0.34)"; // marker-style green fill
+        d.style.border = "none";
+        d.style.borderRadius = "4px";
+        d.style.boxShadow = "inset 0 0 0 1px rgba(22, 163, 74, 0.45)";
         overlay.appendChild(d);
       }
     }
