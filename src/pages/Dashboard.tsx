@@ -1,7 +1,13 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useReducer, useState } from "react";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { DashboardView } from "@/components/dashboard/DashboardView";
+import { MissionBriefV4 } from "@/components/dashboard/MissionBriefV4";
+import {
+  dispatchReducer,
+  initialDispatchState,
+  loadRecentLaunches,
+  type MissionLaunchRecord,
+} from "@/features/dispatch/model";
 import { AutomateAgentPicker } from "@/components/dashboard/AutomateAgentPicker";
 import { AutomateSessionsList } from "@/components/dashboard/AutomateSessionsList";
 import { SessionDetailView } from "@/components/dashboard/SessionDetailView";
@@ -9,11 +15,16 @@ import { StartSessionModal } from "@/components/dashboard/StartSessionModal";
 import { ScheduleSessionModal } from "@/components/dashboard/ScheduleSessionModal";
 import { ConfigDrawer } from "@/components/dashboard/ConfigDrawer";
 import { ChooseMeetingTypeModal } from "@/components/dashboard/ChooseMeetingTypeModal";
+import type { SessionModalPrefill } from "@/components/dashboard/sessionModalPrefill";
 import type { TacitAgent } from "@/data/agents";
 import type { SessionItem } from "@/components/dashboard/AutomateSessionsList";
 
+const hybridDispatchEnabled = import.meta.env.VITE_ENABLE_HYBRID_DISPATCH !== "false";
+
 const Dashboard = () => {
-  const navigate = useNavigate();
+  const [dispatchState, dispatchMission] = useReducer(dispatchReducer, initialDispatchState);
+  const [recentLaunches, setRecentLaunches] = useState<MissionLaunchRecord[]>(() => loadRecentLaunches());
+  const [activeRecentId, setActiveRecentId] = useState<string | null>(null);
   const [currentView, setCurrentView] = useState<"dashboard" | "automate-agents" | "automate-sessions" | "session">("dashboard");
   const [selectedAgent, setSelectedAgent] = useState<TacitAgent | null>(null);
   const [sessionsForAgent, setSessionsForAgent] = useState<SessionItem[]>([]);
@@ -33,6 +44,26 @@ const Dashboard = () => {
   } | null>(null);
 
   const [meetingTypeFlow, setMeetingTypeFlow] = useState<"start" | "schedule" | null>(null);
+  const [sessionModalPrefs, setSessionModalPrefs] = useState<SessionModalPrefill | null>(null);
+
+  const handleMeetingChannelContinue = (channel: "phone" | "virtual") => {
+    const flow = meetingTypeFlow;
+    const mode = channel === "virtual" ? "web" : "phone";
+    const fromMission = hybridDispatchEnabled && !!dispatchState.agentId;
+    setSessionModalPrefs({
+      initialMeetingMode: mode,
+      ...(fromMission
+        ? {
+            initialSessionTitle: dispatchState.missionTitle?.trim() || undefined,
+            initialAgentId: dispatchState.agentId!,
+            initialSessionNotes: dispatchState.missionBrief?.trim() || undefined,
+          }
+        : {}),
+    });
+    setMeetingTypeFlow(null);
+    if (flow === "start") setIsStartModalOpen(true);
+    else if (flow === "schedule") setIsScheduleModalOpen(true);
+  };
 
   const openAutomateFlow = () => {
     setCurrentView("automate-agents");
@@ -93,7 +124,18 @@ const Dashboard = () => {
 
       {/* Main Content */}
       <main className="mx-auto max-w-[1700px] px-5 pb-20 pt-10 sm:px-8 sm:pt-14 lg:px-10">
-        {currentView === "dashboard" && (
+        {currentView === "dashboard" && hybridDispatchEnabled && (
+          <MissionBriefV4
+            dispatchState={dispatchState}
+            dispatchAction={dispatchMission}
+            recentLaunches={recentLaunches}
+            setRecentLaunches={setRecentLaunches}
+            activeRecentId={activeRecentId}
+            setActiveRecentId={setActiveRecentId}
+            onOpenMeetingFlow={(flow) => setMeetingTypeFlow(flow)}
+          />
+        )}
+        {currentView === "dashboard" && !hybridDispatchEnabled && (
           <DashboardView
             onStartSession={() => setMeetingTypeFlow("start")}
             onScheduleSession={() => setMeetingTypeFlow("schedule")}
@@ -132,27 +174,24 @@ const Dashboard = () => {
         open={meetingTypeFlow !== null}
         flow={meetingTypeFlow}
         onClose={() => setMeetingTypeFlow(null)}
-        onContinueVirtual={() => {
-          setMeetingTypeFlow(null);
-          navigate("/meeting-type/coming-soon");
-        }}
-        onContinuePhone={() => {
-          if (meetingTypeFlow === "start") {
-            setIsStartModalOpen(true);
-          } else if (meetingTypeFlow === "schedule") {
-            setIsScheduleModalOpen(true);
-          }
-          setMeetingTypeFlow(null);
-        }}
+        onContinue={handleMeetingChannelContinue}
       />
 
       <StartSessionModal
         open={isStartModalOpen}
-        onClose={() => setIsStartModalOpen(false)}
+        prefill={sessionModalPrefs}
+        onClose={() => {
+          setIsStartModalOpen(false);
+          setSessionModalPrefs(null);
+        }}
       />
       <ScheduleSessionModal
         open={isScheduleModalOpen}
-        onClose={() => setIsScheduleModalOpen(false)}
+        prefill={sessionModalPrefs}
+        onClose={() => {
+          setIsScheduleModalOpen(false);
+          setSessionModalPrefs(null);
+        }}
       />
 
       {/* Configuration Drawer */}

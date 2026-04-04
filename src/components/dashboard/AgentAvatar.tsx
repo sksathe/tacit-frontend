@@ -13,17 +13,19 @@ export function AgentAvatar({ agent, size = "md" }: AgentAvatarProps) {
     size === "sm"
       ? "w-8 h-8"
       : size === "xl"
-      ? "w-20 h-20"
+      ? "h-28 w-28 sm:h-32 sm:w-32"
       : size === "lg"
       ? "w-14 h-14"
       : "w-10 h-10";
 
-  const iconClasses = size === "xl" ? "text-3xl" : "text-xl";
+  const iconClasses = size === "xl" ? "text-4xl" : "text-xl";
 
   const showImage = agent.image && !failed;
 
   return (
-    <div className={`${sizeClasses} rounded-full bg-black/40 border border-white/10 flex items-center justify-center overflow-hidden`}>
+    <div
+      className={`${sizeClasses} flex items-center justify-center overflow-hidden rounded-full border border-border bg-muted/50`}
+    >
       {showImage ? (
         <img
           src={agent.image}

@@ -3,20 +3,21 @@ import { X, Phone, Video } from "lucide-react";
 
 type MeetingFlow = "start" | "schedule" | null;
 
+export type MeetingChannel = "phone" | "virtual";
+
 interface ChooseMeetingTypeModalProps {
   open: boolean;
   flow: MeetingFlow;
   onClose: () => void;
-  onContinueVirtual: () => void;
-  onContinuePhone: () => void;
+  /** Phone → phone session; virtual → web meeting (Zoom/Meet link) in Start/Schedule modal. */
+  onContinue: (channel: MeetingChannel) => void;
 }
 
 export function ChooseMeetingTypeModal({
   open,
   flow,
   onClose,
-  onContinueVirtual,
-  onContinuePhone,
+  onContinue,
 }: ChooseMeetingTypeModalProps) {
   const [selectedType, setSelectedType] = useState<"virtual" | "phone" | null>(null);
 
@@ -29,11 +30,7 @@ export function ChooseMeetingTypeModal({
 
   const handleContinue = () => {
     if (!selectedType) return;
-    if (selectedType === "virtual") {
-      onContinueVirtual();
-    } else {
-      onContinuePhone();
-    }
+    onContinue(selectedType === "virtual" ? "virtual" : "phone");
     setSelectedType(null);
   };
 
@@ -119,7 +116,7 @@ export function ChooseMeetingTypeModal({
               prep for you.
             </p>
             <div className="mt-1 inline-flex items-center gap-1 rounded-full border border-primary/30 bg-primary/5 px-2 py-0.5 text-[0.7rem] font-medium text-primary">
-              Coming soon
+              Available now
             </div>
           </button>
         </div>

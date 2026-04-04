@@ -1,12 +1,20 @@
 import { useState, useEffect } from "react";
-import { ChevronDown, LogOut } from "lucide-react";
+import { ChevronDown, LogOut, Moon, Sun } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 
 export function DashboardHeader() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [darkMode, setDarkMode] = useState(() =>
+    typeof document !== "undefined" ? document.documentElement.classList.contains("dark") : true,
+  );
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+
+  const toggleTheme = () => {
+    document.documentElement.classList.toggle("dark");
+    setDarkMode(document.documentElement.classList.contains("dark"));
+  };
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -65,6 +73,15 @@ export function DashboardHeader() {
           <span className="hidden text-sm text-muted-foreground md:inline">
             Welcome back{user?.name ? `, ${user.name}` : ""}!
           </span>
+
+          <button
+            type="button"
+            onClick={toggleTheme}
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-primary/25 bg-primary/5 text-primary transition-all hover:border-primary/40 hover:bg-primary/10"
+            aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
+          >
+            {darkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+          </button>
 
           <div className="relative user-avatar-container">
             <button
