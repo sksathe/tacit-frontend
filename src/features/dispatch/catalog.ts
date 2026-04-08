@@ -24,11 +24,11 @@ export type DispatchProfile = {
 
 export type ExecutionExperience = "meeting" | "document" | "generic";
 
-/** Drives Mission Brief execution panel: Facilitate → meeting; Clara / MASON agreement review → documents + transcript. */
+/** Drives Mission Brief execution panel: Facilitate → meeting; Clara, Eagle, MASON agreement review → documents + transcript. */
 export function getExecutionExperience(agentId: string | null, modeId: string | null): ExecutionExperience {
   if (!agentId) return "generic";
   if (modeId === "facilitate") return "meeting";
-  if (agentId === "lexa") return "document";
+  if (agentId === "lexa" || agentId === "eagle") return "document";
   if (agentId === "mason" && modeId === "contract-review") return "document";
   return "generic";
 }
@@ -209,6 +209,52 @@ export const DISPATCH_PROFILES: DispatchProfile[] = [
         id: "lexa-audit",
         label: "Audit trail",
         description: "Confidence scores, sources, and human review flags.",
+      },
+    ],
+  },
+  {
+    agentId: "eagle",
+    modes: [
+      {
+        id: "freight-bol",
+        label: "Freight & BOL",
+        shortLabel: "B",
+        description: "Extract parties, references, equipment, and line items from bills of lading and freight paperwork.",
+      },
+      {
+        id: "customs-trade",
+        label: "Customs & trade",
+        shortLabel: "C",
+        description: "Capture invoice, HTS, origin, and declaration-oriented fields from trade documents.",
+      },
+      {
+        id: "receiving-wms",
+        label: "Receiving & WMS",
+        shortLabel: "R",
+        description: "Packing lists, ASNs, and receiving docs normalized for putaway and inventory updates.",
+      },
+      {
+        id: "batch-shipments",
+        label: "Batch shipments",
+        shortLabel: "M",
+        description: "Run consistent extraction across many shipment PDFs in one mission.",
+      },
+    ],
+    outputContracts: [
+      {
+        id: "eagle-tms",
+        label: "TMS-ready",
+        description: "Stops, references, and charges shaped for common TMS import patterns.",
+      },
+      {
+        id: "eagle-wms",
+        label: "WMS / receiving",
+        description: "SKU, quantity, UOM, and location-oriented rows for warehouse systems.",
+      },
+      {
+        id: "eagle-exceptions",
+        label: "Exception report",
+        description: "Variance flags, missing fields, and human review queue for ops.",
       },
     ],
   },

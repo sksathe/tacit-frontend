@@ -6,7 +6,9 @@ export type DispatchStepId =
   | "outputContract"
   | "review"
   | "execution"
-  | "outputReview";
+  | "outputReview"
+  /** Eagle: single-screen upload → extract (logistics API); skips mode/mission wizard */
+  | "eagleWorkspace";
 
 /** Pre-launch wizard steps (hybrid mission brief). */
 export const STEP_ORDER: DispatchStepId[] = [
@@ -17,6 +19,9 @@ export const STEP_ORDER: DispatchStepId[] = [
   "outputContract",
   "review",
 ];
+
+/** Eagle: choose agent → upload & extract only (no mode / mission / launch wizard). */
+export const STEP_ORDER_EAGLE: DispatchStepId[] = ["agent", "eagleWorkspace"];
 
 /** Shown after the user launches from the review step. */
 export const POST_LAUNCH_STEP_ORDER: DispatchStepId[] = ["execution", "outputReview"];
@@ -30,6 +35,7 @@ export const STEP_LABELS: Record<DispatchStepId, string> = {
   review: "Review",
   execution: "Execution",
   outputReview: "Output review",
+  eagleWorkspace: "Document",
 };
 
 export type MissionLaunchRecord = {
@@ -105,22 +111,47 @@ export type DispatchAction =
   | { type: "GO_FORWARD" };
 
 export function orderedSteps(state: DispatchState): DispatchStepId[] {
-  return state.launched ? [...STEP_ORDER, ...POST_LAUNCH_STEP_ORDER] : STEP_ORDER;
+  if (state.agentId === "eagle") {
+    return STEP_ORDER_EAGLE;
+  }
+  const pre = STEP_ORDER;
+  return state.launched ? [...pre, ...POST_LAUNCH_STEP_ORDER] : pre;
+}
+
+function clampStepToOrder(state: DispatchState): DispatchStepId {
+  const ord = orderedSteps(state);
+  if (ord.includes(state.currentStep)) return state.currentStep;
+  if (state.agentId === "eagle") return "eagleWorkspace";
+  if (state.currentStep === "outputContract") return "input";
+  return ord[0] ?? "agent";
 }
 
 export function dispatchReducer(state: DispatchState, action: DispatchAction): DispatchState {
   switch (action.type) {
     case "NEW_MISSION":
       return { ...initialDispatchState };
-    case "SET_STEP":
-      return { ...state, currentStep: action.step };
-    case "SELECT_AGENT":
-      return {
+    case "SET_STEP": {
+      const next = { ...state, currentStep: action.step };
+      const step = clampStepToOrder(next);
+      return step === next.currentStep ? next : { ...next, currentStep: step };
+    }
+    case "SELECT_AGENT": {
+      const next: DispatchState = {
         ...state,
         agentId: action.agentId,
         modeId: null,
         linkedSessionId: null,
+        ...(action.agentId === "eagle" ? { outputContractId: null } : {}),
       };
+      if (action.agentId === "eagle") {
+        return { ...next, currentStep: "eagleWorkspace" };
+      }
+      if (state.agentId === "eagle" && action.agentId !== "eagle") {
+        return { ...next, currentStep: "agent" };
+      }
+      const step = clampStepToOrder({ ...next, currentStep: state.currentStep });
+      return step === next.currentStep ? next : { ...next, currentStep: step };
+    }
     case "SELECT_MODE":
       return { ...state, modeId: action.modeId, linkedSessionId: null };
     case "SET_MISSION":
@@ -137,6 +168,16 @@ export function dispatchReducer(state: DispatchState, action: DispatchAction): D
       return { ...state, linkedSessionId: action.sessionId };
     case "APPLY_RECENT": {
       const { agentId, modeId, missionTitle } = action.payload;
+      if (agentId === "eagle") {
+        return {
+          ...initialDispatchState,
+          agentId: "eagle",
+          modeId,
+          missionTitle,
+          linkedSessionId: null,
+          currentStep: "eagleWorkspace",
+        };
+      }
       return {
         ...initialDispatchState,
         agentId,
@@ -161,6 +202,9 @@ export function dispatchReducer(state: DispatchState, action: DispatchAction): D
       return { ...state, currentStep: ord[idx + 1] };
     }
     case "GO_BACK": {
+      if (state.agentId === "eagle" && state.currentStep === "eagleWorkspace") {
+        return { ...state, currentStep: "agent", agentId: null, modeId: null };
+      }
       const ord = orderedSteps(state);
       const idx = ord.indexOf(state.currentStep);
       if (idx <= 0) return state;

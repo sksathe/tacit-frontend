@@ -76,7 +76,7 @@ const Hero = () => {
   return (
     <section className="relative py-20 lg:py-32 overflow-hidden">
       {/* Background gradient */}
-      <div className="absolute inset-0 bg-gradient-secondary opacity-40" />
+      <div className="absolute inset-0 bg-muted/50" />
       
       <div className="container relative px-4 mx-auto">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
@@ -88,11 +88,7 @@ const Hero = () => {
                 AI-Powered Knowledge Extraction
               </div>
               <h1 className="text-balance text-4xl font-bold tracking-tight leading-tight lg:text-6xl lg:leading-[1.08]">
-                Capture {" "}
-                <span className="bg-gradient-primary bg-clip-text text-transparent">
-                  Tacit SME knowledge
-                </span>{" "}
-                and turn it into shared team intelligence.
+                Capture <span className="text-primary">Tacit SME knowledge</span> and turn it into shared team intelligence.
               </h1>
               <h2 className="max-w-lg border-l-2 border-primary/40 pl-4 text-base italic text-muted-foreground lg:text-lg">
                 "Tacit knowledge lives in the minds of your top performers - unwritten, unseen, and hard to capture."
@@ -105,7 +101,7 @@ const Hero = () => {
             <div className="flex flex-col sm:flex-row gap-4">
               <Button 
                 size="lg" 
-                className="h-12 rounded-lg bg-gradient-primary px-8 text-base font-semibold text-primary-foreground shadow-floating transition-smooth hover:shadow-glow sm:min-w-[220px]"
+                className="h-12 rounded-lg bg-primary px-8 text-base font-semibold text-primary-foreground shadow-floating transition-smooth hover:shadow-glow sm:min-w-[220px]"
                 onClick={() => navigate("/login")}
               >
                 Start Extracting Knowledge
@@ -175,7 +171,7 @@ const Hero = () => {
                   ))}
                 </CarouselContent>
               </Carousel>
-              <div className="absolute inset-0 bg-gradient-to-t from-primary/20 via-transparent to-transparent" />
+              <div className="absolute inset-0 bg-primary/10" />
               
               {/* Dot Navigation */}
               <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 space-x-2 rounded-full border border-white/25 bg-black/25 px-2.5 py-1.5 backdrop-blur-md">

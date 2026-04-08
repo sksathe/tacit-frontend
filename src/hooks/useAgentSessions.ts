@@ -9,6 +9,7 @@ function getMockSessions(agent: TacitAgent): SessionItem[] {
     ross: ["Compliance Review", "Policy Update", "Audit Prep"],
     monica: ["Operations Runbook", "Process Documentation", "Vendor Coordination"],
     chandler: ["Data Analysis", "Metrics Review", "Dashboard Design"],
+    eagle: ["Inbound BOL batch — LAX", "Customs doc pack — ORD", "POD reconciliation — DFW"],
   };
   const list = topics[agent.id as keyof typeof topics] ?? ["Session 1", "Session 2", "Session 3"];
   return list.map((title, i) => ({

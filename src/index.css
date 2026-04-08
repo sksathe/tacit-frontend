@@ -9,44 +9,47 @@ All colors MUST be HSL.
 */
 
 @layer base {
+  /* Light theme: cool blue-tinted surfaces + royal blue accents (less stark white) */
   :root {
-    --background: 0 0% 100%;
-    --foreground: 0 0% 3.9%;
+    color-scheme: light;
 
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 3.9%;
+    --background: 220 32% 97%;
+    --foreground: 222 47% 11%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 3.9%;
+    --card: 220 38% 99%;
+    --card-foreground: 222 47% 11%;
 
-    --primary: 142 76% 36%;
-    --primary-foreground: 0 0% 98%;
-    --primary-glow: 142 76% 46%;
+    --popover: 220 40% 99%;
+    --popover-foreground: 222 47% 11%;
 
-    --secondary: 0 0% 96.1%;
-    --secondary-foreground: 0 0% 9%;
+    --primary: 226 72% 46%;
+    --primary-foreground: 0 0% 100%;
+    --primary-glow: 226 74% 58%;
 
-    --muted: 0 0% 96.1%;
-    --muted-foreground: 0 0% 45.1%;
+    --secondary: 220 26% 94%;
+    --secondary-foreground: 222 47% 11%;
 
-    --accent: 142 76% 36%;
-    --accent-foreground: 0 0% 98%;
+    --muted: 220 24% 94%;
+    --muted-foreground: 220 12% 40%;
+
+    --accent: 226 72% 46%;
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 0 0% 89.8%;
-    --input: 0 0% 89.8%;
-    --ring: 142 76% 36%;
+    --border: 220 20% 87%;
+    --input: 220 22% 88%;
+    --ring: 226 72% 46%;
 
-    /* Custom design tokens - Supabase Dark Theme */
-    --gradient-primary: linear-gradient(135deg, hsl(142 76% 36%), hsl(142 76% 46%));
-    --gradient-secondary: linear-gradient(135deg, hsl(0 0% 96.1%), hsl(0 0% 89.8%));
-    --gradient-accent: linear-gradient(135deg, hsl(142 76% 36%), hsl(156 76% 46%));
-    --gradient-luxury: linear-gradient(135deg, hsl(142 76% 36%), hsl(156 76% 36%), hsl(142 76% 46% / 0.8));
-    --shadow-elegant: 0 10px 30px -10px hsl(142 76% 36% / 0.25);
-    --shadow-glow: 0 0 40px hsl(142 76% 46% / 0.3);
-    --shadow-floating: 0 8px 25px -8px hsl(142 76% 36% / 0.15), 0 20px 40px -12px hsl(156 76% 36% / 0.1);
+    /* Flat “gradients” so bg-gradient-primary / marketing tokens stay solid royal blue */
+    --gradient-primary: linear-gradient(135deg, hsl(226 72% 46%), hsl(226 72% 46%));
+    --gradient-secondary: linear-gradient(135deg, hsl(220 26% 94%), hsl(220 22% 92%));
+    --gradient-accent: linear-gradient(135deg, hsl(226 72% 46%), hsl(226 72% 46%));
+    --gradient-luxury: linear-gradient(135deg, hsl(226 72% 46%), hsl(226 72% 46%));
+    --shadow-elegant: 0 10px 30px -10px hsl(226 72% 46% / 0.22);
+    --shadow-glow: 0 0 40px hsl(226 74% 58% / 0.28);
+    --shadow-floating: 0 8px 25px -8px hsl(226 72% 46% / 0.14), 0 20px 40px -12px hsl(212 80% 50% / 0.1);
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
     --radius: 0.5rem;
@@ -62,34 +65,48 @@ All colors MUST be HSL.
     --font-display: 'Fraunces', Georgia, serif;
     --font-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
 
-    /* Dashboard/chrome primary (emerald #10b981) - use for dashboard UI to match existing look */
-    --primary-dashboard: 160 84% 39%;
-    --primary-dashboard-foreground: 0 0% 9%;
-    --primary-dashboard-glow: 160 84% 49%;
+    /* Dashboard/chrome — aligned with royal blue light theme */
+    --primary-dashboard: 226 72% 46%;
+    --primary-dashboard-foreground: 226 72% 24%;
+    --primary-dashboard-glow: 226 74% 56%;
 
-    /* Chart/status colors for badges and data viz (keep same visual) */
-    --chart-1: 142 76% 36%;
-    --chart-2: 217 91% 60%;
+    /* Top chrome: same navy as Mission Brief v4 sidebar rail (html:not(.dark) --mb-sidebar-bg) */
+    --dashboard-header-background: 226 72% 28%;
+    --dashboard-header-border: 226 65% 22%;
+
+    --dashboard-canvas: 220 33% 95%;
+    --dashboard-surface: 220 40% 99%;
+    --dashboard-surface-muted: 220 30% 97%;
+    --dashboard-rail-bg: 226 72% 28%;
+    --dashboard-rail-border: 226 65% 22%;
+    --dashboard-rail-active: 217 92% 60%;
+    --dashboard-metric-highlight-from: 216 91% 61%;
+    --dashboard-metric-highlight-to: 226 80% 57%;
+    --dashboard-text-strong: 222 52% 14%;
+    --dashboard-text-muted: 220 14% 42%;
+
+    --chart-1: 226 72% 46%;
+    --chart-2: 199 89% 48%;
 
     /* Logo hover glows (exact match for App.css) */
     --logo-link-glow: 239 84% 67% / 0.67;
     --logo-react-glow: 187 100% 50% / 0.67;
 
-    --sidebar-background: 0 0% 98%;
+    --sidebar-background: 220 30% 96%;
 
-    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-foreground: 222 30% 18%;
 
-    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary: 226 72% 46%;
 
-    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-primary-foreground: 0 0% 100%;
 
-    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent: 220 26% 92%;
 
-    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-accent-foreground: 222 47% 11%;
 
-    --sidebar-border: 220 13% 91%;
+    --sidebar-border: 220 22% 88%;
 
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-ring: 226 72% 46%;
   }
 
   .dark {
@@ -136,6 +153,12 @@ All colors MUST be HSL.
     --chart-2: 217 91% 60%;
     --logo-link-glow: 239 84% 67% / 0.67;
     --logo-react-glow: 187 100% 50% / 0.67;
+
+    /* Flat fills in dark mode (match emerald primary) */
+    --gradient-primary: linear-gradient(135deg, hsl(142 76% 46%), hsl(142 76% 46%));
+    --gradient-secondary: linear-gradient(135deg, hsl(0 0% 14.9%), hsl(0 0% 14.9%));
+    --gradient-accent: linear-gradient(135deg, hsl(142 76% 46%), hsl(142 76% 46%));
+    --gradient-luxury: linear-gradient(135deg, hsl(142 76% 46%), hsl(142 76% 46%));
   }
 }
 
@@ -179,3 +202,4 @@ All colors MUST be HSL.
     color-scheme: dark;
   }
 }
+

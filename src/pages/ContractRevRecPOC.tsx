@@ -1030,7 +1030,7 @@ export default function ContractRevRecPOC() {
           <div className="flex flex-col sm:flex-row gap-2">
             <Button
               variant="default"
-              className="bg-gradient-primary"
+              className="bg-primary text-primary-foreground"
               onClick={() => {
                 // Reset to initial page state
                 if (processingIntervalRef.current !== null) {
@@ -1307,7 +1307,7 @@ export default function ContractRevRecPOC() {
                     <Button
                       onClick={processContract}
                       disabled={!selectedFile || isProcessing}
-                      className="h-11 w-full sm:w-auto px-6 text-base font-semibold bg-gradient-primary"
+                      className="h-11 w-full sm:w-auto px-6 text-base font-semibold bg-primary text-primary-foreground"
                     >
                       Process Information
                     </Button>
@@ -1462,7 +1462,7 @@ export default function ContractRevRecPOC() {
                     <Button
                       onClick={processContract}
                       disabled={!selectedFile || isProcessing}
-                      className="h-11 w-full sm:w-auto px-6 text-base font-semibold bg-gradient-primary"
+                      className="h-11 w-full sm:w-auto px-6 text-base font-semibold bg-primary text-primary-foreground"
                     >
                       Process Information
                     </Button>
@@ -1566,7 +1566,7 @@ export default function ContractRevRecPOC() {
                         <Button
                           type="button"
                           variant="default"
-                          className="bg-gradient-primary"
+                          className="bg-primary text-primary-foreground"
                           onClick={exportExcelWithCurrentEdits}
                           disabled={!excelResult || isExportingExcel || isUploadingDestinations}
                         >
@@ -1683,7 +1683,7 @@ export default function ContractRevRecPOC() {
                               Configure up to 5 visible columns, then click any cell value to redline it in the PDF.
                             </div>
                           </div>
-                          <Button type="button" className="bg-gradient-primary" onClick={() => setIsLineItemsModalOpen(true)}>
+                          <Button type="button" className="bg-primary text-primary-foreground" onClick={() => setIsLineItemsModalOpen(true)}>
                             <Maximize2 className="mr-2 h-4 w-4" />
                             Open Full Table
                           </Button>
@@ -1716,7 +1716,7 @@ export default function ContractRevRecPOC() {
                                   <Button
                                     type="button"
                                     size="sm"
-                                    className="w-full bg-gradient-primary"
+                                    className="w-full bg-primary text-primary-foreground"
                                     disabled={!draftExtractedDataColumns.length}
                                     onClick={applyDraftExtractedDataColumns}
                                   >

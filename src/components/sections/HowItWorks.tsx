@@ -39,9 +39,7 @@ const HowItWorks = () => {
           </div>
           <h2 className="text-3xl font-bold tracking-tight lg:text-5xl lg:leading-tight">
             From conversation to{" "}
-            <span className="bg-gradient-primary bg-clip-text text-transparent">
-              structured knowledge
-            </span>
+            <span className="text-primary">structured knowledge</span>
           </h2>
           <p className="mx-auto max-w-3xl text-lg leading-relaxed text-muted-foreground lg:text-xl">
             Our AI-powered process transforms tacit knowledge into actionable learning assets in just four simple steps.
@@ -54,8 +52,8 @@ const HowItWorks = () => {
               <Card className="group h-full rounded-2xl border border-border/60 bg-card/80 shadow-elegant backdrop-blur-sm transition-smooth hover:-translate-y-1 hover:shadow-glow">
                 <CardContent className="space-y-4 p-6 text-center">
                   <div className="relative">
-                    <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary-glow shadow-glow">
-                      <step.icon className="h-8 w-8 text-white" />
+                    <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary shadow-glow">
+                      <step.icon className="h-8 w-8 text-primary-foreground" />
                     </div>
                     <div className="absolute -top-2 -right-2 w-8 h-8 bg-accent text-white rounded-full flex items-center justify-center text-sm font-bold">
                       {step.step}
@@ -78,14 +76,14 @@ const HowItWorks = () => {
 
         {/* Use Cases */}
         <div className="grid md:grid-cols-2 gap-8">
-          <Card className="rounded-2xl border border-border/60 bg-gradient-to-br from-primary/5 to-primary-glow/5 p-8 shadow-elegant">
+          <Card className="rounded-2xl border border-border/60 bg-primary/5 p-8 shadow-elegant">
             <h3 className="mb-4 text-2xl font-bold tracking-tight">Scenario 1: Urgent Documentation</h3>
             <p className="leading-relaxed text-muted-foreground">
               L&D Associate identifies a knowledge gap and needs to establish reference SOPs from the most experienced SME. They set up a Tacit-AI session and invite the SME to share their expertise.
             </p>
           </Card>
 
-          <Card className="rounded-2xl border border-border/60 bg-gradient-to-br from-accent/5 to-primary/5 p-8 shadow-elegant">
+          <Card className="rounded-2xl border border-border/60 bg-primary/[0.06] p-8 shadow-elegant">
             <h3 className="mb-4 text-2xl font-bold tracking-tight">Scenario 2: SME Self-Service</h3>
             <p className="leading-relaxed text-muted-foreground">
               SME is overwhelmed with repetitive help requests from colleagues. They proactively create a knowledge extraction session to document their expertise and reduce future interruptions.

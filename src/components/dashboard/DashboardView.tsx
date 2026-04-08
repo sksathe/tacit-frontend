@@ -11,7 +11,7 @@ export function DashboardView({ onStartSession, onScheduleSession, onAutomateSes
         <div className="mx-auto mb-5 inline-flex items-center rounded-full border border-primary/30 bg-primary/10 px-4 py-1.5 text-[0.72rem] font-bold uppercase tracking-[0.14em] text-primary">
           AI Knowledge Operations
         </div>
-        <h1 className="mx-auto mb-4 max-w-[12ch] text-balance bg-gradient-primary bg-clip-text text-[2.6rem] font-extrabold leading-[1.02] text-transparent md:text-[3.6rem]">
+        <h1 className="mx-auto mb-4 max-w-[12ch] text-balance text-[2.6rem] font-extrabold leading-[1.02] text-primary md:text-[3.6rem]">
           Welcome to Tacit Studio
         </h1>
         <p className="mx-auto max-w-[760px] text-[1.05rem] leading-relaxed text-muted-foreground md:text-[1.25rem]">
@@ -26,7 +26,7 @@ export function DashboardView({ onStartSession, onScheduleSession, onAutomateSes
           className="group relative flex min-h-[420px] cursor-pointer flex-col justify-between overflow-hidden rounded-3xl border border-primary/35 bg-card/65 p-8 shadow-elegant transition-all duration-300 hover:-translate-y-1.5 hover:border-primary hover:shadow-glow md:p-12"
         >
           <div className="absolute -right-24 -top-24 h-64 w-64 rounded-full bg-primary/12 blur-3xl transition-all duration-500 group-hover:bg-primary/16" />
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-transparent opacity-70" />
+          <div className="absolute inset-0 bg-primary/5 opacity-90" />
           <div className="relative z-10">
             <span className="mb-6 inline-flex items-center rounded-full border border-primary/35 bg-primary/15 px-4 py-1.5 text-[0.74rem] font-semibold uppercase tracking-[0.13em] text-primary">
               Capture Tacit Data
@@ -73,7 +73,7 @@ export function DashboardView({ onStartSession, onScheduleSession, onAutomateSes
           className="group relative flex min-h-[420px] cursor-pointer flex-col justify-between overflow-hidden rounded-3xl border border-primary/35 bg-card/65 p-8 shadow-elegant transition-all duration-300 hover:-translate-y-1.5 hover:border-primary hover:shadow-glow md:p-12"
         >
           <div className="absolute -left-24 -top-24 h-64 w-64 rounded-full bg-primary/10 blur-3xl transition-all duration-500 group-hover:bg-primary/15" />
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/8 via-transparent to-transparent opacity-70" />
+          <div className="absolute inset-0 bg-primary/[0.04] opacity-90" />
           <div className="relative z-10">
             <span className="mb-6 inline-flex items-center rounded-full border border-primary/35 bg-primary/15 px-4 py-1.5 text-[0.74rem] font-semibold uppercase tracking-[0.13em] text-primary">
               Leverage Captured Data

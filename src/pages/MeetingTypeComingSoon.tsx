@@ -10,7 +10,7 @@ const MeetingTypeComingSoon = () => {
 
       <main className="max-w-[960px] mx-auto px-8 py-16">
         <div className="text-center mb-10">
-          <h1 className="text-3xl md:text-4xl font-extrabold mb-4 bg-gradient-primary bg-clip-text text-transparent">
+          <h1 className="mb-4 text-3xl font-extrabold text-primary md:text-4xl">
             Virtual meetings are coming soon
           </h1>
           <p className="text-muted-foreground text-base md:text-lg max-w-[640px] mx-auto">

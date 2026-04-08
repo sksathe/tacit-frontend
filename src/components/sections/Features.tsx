@@ -7,32 +7,27 @@ const Features = () => {
       icon: Bot,
       title: "AI Agent as Trainee",
       description: "Our intelligent AI agent adapts different personas to naturally extract knowledge from SMEs through conversational interactions.",
-      gradient: "from-primary to-primary-glow"
     },
     {
       icon: MessageSquare,
       title: "Adaptive Questioning",
       description: "Dynamic questioning that adjusts based on responses, identifying knowledge gaps and seeking clarification in real-time.",
-      gradient: "from-primary-glow to-accent"
     },
     {
       icon: FileText,
       title: "Automated Structuring",
       description: "Transform unstructured conversations into logical hierarchies with summaries, guides, FAQs, and learning modules.",
-      gradient: "from-secondary to-primary"
     },
     {
       icon: Search,
       title: "Searchable Knowledge Library",
       description: "Central repository with tagging, categorization, and version control for all captured knowledge assets.",
-      gradient: "from-primary to-accent"
     },
     {
       icon: Share2,
       title: "Multi-Format Content",
       description: "Generate various learning assets including written guides, audio snippets, quizzes, and structured courses.",
-      gradient: "from-accent to-primary-glow"
-    }
+    },
   ];
 
   return (
@@ -45,9 +40,7 @@ const Features = () => {
           </div>
           <h2 className="text-3xl font-bold tracking-tight lg:text-5xl lg:leading-tight">
             Everything you need to capture{" "}
-            <span className="bg-gradient-primary bg-clip-text text-transparent">
-              tacit knowledge
-            </span>
+            <span className="text-primary">tacit knowledge</span>
           </h2>
           <p className="mx-auto max-w-3xl text-lg leading-relaxed text-muted-foreground lg:text-xl">
             From conversation to structured learning assets, our platform handles the entire knowledge extraction and synthesis process.
@@ -57,10 +50,10 @@ const Features = () => {
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {features.map((feature, index) => (
             <Card key={index} className="group relative h-full overflow-hidden rounded-2xl border border-border/60 bg-card/80 shadow-elegant backdrop-blur-sm transition-smooth hover:-translate-y-1 hover:shadow-floating focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2">
-              <div className={`absolute inset-0 bg-gradient-to-br ${feature.gradient} opacity-5 transition-smooth group-hover:opacity-10`} />
+              <div className="absolute inset-0 bg-primary/5 transition-smooth group-hover:bg-primary/10" />
               <CardHeader className="relative pb-4">
-                <div className={`mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-gradient-to-br ${feature.gradient} shadow-glow`}>
-                  <feature.icon className="h-6 w-6 text-white" />
+                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-primary shadow-glow">
+                  <feature.icon className="h-6 w-6 text-primary-foreground" />
                 </div>
                 <CardTitle className="text-xl tracking-tight">{feature.title}</CardTitle>
               </CardHeader>
@@ -85,7 +78,7 @@ const Features = () => {
               <span className="text-sm font-medium">10k+ Hours Extracted</span>
             </div>
             <div className="flex items-center space-x-2">
-              <Brain className="h-5 w-5 text-primary-glow" />
+              <Brain className="h-5 w-5 text-primary" />
               <span className="text-sm font-medium">95% Accuracy</span>
             </div>
           </div>

@@ -110,7 +110,7 @@ const SetupSession = () => {
               Setup Knowledge Extraction Session
             </div>
             <h1 className="text-3xl lg:text-4xl font-bold">
-              Create Your <span className="bg-gradient-primary bg-clip-text text-transparent">{SESSION_TYPE_NAME}</span>
+              Create Your <span className="text-primary">{SESSION_TYPE_NAME}</span>
             </h1>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
               Configure your AI agent and invite SMEs to share their valuable expertise
@@ -301,7 +301,7 @@ const SetupSession = () => {
             <Button
               type="submit"
               size="lg"
-              className="bg-gradient-primary hover:shadow-glow transition-smooth px-8"
+              className="bg-primary px-8 text-primary-foreground transition-smooth hover:shadow-glow"
               disabled={isSubmitting}
             >
               <Send className="mr-2 h-4 w-4" />

@@ -26,7 +26,7 @@ const Header = ({ fullWidth = false }: HeaderProps) => {
       >
         <div className="flex items-center space-x-2">
           <Brain className="h-7 w-7 text-primary" />
-          <span className="text-xl font-bold tracking-tight bg-gradient-primary bg-clip-text text-transparent">
+          <span className="text-xl font-bold tracking-tight text-primary">
             Tacit-AI
           </span>
         </div>

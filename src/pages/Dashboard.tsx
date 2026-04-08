@@ -113,17 +113,17 @@ const Dashboard = () => {
     setCurrentAutomation(null);
   };
 
+  const missionBriefActive = currentView === "dashboard" && hybridDispatchEnabled;
+
   return (
-    <div className="relative isolate min-h-screen overflow-x-hidden bg-background text-foreground">
-      <div className="pointer-events-none absolute inset-0 -z-10">
-        <div className="absolute left-[-12rem] top-[-10rem] h-[28rem] w-[28rem] rounded-full bg-[radial-gradient(circle_at_center,hsl(var(--primary)/0.16),transparent_68%)]" />
-        <div className="absolute right-[-10rem] top-[8rem] h-[24rem] w-[24rem] rounded-full bg-[radial-gradient(circle_at_center,hsl(var(--primary)/0.12),transparent_70%)]" />
-        <div className="absolute bottom-[-14rem] left-1/2 h-[30rem] w-[40rem] -translate-x-1/2 rounded-full bg-[radial-gradient(circle_at_center,hsl(var(--primary)/0.1),transparent_72%)]" />
-      </div>
+    <div className="relative isolate flex min-h-screen min-h-dvh flex-col overflow-x-hidden bg-dashboard-canvas text-foreground dark:bg-background">
+      <div className="pointer-events-none absolute inset-0 -z-10 bg-[linear-gradient(180deg,hsl(var(--dashboard-surface-muted)),hsl(var(--dashboard-canvas))_40%)] dark:hidden" />
       <DashboardHeader />
 
-      {/* Main Content */}
-      <main className="mx-auto max-w-[1700px] px-5 pb-20 pt-10 sm:px-8 sm:pt-14 lg:px-10">
+      {/* Main Content — min-h-0 + flex-1 so Mission Brief can own internal scroll without a second page scrollbar */}
+      <main
+        className={`flex min-h-0 w-full max-w-[1600px] flex-1 flex-col self-center px-3 pb-10 sm:px-5 lg:px-8 ${missionBriefActive ? "pt-3 sm:pt-4" : "pt-8 sm:pt-10"}`}
+      >
         {currentView === "dashboard" && hybridDispatchEnabled && (
           <MissionBriefV4
             dispatchState={dispatchState}
@@ -205,3 +205,7 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+
+
+
+

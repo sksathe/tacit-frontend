@@ -2,21 +2,23 @@ import "./mission-brief-v4.css";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { Dispatch, SetStateAction } from "react";
 import { useNavigate } from "react-router-dom";
-import { ChevronRight, Plus, Search, Upload, X } from "lucide-react";
+import { ChevronRight, PanelLeftClose, PanelLeftOpen, Plus, Search, Upload, X } from "lucide-react";
 import { TACIT_AGENTS, type TacitAgent } from "@/data/agents";
 import { getDispatchProfile, getExecutionExperience, type DispatchMode } from "@/features/dispatch/catalog";
 import { useAgentSessions } from "@/hooks/useAgentSessions";
 import {
   orderedSteps,
   persistRecentLaunches,
+  POST_LAUNCH_STEP_ORDER,
   STEP_LABELS,
-  STEP_ORDER,
   type DispatchAction,
   type DispatchState,
   type DispatchStepId,
   type MissionLaunchRecord,
 } from "@/features/dispatch/model";
 import { AgentAvatar } from "@/components/dashboard/AgentAvatar";
+import { EagleLogisticsMissionPanel } from "@/components/dashboard/EagleLogisticsMissionPanel";
+import { cn } from "@/lib/utils";
 
 const MAX_RECENT = 12;
 
@@ -54,6 +56,8 @@ function canProceed(state: DispatchState): boolean {
       return !!state.outputContractId;
     case "review":
       return true;
+    case "eagleWorkspace":
+      return false;
     case "execution":
       return true;
     case "outputReview":
@@ -90,6 +94,9 @@ export function MissionBriefV4({
   onOpenMeetingFlow,
 }: MissionBriefV4Props) {
   const navigate = useNavigate();
+  const [eagleFileLabel, setEagleFileLabel] = useState<string | null>(null);
+  const [eagleHasExtraction, setEagleHasExtraction] = useState(false);
+  const [eagleSidebarExpanded, setEagleSidebarExpanded] = useState(false);
   const ord = useMemo(() => orderedSteps(dispatchState), [dispatchState]);
   const curIdx = stepIndex(dispatchState);
   const agent = agentById(dispatchState.agentId);
@@ -115,6 +122,31 @@ export function MissionBriefV4({
   useEffect(() => {
     setExecFiles([]);
   }, [dispatchState.agentId]);
+
+  useEffect(() => {
+    if (dispatchState.agentId !== "eagle" || dispatchState.currentStep !== "eagleWorkspace") {
+      setEagleFileLabel(null);
+      setEagleHasExtraction(false);
+      setEagleSidebarExpanded(false);
+    }
+  }, [dispatchState.agentId, dispatchState.currentStep]);
+
+  useEffect(() => {
+    if (!eagleHasExtraction) {
+      setEagleSidebarExpanded(false);
+    }
+  }, [eagleHasExtraction]);
+
+  const eagleOutputFocus =
+    dispatchState.agentId === "eagle" &&
+    dispatchState.currentStep === "eagleWorkspace" &&
+    eagleHasExtraction &&
+    !eagleSidebarExpanded;
+  const eagleSidebarCanMinify =
+    dispatchState.agentId === "eagle" &&
+    dispatchState.currentStep === "eagleWorkspace" &&
+    eagleHasExtraction &&
+    eagleSidebarExpanded;
 
   useEffect(() => {
     if (!dispatchState.linkedSessionId) setLinkedSessionName(null);
@@ -191,10 +223,16 @@ export function MissionBriefV4({
   const continueLabel =
     dispatchState.currentStep === "review" ? "Launch mission" : "Continue";
 
-  const preLen = STEP_ORDER.length;
+  const preLaunchStepCount = dispatchState.launched
+    ? ord.length - POST_LAUNCH_STEP_ORDER.length
+    : ord.length;
   const sidebarSteps = ord.map((stepId, i) => {
     const st = stepStatuses.get(stepId) ?? "future";
-    const canJump = dispatchState.launched ? i >= preLen && i <= curIdx : i <= curIdx;
+    const canJump = dispatchState.launched
+      ? i >= preLaunchStepCount && i <= curIdx
+      : dispatchState.agentId === "eagle"
+        ? false
+        : i <= curIdx;
     return (
       <button
         key={stepId}
@@ -215,7 +253,7 @@ export function MissionBriefV4({
     <div className="mission-brief-v4">
       <div className="mission-brief-v4__breadcrumb">
         <button type="button" className="mission-brief-v4__new-btn" onClick={handleNewMission}>
-          <Plus className="h-4 w-4 shrink-0" strokeWidth={2.5} />
+          <Plus className="h-4 w-4 shrink-0 text-primary" strokeWidth={2.5} />
           New Mission
         </button>
         <div className="mission-brief-v4__breadcrumb-scroll">
@@ -236,13 +274,36 @@ export function MissionBriefV4({
         </div>
       </div>
 
-      <div className="mission-brief-v4__layout">
-        <aside className="mission-brief-v4__sidebar">
+      <div
+        className={`mission-brief-v4__layout${eagleOutputFocus ? " mission-brief-v4__layout--eagle-output" : ""}`}
+      >
+        <aside
+          className={[
+            "mission-brief-v4__sidebar",
+            eagleOutputFocus ? "mission-brief-v4__sidebar--collapsed" : "",
+            eagleSidebarCanMinify ? "mission-brief-v4__sidebar--can-minify" : "",
+          ]
+            .filter(Boolean)
+            .join(" ")}
+        >
+          {eagleSidebarCanMinify && (
+            <button
+              type="button"
+              className="mission-brief-v4__sidebar-minify"
+              aria-label="Collapse agent sidebar"
+              title="Collapse sidebar"
+              onClick={() => setEagleSidebarExpanded(false)}
+            >
+              <PanelLeftClose className="h-4 w-4" strokeWidth={2} />
+            </button>
+          )}
           <div className="mission-brief-v4__agent-block">
             <span className="mission-brief-v4__agent-label">Agent</span>
             {agent ? (
               <>
-                <AgentAvatar agent={agent} size="lg" />
+                <div className="mission-brief-v4__agent-avatar-shell">
+                  <AgentAvatar agent={agent} size="lg" />
+                </div>
                 <div className={`mission-brief-v4__agent-name mission-brief-v4__agent-name--active`}>
                   {agent.name}
                 </div>
@@ -276,14 +337,26 @@ export function MissionBriefV4({
                 {dispatchState.missionTitle.trim() || "—"}
               </div>
             </div>
-            <div className="mission-brief-v4__ctx-row">
-              <div className="mission-brief-v4__ctx-label">Output</div>
-              <div
-                className={`mission-brief-v4__ctx-value${dispatchState.outputContractId ? " mission-brief-v4__ctx-value--filled" : ""}`}
-              >
-                {profile?.outputContracts.find((o) => o.id === dispatchState.outputContractId)?.label ?? "—"}
+            {dispatchState.agentId === "eagle" && dispatchState.currentStep === "eagleWorkspace" && (
+              <div className="mission-brief-v4__ctx-row">
+                <div className="mission-brief-v4__ctx-label">File</div>
+                <div
+                  className={`mission-brief-v4__ctx-value${eagleFileLabel ? " mission-brief-v4__ctx-value--filled" : ""}`}
+                >
+                  {eagleFileLabel ?? "—"}
+                </div>
               </div>
-            </div>
+            )}
+            {dispatchState.agentId !== "eagle" && (
+              <div className="mission-brief-v4__ctx-row">
+                <div className="mission-brief-v4__ctx-label">Output</div>
+                <div
+                  className={`mission-brief-v4__ctx-value${dispatchState.outputContractId ? " mission-brief-v4__ctx-value--filled" : ""}`}
+                >
+                  {profile?.outputContracts.find((o) => o.id === dispatchState.outputContractId)?.label ?? "—"}
+                </div>
+              </div>
+            )}
             {experience === "document" && dispatchState.modeId && (
               <div className="mission-brief-v4__ctx-row">
                 <div className="mission-brief-v4__ctx-label">Linked session</div>
@@ -296,10 +369,26 @@ export function MissionBriefV4({
               </div>
             )}
           </div>
+          <button
+            type="button"
+            className="mission-brief-v4__sidebar-expand"
+            aria-label="Expand agent sidebar"
+            title="Expand sidebar"
+            onClick={() => setEagleSidebarExpanded(true)}
+          >
+            <PanelLeftOpen className="h-4 w-4" strokeWidth={2} />
+          </button>
         </aside>
 
         <div className="mission-brief-v4__main">
-          <div className="mission-brief-v4__content">
+          <div
+            className={cn(
+              "mission-brief-v4__content",
+              dispatchState.currentStep === "eagleWorkspace" &&
+                eagleFileLabel &&
+                "mission-brief-v4__content--eagle-split-fill",
+            )}
+          >
             {dispatchState.currentStep === "agent" && (
               <>
                 <h1 className="mission-brief-v4__screen-title">Choose your agent</h1>
@@ -321,7 +410,16 @@ export function MissionBriefV4({
                         <div className="mission-brief-v4__agent-meta">
                           <div className="mission-brief-v4__agent-card-name">{a.name}</div>
                           <div className="mission-brief-v4__agent-card-role">{a.role}</div>
-                          {p?.modes?.length ? (
+                          {a.id === "eagle" ? (
+                            <div className="mission-brief-v4__badges">
+                              <span className="mission-brief-v4__mode-badge mission-brief-v4__mode-badge--d">
+                                PDF · PNG · JPEG
+                              </span>
+                              <span className="mission-brief-v4__mode-badge mission-brief-v4__mode-badge--e">
+                                Upload &amp; extract
+                              </span>
+                            </div>
+                          ) : p?.modes?.length ? (
                             <div className="mission-brief-v4__badges">
                               {p.modes.slice(0, 4).map((m, idx) => (
                                 <span
@@ -374,6 +472,13 @@ export function MissionBriefV4({
                   </>
                 )}
               </>
+            )}
+
+            {dispatchState.currentStep === "eagleWorkspace" && (
+              <EagleLogisticsMissionPanel
+                onFileSelected={setEagleFileLabel}
+                onExtractionOutputChange={setEagleHasExtraction}
+              />
             )}
 
             {dispatchState.currentStep === "mode" && (
@@ -451,7 +556,18 @@ export function MissionBriefV4({
               <>
                 <h1 className="mission-brief-v4__screen-title">Inputs</h1>
                 <p className="mission-brief-v4__screen-desc">
-                  Describe what you will attach or connect for this run. File upload wiring can plug in here later.
+                  {dispatchState.agentId === "lexa" ? (
+                    <>
+                      Optional notes about what you’ll process. Use{" "}
+                      <strong>Execution</strong> after launch to attach contract files, or open the full contract
+                      workspace from there.
+                    </>
+                  ) : (
+                    <>
+                      Describe what you will attach or connect for this run. File upload wiring can plug in here
+                      later.
+                    </>
+                  )}
                 </p>
                 <div className="mission-brief-v4__field">
                   <label className="mission-brief-v4__label" htmlFor="mb-v4-input">
@@ -525,8 +641,7 @@ export function MissionBriefV4({
                 <div className="mission-brief-v4__review-block">
                   <h3>Output</h3>
                   <p>
-                    {profile?.outputContracts.find((o) => o.id === dispatchState.outputContractId)?.label ??
-                      "—"}
+                    {profile?.outputContracts.find((o) => o.id === dispatchState.outputContractId)?.label ?? "—"}
                   </p>
                 </div>
               </>
@@ -565,52 +680,67 @@ export function MissionBriefV4({
               <>
                 <div className="mission-brief-v4__hero">
                   <AgentAvatar agent={agent} size="xl" />
-                  <div className="mission-brief-v4__hero-title">Prepare documents &amp; sources</div>
+                  <div className="mission-brief-v4__hero-title">
+                    {dispatchState.agentId === "eagle"
+                      ? "Extract logistics documents"
+                      : "Prepare documents &amp; sources"}
+                  </div>
                 </div>
                 <p className="mission-brief-v4__screen-desc">
-                  Attach files to process (e.g. PDF contracts), or point to an existing session transcript to
-                  automate. Full parsing pipeline wiring can connect here later.
+                  {dispatchState.agentId === "eagle" ? (
+                    <>
+                      Extraction runs on the <strong>Input</strong> step. Use this screen to optionally link a past
+                      session for transcript-style context.
+                    </>
+                  ) : (
+                    <>
+                      Attach files to process (e.g. PDF contracts), or point to an existing session transcript to
+                      automate. Full parsing pipeline wiring can connect here later.
+                    </>
+                  )}
                 </p>
 
-                <div className="mission-brief-v4__doc-section">
-                  <div className="mission-brief-v4__doc-label">Attached files</div>
-                  <button
-                    type="button"
-                    className="mission-brief-v4__dropzone"
-                    onClick={() => fileInputRef.current?.click()}
-                  >
-                    <Upload className="mission-brief-v4__dropzone-icon" aria-hidden />
-                    <span>Click to add files</span>
-                    <span className="mission-brief-v4__dropzone-hint">PDF, DOCX, or other supported types</span>
-                  </button>
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    className="mission-brief-v4__file-input-hidden"
-                    multiple
-                    onChange={onExecFilesChange}
-                  />
-                  {execFiles.length > 0 && (
-                    <ul className="mission-brief-v4__file-list">
-                      {execFiles.map((f, i) => (
-                        <li key={`${f.name}-${i}`} className="mission-brief-v4__file-row">
-                          <span className="mission-brief-v4__file-name">{f.name}</span>
-                          <span className="mission-brief-v4__file-size">
-                            {(f.size / 1024).toFixed(1)} KB
-                          </span>
-                          <button
-                            type="button"
-                            className="mission-brief-v4__file-remove"
-                            aria-label={`Remove ${f.name}`}
-                            onClick={() => removeExecFile(i)}
-                          >
-                            <X className="h-4 w-4" />
-                          </button>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
+                {dispatchState.agentId !== "eagle" && (
+                  <div className="mission-brief-v4__doc-section">
+                    <div className="mission-brief-v4__doc-label">Attached files</div>
+                    <button
+                      type="button"
+                      className="mission-brief-v4__dropzone"
+                      onClick={() => fileInputRef.current?.click()}
+                    >
+                      <Upload className="mission-brief-v4__dropzone-icon" aria-hidden />
+                      <span>Click to add files</span>
+                      <span className="mission-brief-v4__dropzone-hint">PDF, DOCX, or other supported types</span>
+                    </button>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      className="mission-brief-v4__file-input-hidden"
+                      multiple
+                      onChange={onExecFilesChange}
+                    />
+                    {execFiles.length > 0 && (
+                      <ul className="mission-brief-v4__file-list">
+                        {execFiles.map((f, i) => (
+                          <li key={`${f.name}-${i}`} className="mission-brief-v4__file-row">
+                            <span className="mission-brief-v4__file-name">{f.name}</span>
+                            <span className="mission-brief-v4__file-size">
+                              {(f.size / 1024).toFixed(1)} KB
+                            </span>
+                            <button
+                              type="button"
+                              className="mission-brief-v4__file-remove"
+                              aria-label={`Remove ${f.name}`}
+                              onClick={() => removeExecFile(i)}
+                            >
+                              <X className="h-4 w-4" />
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                )}
 
                 <div className="mission-brief-v4__doc-section">
                   <div className="mission-brief-v4__doc-label">Past session transcript</div>
@@ -699,9 +829,11 @@ export function MissionBriefV4({
                   </p>
                 )}
 
-                <div className="mission-brief-v4__placeholder mission-brief-v4__placeholder--tight">
-                  Run status, progress, and backend jobs will mount here when wired.
-                </div>
+                {dispatchState.agentId !== "eagle" && (
+                  <div className="mission-brief-v4__placeholder mission-brief-v4__placeholder--tight">
+                    Run status, progress, and backend jobs will mount here when wired.
+                  </div>
+                )}
               </>
             )}
 
@@ -743,14 +875,16 @@ export function MissionBriefV4({
             >
               Back
             </button>
-            <button
-              type="button"
-              className="mission-brief-v4__btn mission-brief-v4__btn--primary"
-              disabled={!canProceed(dispatchState) || dispatchState.currentStep === "outputReview"}
-              onClick={onContinue}
-            >
-              {continueLabel}
-            </button>
+            {dispatchState.currentStep !== "eagleWorkspace" && (
+              <button
+                type="button"
+                className="mission-brief-v4__btn mission-brief-v4__btn--primary"
+                disabled={!canProceed(dispatchState) || dispatchState.currentStep === "outputReview"}
+                onClick={onContinue}
+              >
+                {continueLabel}
+              </button>
+            )}
           </footer>
         </div>
       </div>

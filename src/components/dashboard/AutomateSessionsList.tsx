@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { ChevronLeft, Search } from "lucide-react";
 import type { TacitAgent } from "@/data/agents";
 import { apiClient } from "@/lib/apiClient";
+import { EagleAnalysisWorkspace } from "./EagleAnalysisWorkspace";
 
 export interface SessionItem {
   sessionId: string;
@@ -24,6 +25,9 @@ export function AutomateSessionsList({ agent, onSelectSession, onSessionsLoaded,
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [query, setQuery] = useState("");
+  const [eagleProcessing, setEagleProcessing] = useState(false);
+  const [eagleHasResult, setEagleHasResult] = useState(false);
+  const isEagle = agent.id === "eagle";
 
   useEffect(() => {
     let cancelled = false;
@@ -104,6 +108,8 @@ export function AutomateSessionsList({ agent, onSelectSession, onSessionsLoaded,
     );
   });
 
+  const showEagleIntro = isEagle && !eagleProcessing && !eagleHasResult;
+
   return (
     <>
       <div className="mb-8 flex flex-wrap items-center gap-2 text-[0.88rem] text-muted-foreground">
@@ -119,26 +125,78 @@ export function AutomateSessionsList({ agent, onSelectSession, onSessionsLoaded,
         <span className="text-primary font-semibold">{agent.name}</span>
       </div>
 
-      <div className="mb-10 rounded-2xl border border-primary/25 bg-card/55 p-8 md:p-10">
-        <div className="mb-3 inline-flex rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-[0.68rem] font-bold uppercase tracking-[0.13em] text-primary">
-          Step 2 of 3
-        </div>
-        <h1 className="mb-2 text-[2rem] font-extrabold text-foreground md:text-[2.4rem]">Sessions for {agent.name}</h1>
-        <p className="mb-6 text-[1rem] leading-relaxed text-muted-foreground">
-          Choose the session to automate. Call details and transcripts are available when you open a session.
-        </p>
+      {isEagle && (
+        <EagleAnalysisWorkspace
+          compact
+          onProcessingChange={setEagleProcessing}
+          onExtractionResult={(r) => setEagleHasResult(r != null)}
+          onBackToSessionList={() => setEagleHasResult(false)}
+          className="mb-10"
+        />
+      )}
 
-        <div className="relative max-w-md">
-          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <input
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search sessions"
-            className="h-11 w-full rounded-lg border border-primary/30 bg-background/70 pl-10 pr-3 text-sm text-foreground outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
-          />
+      {showEagleIntro && (
+        <div className="mb-10 rounded-2xl border border-primary/25 bg-card/55 p-8 md:p-10">
+          <div className="mb-3 inline-flex rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-[0.68rem] font-bold uppercase tracking-[0.13em] text-primary">
+            Step 2 of 3
+          </div>
+          <h1 className="mb-2 text-[2rem] font-extrabold text-foreground md:text-[2.4rem]">Sessions for {agent.name}</h1>
+          <p className="mb-6 text-[1rem] leading-relaxed text-muted-foreground">
+            Extract a logistics document below, or open a session for a saved workspace. Call details appear on the
+            session page when available.
+          </p>
+
+          <div className="relative max-w-md">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <input
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search sessions"
+              className="h-11 w-full rounded-lg border border-primary/30 bg-background/70 pl-10 pr-3 text-sm text-foreground outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
+            />
+          </div>
         </div>
-      </div>
+      )}
+
+      {!isEagle && (
+        <div className="mb-10 rounded-2xl border border-primary/25 bg-card/55 p-8 md:p-10">
+          <div className="mb-3 inline-flex rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-[0.68rem] font-bold uppercase tracking-[0.13em] text-primary">
+            Step 2 of 3
+          </div>
+          <h1 className="mb-2 text-[2rem] font-extrabold text-foreground md:text-[2.4rem]">Sessions for {agent.name}</h1>
+          <p className="mb-6 text-[1rem] leading-relaxed text-muted-foreground">
+            Choose the session to automate. Call details and transcripts are available when you open a session.
+          </p>
+
+          <div className="relative max-w-md">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <input
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search sessions"
+              className="h-11 w-full rounded-lg border border-primary/30 bg-background/70 pl-10 pr-3 text-sm text-foreground outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
+            />
+          </div>
+        </div>
+      )}
+
+      {isEagle && !showEagleIntro && (
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+          <h2 className="text-lg font-bold text-foreground">Your sessions</h2>
+          <div className="relative max-w-md flex-1 min-w-[200px]">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <input
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search sessions"
+              className="h-10 w-full rounded-lg border border-primary/30 bg-background/70 pl-10 pr-3 text-sm text-foreground outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
+            />
+          </div>
+        </div>
+      )}
 
       {loading ? (
         <div className="py-12 text-center text-muted-foreground">Loading sessions…</div>
@@ -198,6 +256,7 @@ function getMockSessions(agent: TacitAgent): SessionItem[] {
     ross: ["Compliance Review", "Policy Update", "Audit Prep"],
     monica: ["Operations Runbook", "Process Documentation", "Vendor Coordination"],
     chandler: ["Data Analysis", "Metrics Review", "Dashboard Design"],
+    eagle: ["Inbound BOL batch — LAX", "Customs doc pack — ORD", "POD reconciliation — DFW"],
   };
   const list = topics[agent.id as keyof typeof topics] ?? ["Session 1", "Session 2", "Session 3"];
   return list.map((title, i) => ({

@@ -116,7 +116,7 @@ const KnowledgeLibrary = () => {
           <div className="text-center space-y-4 mb-8">
             <h1 className="text-3xl lg:text-4xl font-bold">
               Knowledge{" "}
-              <span className="bg-gradient-primary bg-clip-text text-transparent">
+              <span className="text-primary">
                 Library
               </span>
             </h1>
@@ -167,8 +167,8 @@ const KnowledgeLibrary = () => {
               <CardHeader className="pb-4">
                 <div className="flex items-start justify-between">
                   <div className="flex items-center space-x-3">
-                    <div className="w-12 h-12 rounded-lg bg-gradient-primary flex items-center justify-center">
-                      <asset.icon className="h-6 w-6 text-white" />
+                    <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary">
+                      <asset.icon className="h-6 w-6 text-primary-foreground" />
                     </div>
                     <div>
                       <CardTitle className="text-lg group-hover:text-primary transition-smooth">
@@ -236,7 +236,7 @@ const KnowledgeLibrary = () => {
 
                 {/* Actions */}
                 <div className="flex gap-2 pt-2">
-                  <Button size="sm" className="bg-gradient-primary hover:shadow-glow transition-smooth">
+                  <Button size="sm" className="bg-primary text-primary-foreground transition-smooth hover:shadow-glow">
                     <Eye className="mr-2 h-4 w-4" />
                     View Assets
                   </Button>
