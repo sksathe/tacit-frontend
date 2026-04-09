@@ -20,8 +20,15 @@ export const STEP_ORDER: DispatchStepId[] = [
   "review",
 ];
 
-/** Facilitate mode: skip input/output/review and go straight to meeting setup. */
-export const STEP_ORDER_FACILITATE: DispatchStepId[] = ["agent", "mode", "mission", "execution"];
+/** Facilitate mode (v5.2): keep the full brief flow before meeting setup. */
+export const STEP_ORDER_FACILITATE: DispatchStepId[] = [
+  "agent",
+  "mode",
+  "mission",
+  "input",
+  "outputContract",
+  "review",
+];
 
 /** Eagle: choose agent → upload & extract only (no mode / mission / launch wizard). */
 export const STEP_ORDER_EAGLE: DispatchStepId[] = ["agent", "eagleWorkspace"];
@@ -30,7 +37,7 @@ export const STEP_ORDER_EAGLE: DispatchStepId[] = ["agent", "eagleWorkspace"];
 export const POST_LAUNCH_STEP_ORDER: DispatchStepId[] = ["execution", "outputReview"];
 
 export const STEP_LABELS: Record<DispatchStepId, string> = {
-  agent: "Agent",
+  agent: "Choose agent",
   mode: "Mode",
   mission: "Mission",
   input: "Input",
@@ -75,8 +82,10 @@ export type DispatchState = {
   currentStep: DispatchStepId;
   agentId: string | null;
   modeId: string | null;
+  missionTemplateId: string | null;
   missionTitle: string;
   missionBrief: string;
+  meetingLink: string;
   inputNotes: string;
   outputContractId: string | null;
   launched: boolean;
@@ -88,8 +97,10 @@ export const initialDispatchState: DispatchState = {
   currentStep: "agent",
   agentId: null,
   modeId: null,
+  missionTemplateId: null,
   missionTitle: "",
   missionBrief: "",
+  meetingLink: "",
   inputNotes: "",
   outputContractId: null,
   launched: false,
@@ -105,6 +116,8 @@ export type DispatchAction =
       missionTitle?: string;
       missionBrief?: string;
     }
+  | { type: "SET_MISSION_TEMPLATE"; missionTemplateId: string | null }
+  | { type: "SET_MEETING_LINK"; meetingLink: string }
   | { type: "SET_INPUT_NOTES"; inputNotes: string }
   | { type: "SET_OUTPUT_CONTRACT"; outputContractId: string | null }
   | { type: "SET_LINKED_SESSION"; sessionId: string | null }
@@ -118,7 +131,8 @@ export function orderedSteps(state: DispatchState): DispatchStepId[] {
     return STEP_ORDER_EAGLE;
   }
   if (state.modeId === "facilitate") {
-    return STEP_ORDER_FACILITATE;
+    const pre = STEP_ORDER_FACILITATE;
+    return state.launched ? [...pre, ...POST_LAUNCH_STEP_ORDER] : pre;
   }
   const pre = STEP_ORDER;
   return state.launched ? [...pre, ...POST_LAUNCH_STEP_ORDER] : pre;
@@ -146,6 +160,7 @@ export function dispatchReducer(state: DispatchState, action: DispatchAction): D
         ...state,
         agentId: action.agentId,
         modeId: null,
+        missionTemplateId: null,
         linkedSessionId: null,
         ...(action.agentId === "eagle" ? { outputContractId: null } : {}),
       };
@@ -166,6 +181,10 @@ export function dispatchReducer(state: DispatchState, action: DispatchAction): D
         ...(action.missionTitle !== undefined ? { missionTitle: action.missionTitle } : {}),
         ...(action.missionBrief !== undefined ? { missionBrief: action.missionBrief } : {}),
       };
+    case "SET_MISSION_TEMPLATE":
+      return { ...state, missionTemplateId: action.missionTemplateId };
+    case "SET_MEETING_LINK":
+      return { ...state, meetingLink: action.meetingLink };
     case "SET_INPUT_NOTES":
       return { ...state, inputNotes: action.inputNotes };
     case "SET_OUTPUT_CONTRACT":
@@ -189,6 +208,7 @@ export function dispatchReducer(state: DispatchState, action: DispatchAction): D
         agentId,
         modeId,
         missionTitle,
+        missionTemplateId: null,
         linkedSessionId: null,
         currentStep: modeId ? "mission" : "mode",
       };
@@ -197,12 +217,6 @@ export function dispatchReducer(state: DispatchState, action: DispatchAction): D
       const ord = orderedSteps(state);
       const idx = ord.indexOf(state.currentStep);
       if (idx < 0) return state;
-      if (state.currentStep === "mission" && state.modeId === "facilitate") {
-        return {
-          ...state,
-          currentStep: "execution",
-        };
-      }
       if (state.currentStep === "review" && !state.launched) {
         return {
           ...state,

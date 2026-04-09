@@ -1,0 +1,71 @@
+/**
+ * Mission Brief v5.2 — Nova/Mist + emerald accent
+ * Source: ux-option-2-mission-brief-v5.2.html
+ *
+ * Raw hex tokens for use outside Tailwind/shadcn (data viz, one-off CSS, exports).
+ * Scope with .mission-brief-v5-2 on any wrapper, or use Tailwind via
+ * .mission-brief-v4.mission-brief-v4--v52 (see mission-brief-v4.css).
+ */
+
+:is(.mission-brief-v5-2, .mission-brief-v4.mission-brief-v4--v52) {
+  /* Backgrounds — Nova/Mist */
+  --mb52-bg: #0c0f11;
+  --mb52-surface: #141a1f;
+  --mb52-surface-2: #1c2329;
+  --mb52-surface-3: #222b33;
+  --mb52-border: #232c33;
+  --mb52-border-hover: #2e3a44;
+
+  /* Typography */
+  --mb52-text: #eef0f2;
+  --mb52-text-muted: #6b7a85;
+
+  /* Accent — shadcn emerald */
+  --mb52-accent: #10b981;
+  --mb52-accent-dim: #059669;
+  --mb52-accent-light: #34d399;
+
+  --mb52-radius: 12px;
+  --mb52-transition: 150ms ease;
+
+  /* Semantic */
+  --mb52-danger: #ff5252;
+  --mb52-warning: #ffd740;
+
+  /* Type scale (px, from prototype) */
+  --mb52-text-display: 40px;
+  --mb52-text-title: 22px;
+  --mb52-text-body: 17px;
+  --mb52-text-small: 13px;
+  --mb52-text-micro: 11px;
+
+  /* Emerald chart ramp */
+  --mb52-chart-1: #6ee7b7;
+  --mb52-chart-2: #34d399;
+  --mb52-chart-3: #10b981;
+  --mb52-chart-4: #059669;
+  --mb52-chart-5: #047857;
+
+  /* Focus / selection ring (active step pill in prototype) */
+  --mb52-accent-ring: rgba(16, 185, 129, 0.18);
+  --mb52-selected-surface: rgba(16, 185, 129, 0.04);
+
+  /* Metallic chrome — subtle top highlight + depth (reference Mission Studio mocks) */
+  --mb52-metal-edge: rgba(255, 255, 255, 0.09);
+  --mb52-metal-edge-soft: rgba(255, 255, 255, 0.05);
+  --mb52-metal-inset-top: rgba(255, 255, 255, 0.07);
+  --mb52-metal-inset-bottom: rgba(0, 0, 0, 0.35);
+  --mb52-glow-accent: 0 0 20px rgba(16, 185, 129, 0.22);
+  --mb52-glow-accent-strong: 0 0 28px rgba(16, 185, 129, 0.38);
+  --mb52-card-sheen: linear-gradient(165deg, rgba(255, 255, 255, 0.06) 0%, transparent 42%),
+    linear-gradient(180deg, #1e242c 0%, #141a1f 48%, #10151a 100%);
+
+  /* Pickup featured cards — subtle brushed specular (very low contrast) */
+  --mb52-pickup-brushed: repeating-linear-gradient(
+    92deg,
+    hsl(0 0% 100% / 0.016) 0px,
+    hsl(0 0% 100% / 0.016) 1px,
+    transparent 1px,
+    transparent 5px
+  );
+}

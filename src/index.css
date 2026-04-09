@@ -1,4 +1,5 @@
 @import url("https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap");
+@import "./styles/mission-brief-v5.2-tokens.css";
 
 @tailwind base;
 @tailwind components;
@@ -212,6 +213,24 @@ All colors MUST be HSL.
 
   .dark {
     color-scheme: dark;
+  }
+
+  /* Mission Studio active: canvas + header align with MissionBrief charcoal / metallic frame */
+  .dark .dashboard--mission-studio {
+    --dashboard-canvas: 216 28% 7%;
+    --dashboard-surface: 220 14% 10%;
+    --dashboard-surface-muted: 218 16% 9%;
+    --dashboard-header-background: 220 16% 8%;
+    --dashboard-header-border: 220 12% 16%;
+    --dashboard-rail-bg: 220 14% 10%;
+    --dashboard-rail-border: 220 12% 18%;
+  }
+
+  .dark .dashboard--mission-studio > header {
+    border-bottom-color: hsl(0 0% 100% / 0.08);
+    box-shadow:
+      0 1px 0 hsl(0 0% 100% / 0.06) inset,
+      0 12px 40px -16px hsl(0 0% 0% / 0.55);
   }
 }
 

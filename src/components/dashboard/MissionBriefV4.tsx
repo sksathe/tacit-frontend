@@ -2,13 +2,28 @@ import "./mission-brief-v4.css";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { Dispatch, SetStateAction } from "react";
 import { useNavigate } from "react-router-dom";
-import { ChevronRight, PanelLeftClose, PanelLeftOpen, Plus, Search, Upload, X } from "lucide-react";
+import {
+  AlertCircle,
+  Calendar,
+  ChevronLeft,
+  ChevronRight,
+  Loader2,
+  Mic,
+  PanelLeftClose,
+  PanelLeftOpen,
+  Plus,
+  Search,
+  Zap,
+  Upload,
+  User,
+  Video,
+  X,
+} from "lucide-react";
 import { TACIT_AGENTS, type TacitAgent } from "@/data/agents";
 import { getDispatchProfile, getExecutionExperience, type DispatchMode } from "@/features/dispatch/catalog";
 import { useAgentSessions } from "@/hooks/useAgentSessions";
 import {
   orderedSteps,
-  persistRecentLaunches,
   POST_LAUNCH_STEP_ORDER,
   STEP_LABELS,
   type DispatchAction,
@@ -19,8 +34,6 @@ import {
 import { AgentAvatar } from "@/components/dashboard/AgentAvatar";
 import { EagleLogisticsMissionPanel } from "@/components/dashboard/EagleLogisticsMissionPanel";
 import { cn } from "@/lib/utils";
-
-const MAX_RECENT = 12;
 
 function agentById(id: string | null): TacitAgent | undefined {
   if (!id) return undefined;
@@ -34,44 +47,178 @@ function modeBadgeModifier(m: DispatchMode, index: number): string {
   return "mission-brief-v4__mode-badge--h";
 }
 
+function formatRelativeTime(ts: number): string {
+  const diffMs = Date.now() - ts;
+  const sec = Math.floor(diffMs / 1000);
+  if (sec < 45) return "Just now";
+  const min = Math.floor(sec / 60);
+  const hr = Math.floor(min / 60);
+  const d = Math.floor(hr / 24);
+  if (d > 0) return d === 1 ? "1 day ago" : `${d} days ago`;
+  if (hr > 0) return hr === 1 ? "1 hour ago" : `${hr} hours ago`;
+  if (min > 0) return min === 1 ? "1 min ago" : `${min} min ago`;
+  return "Just now";
+}
+
+function pickupBadgeModifier(agentId: string): string {
+  const map: Record<string, string> = {
+    sage: "mission-brief-v4__pickup-badge--sage",
+    aria: "mission-brief-v4__pickup-badge--aria",
+    mason: "mission-brief-v4__pickup-badge--mason",
+    lexa: "mission-brief-v4__pickup-badge--lexa",
+    eagle: "mission-brief-v4__pickup-badge--eagle",
+    ross: "mission-brief-v4__pickup-badge--ross",
+    monica: "mission-brief-v4__pickup-badge--monica",
+    chandler: "mission-brief-v4__pickup-badge--chandler",
+  };
+  return map[agentId] ?? "mission-brief-v4__pickup-badge--default";
+}
+
+function agentPickupBadgeText(agent: TacitAgent | undefined, agentId: string): string {
+  const raw = agent?.name ?? agentId;
+  return raw.replace(/\s/g, "").toUpperCase().slice(0, 5);
+}
+
+function formatPickupDateTime(ts: number): string {
+  return new Date(ts).toLocaleString(undefined, {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+}
+
+type MissionTemplate = {
+  id: string;
+  name: string;
+  description?: string;
+  defaultOutputs: string[];
+};
+
+const MISSION_TEMPLATES_BY_AGENT: Partial<Record<string, MissionTemplate[]>> = {
+  sage: [
+    {
+      id: "soc2-control-evidence",
+      name: "SOC 2 Control Evidence Interview",
+      defaultOutputs: ["Control Evidence Map", "Gap Analysis Report", "Follow-up Action List"],
+    },
+    {
+      id: "vendor-risk-assessment",
+      name: "Vendor Risk Assessment",
+      defaultOutputs: ["Risk Register Update", "Vendor Risk Score", "Remediation Recommendations"],
+    },
+    {
+      id: "security-posture-review",
+      name: "Security Posture Review",
+      defaultOutputs: ["Posture Score Report", "Control Gap Matrix", "Audit Artifact Pack"],
+    },
+    {
+      id: "audit-prep-interview",
+      name: "Audit Prep Stakeholder Interview",
+      defaultOutputs: ["Readiness Summary", "Evidence Checklist", "Stakeholder Briefing Doc"],
+    },
+  ],
+  mason: [
+    {
+      id: "contract-extraction",
+      name: "Contract Extraction & CRM Push",
+      defaultOutputs: ["CRM Data Push", "Contract Summary", "Audit Trail Export"],
+    },
+    {
+      id: "invoice-terms",
+      name: "Invoice Terms Extraction",
+      defaultOutputs: ["Invoice Data (CSV)", "GL Code Assignment", "Payment Schedule"],
+    },
+    {
+      id: "redline-review",
+      name: "Redline Review Session",
+      defaultOutputs: ["Redline Delta Report", "Negotiation Summary", "Risk Flags"],
+    },
+    {
+      id: "vendor-onboarding",
+      name: "Vendor Onboarding Interview",
+      defaultOutputs: ["Vendor Profile", "Contract Draft", "CRM Data Push"],
+    },
+  ],
+  aria: [
+    {
+      id: "practice-intake",
+      name: "Practice Intake Interview",
+      defaultOutputs: ["Practice Profile", "CRM Setup Push", "Compliance Checklist"],
+    },
+    {
+      id: "advisor-registration",
+      name: "Advisor Registration Collection",
+      defaultOutputs: ["Registration Data Package", "Form U4 Pre-fill", "Compliance Checklist"],
+    },
+    {
+      id: "compliance-discovery",
+      name: "Compliance Discovery Session",
+      defaultOutputs: ["Compliance Flag Report", "Regulatory Checklist", "Disclosure Summary"],
+    },
+    {
+      id: "book-review",
+      name: "Book of Business Review",
+      defaultOutputs: ["Book of Business Summary", "AUM Breakdown", "Account Migration Plan"],
+    },
+  ],
+};
+
+function missionTemplatesForAgent(agentId: string | null): MissionTemplate[] {
+  if (!agentId) return [];
+  return MISSION_TEMPLATES_BY_AGENT[agentId] ?? [];
+}
+
+function getModeUiCards(profile: ReturnType<typeof getDispatchProfile> | undefined) {
+  const modes = profile?.modes ?? [];
+  const facilitate = modes.find((m) => m.id === "facilitate") ?? null;
+  const execute = modes.find((m) => m.id !== "facilitate") ?? null;
+
+  if (facilitate && execute) {
+    return [
+      {
+        id: facilitate.id,
+        title: "Facilitate",
+        description:
+          "Agent joins a live session and facilitates structured data collection via conversation.",
+        details: ["Live session (Zoom/Meet/phone)", "Great for stakeholder interviews", "Outputs notes + next steps"],
+        Icon: Mic,
+      },
+      {
+        id: execute.id,
+        title: "Execute",
+        description: "Agent processes documents and data autonomously without a live session.",
+        details: ["Upload docs (PDF/DOCX/etc.)", "Best for extraction + classification", "Outputs structured data + summary"],
+        Icon: Zap,
+      },
+    ] as const;
+  }
+
+  return modes.map((m, idx) => ({
+    id: m.id,
+    title: m.label,
+    description: m.description,
+    details: idx % 2 === 0 ? ["Autonomous run", "Structured output", "Fast turnaround"] : ["Live session", "Guided capture", "Collaborative"],
+    Icon: idx % 2 === 0 ? Zap : Mic,
+  }));
+}
+
 function stepIndex(state: DispatchState): number {
   const ord = orderedSteps(state);
   return ord.indexOf(state.currentStep);
 }
 
-function canProceed(state: DispatchState): boolean {
-  const profile = state.agentId ? getDispatchProfile(state.agentId) : undefined;
-  switch (state.currentStep) {
-    case "agent":
-      return !!state.agentId;
-    case "mode":
-      if (!profile?.modes?.length) return false;
-      return !!state.modeId;
-    case "mission":
-      return state.missionTitle.trim().length > 0;
-    case "input":
-      return true;
-    case "outputContract":
-      if (!profile?.outputContracts?.length) return true;
-      return !!state.outputContractId;
-    case "review":
-      return true;
-    case "eagleWorkspace":
-      return false;
-    case "execution":
-      return true;
-    case "outputReview":
-      return false;
-    default:
-      return false;
-  }
-}
+const LIGHT_CONFIGURE_STEPS = new Set<DispatchStepId>([
+  "mode",
+  "mission",
+  "input",
+  "outputContract",
+  "review",
+]);
 
-function canGoBack(state: DispatchState): boolean {
-  if (state.currentStep === "execution") return false;
-  const ord = orderedSteps(state);
-  const idx = ord.indexOf(state.currentStep);
-  return idx > 0;
+function isLightConfigureStep(step: DispatchStepId): boolean {
+  return LIGHT_CONFIGURE_STEPS.has(step);
 }
 
 export type MissionBriefV4Props = {
@@ -111,7 +258,32 @@ export function MissionBriefV4({
   const [sessionPickerOpen, setSessionPickerOpen] = useState(false);
   const [sessionQuery, setSessionQuery] = useState("");
   const [linkedSessionName, setLinkedSessionName] = useState<string | null>(null);
+  const [missionMenuOpen, setMissionMenuOpen] = useState(false);
+  const [missionMenuQuery, setMissionMenuQuery] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const tabScrollRef = useRef<HTMLDivElement>(null);
+  const [dismissedRecentTabIds, setDismissedRecentTabIds] = useState(() => new Set<string>());
+
+  const tabBarRecents = useMemo(
+    () => recentLaunches.filter((r) => !dismissedRecentTabIds.has(r.id)),
+    [recentLaunches, dismissedRecentTabIds],
+  );
+
+  const isLightWorkspace = isLightConfigureStep(dispatchState.currentStep);
+  const phaseLabel = useMemo(() => {
+    if (dispatchState.agentId === "eagle") return "Document";
+    if (dispatchState.modeId === "facilitate") return "Facilitation";
+    return "Configuration";
+  }, [dispatchState.agentId, dispatchState.modeId]);
+
+  const stepAnnouncement = `${STEP_LABELS[dispatchState.currentStep] ?? dispatchState.currentStep}. Step ${curIdx + 1} of ${ord.length}.`;
+
+  useEffect(() => {
+    if (!isLightWorkspace) return;
+    window.requestAnimationFrame(() => {
+      document.getElementById("mb-wizard-heading")?.focus();
+    });
+  }, [dispatchState.currentStep, isLightWorkspace]);
 
   const loadSessionsForPicker =
     agent && experience === "document" && dispatchState.currentStep === "execution";
@@ -195,40 +367,9 @@ export function MissionBriefV4({
     dispatchAction({ type: "APPLY_RECENT", payload: rec });
   };
 
-  const appendLaunch = () => {
-    if (!dispatchState.agentId || !dispatchState.missionTitle.trim()) return;
-    const rec: MissionLaunchRecord = {
-      id: crypto.randomUUID(),
-      agentId: dispatchState.agentId,
-      modeId: dispatchState.modeId,
-      missionTitle: dispatchState.missionTitle.trim(),
-      createdAt: Date.now(),
-    };
-    setRecentLaunches((prev) => {
-      const next = [rec, ...prev.filter((x) => x.id !== rec.id)].slice(0, MAX_RECENT);
-      persistRecentLaunches(next);
-      return next;
-    });
-    setActiveRecentId(rec.id);
-  };
-
-  const onContinue = () => {
-    if (!canProceed(dispatchState)) return;
-    if (
-      dispatchState.currentStep === "review" ||
-      (dispatchState.currentStep === "mission" && dispatchState.modeId === "facilitate")
-    ) {
-      appendLaunch();
-    }
-    dispatchAction({ type: "GO_FORWARD" });
-  };
-
-  const continueLabel =
-    dispatchState.currentStep === "review"
-      ? "Launch mission"
-      : dispatchState.currentStep === "mission" && dispatchState.modeId === "facilitate"
-        ? "Set up meeting"
-        : "Continue";
+  const showConfigProgressStrip = isLightWorkspace;
+  const progressStepLabel = ord[curIdx] ? STEP_LABELS[ord[curIdx]] : "";
+  const progressPct = ord.length > 0 ? Math.round(((curIdx + 1) / ord.length) * 100) : 0;
 
   const preLaunchStepCount = dispatchState.launched
     ? ord.length - POST_LAUNCH_STEP_ORDER.length
@@ -256,30 +397,24 @@ export function MissionBriefV4({
     );
   });
 
+  const selectedRecentTabId =
+    activeRecentId && tabBarRecents.some((r) => r.id === activeRecentId) ? activeRecentId : null;
+  const newMissionTabSelected = selectedRecentTabId === null;
+
+  const dismissRecentFromTabBar = (e: React.MouseEvent, rec: MissionLaunchRecord) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDismissedRecentTabIds((s) => new Set(s).add(rec.id));
+    if (activeRecentId === rec.id) {
+      setActiveRecentId(null);
+    }
+  };
+
   return (
-    <div className="mission-brief-v4">
-      <div className="mission-brief-v4__breadcrumb">
-        <button type="button" className="mission-brief-v4__new-btn" onClick={handleNewMission}>
-          <Plus className="h-4 w-4 shrink-0 text-primary" strokeWidth={2.5} />
-          New Mission
-        </button>
-        <div className="mission-brief-v4__breadcrumb-scroll">
-          {recentLaunches.map((rec) => {
-            const a = agentById(rec.agentId);
-            return (
-              <button
-                key={rec.id}
-                type="button"
-                className={`mission-brief-v4__chip${activeRecentId === rec.id ? " mission-brief-v4__chip--active" : ""}`}
-                title={rec.missionTitle}
-                onClick={() => handleRecentClick(rec)}
-              >
-                {a?.name ?? rec.agentId}: {rec.missionTitle}
-              </button>
-            );
-          })}
-        </div>
-      </div>
+    <div className="mission-brief-v4 mission-brief-v4--v52">
+      <p className="sr-only" aria-live="polite" aria-atomic="true">
+        {stepAnnouncement}
+      </p>
 
       <div
         className={`mission-brief-v4__layout${eagleOutputFocus ? " mission-brief-v4__layout--eagle-output" : ""}`}
@@ -328,7 +463,7 @@ export function MissionBriefV4({
           <div className="mission-brief-v4__steps">{sidebarSteps}</div>
           <div className="mission-brief-v4__divider" />
           <div className="mission-brief-v4__context">
-            <div className="mission-brief-v4__context-title">Mission context</div>
+            <div className="mission-brief-v4__context-title">Live summary</div>
             <div className="mission-brief-v4__ctx-row">
               <div className="mission-brief-v4__ctx-label">Mode</div>
               <div
@@ -388,28 +523,170 @@ export function MissionBriefV4({
           </button>
         </aside>
 
-        <div className="mission-brief-v4__main mission-brief-v4__right-panel">
+        <div
+          className={cn(
+            "mission-brief-v4__main mission-brief-v4__right-panel",
+            isLightWorkspace && "mission-brief-v4__main--light",
+          )}
+        >
           <div
             className={cn(
               "mission-brief-v4__content mission-brief-v4__step-content",
+              isLightWorkspace && "mission-brief-v4__content--configure-light",
               dispatchState.currentStep === "eagleWorkspace" &&
                 eagleFileLabel &&
                 "mission-brief-v4__content--eagle-split-fill",
             )}
           >
+            {showConfigProgressStrip && (
+              <div className="mission-brief-v4__progress-strip mission-brief-v4__progress-strip--light">
+                <div className="mission-brief-v4__progress-meta">
+                  <span className="mission-brief-v4__progress-phase">{phaseLabel}</span>
+                  <span className="mission-brief-v4__progress-count">
+                    Step {curIdx + 1} of {ord.length}
+                  </span>
+                </div>
+                <div className="mission-brief-v4__progress-bar-track">
+                  <div
+                    className="mission-brief-v4__progress-bar-fill"
+                    style={{ width: `${progressPct}%` }}
+                  />
+                </div>
+                <div className="mission-brief-v4__progress-current">{progressStepLabel}</div>
+              </div>
+            )}
+
             {dispatchState.currentStep === "agent" && (
               <>
                 <div className="mission-brief-v4__screen mission-brief-v4__screen--agent">
-                  <div className="mission-brief-v4__screen-header">
-                    <h1 className="mission-brief-v4__screen-title">Choose your agent</h1>
-                    <p className="mission-brief-v4__screen-desc">
-                      Select who will run this mission. Modes and output options depend on the agent profile.
+                  <div className="mission-brief-v4__screen-header mission-brief-v4__screen-header--hero">
+                    <p className="mission-brief-v4__eyebrow">Tacit · AI agents for real work</p>
+                    <h1 className="mission-brief-v4__screen-title">Design your next mission</h1>
+                    <p className="mission-brief-v4__screen-desc mission-brief-v4__screen-desc--hero">
+                      Pair the right specialist with your workflow—live facilitation, document extraction, or
+                      policy-heavy review. Everything you choose here feeds the launch checklist on the left.
                     </p>
                   </div>
+
+                  {recentLaunches.length > 0 && (
+                    <section className="mission-brief-v4__landing-zone" aria-label="Pick up where you left off">
+                      <h2 className="mission-brief-v4__landing-heading">Pick up where you left off</h2>
+                      <p className="mission-brief-v4__landing-sub">
+                        Reopen a run with agent, mode, and title prefilled.
+                      </p>
+                      <div className="mission-brief-v4__pickup-strip">
+                        {recentLaunches.map((rec, index) => {
+                          const a = agentById(rec.agentId);
+                          const profile = getDispatchProfile(rec.agentId);
+                          const modeLabel =
+                            profile?.modes.find((m) => m.id === rec.modeId)?.label ??
+                            (rec.modeId ? String(rec.modeId) : "Mission");
+                          const badge = agentPickupBadgeText(a, rec.agentId);
+                          const featured = recentLaunches.length >= 2 ? index < 2 : index === 0;
+                          const active = activeRecentId === rec.id;
+                          return (
+                            <button
+                              key={rec.id}
+                              type="button"
+                              className={cn(
+                                "mission-brief-v4__pickup-card",
+                                featured
+                                  ? "mission-brief-v4__pickup-card--featured"
+                                  : "mission-brief-v4__pickup-card--secondary",
+                                active && "mission-brief-v4__pickup-card--active",
+                              )}
+                              onClick={() => handleRecentClick(rec)}
+                            >
+                              {featured ? (
+                                <div className="mission-brief-v4__pickup-ribbon">
+                                  ✦ Ready to continue — Mission saved
+                                </div>
+                              ) : null}
+                              <div className="mission-brief-v4__pickup-body">
+                                <span
+                                  className={cn(
+                                    "mission-brief-v4__pickup-badge",
+                                    pickupBadgeModifier(rec.agentId),
+                                  )}
+                                >
+                                  {badge}
+                                </span>
+                                <h3 className="mission-brief-v4__pickup-title">{rec.missionTitle}</h3>
+                                <p className="mission-brief-v4__pickup-sub">
+                                  {badge} · {modeLabel}
+                                </p>
+                                {featured ? (
+                                  <>
+                                    <div className="mission-brief-v4__pickup-meta">
+                                      <div className="mission-brief-v4__pickup-meta-row">
+                                        <Calendar className="mission-brief-v4__pickup-meta-icon" aria-hidden />
+                                        <span>{formatPickupDateTime(rec.createdAt)}</span>
+                                      </div>
+                                      <div className="mission-brief-v4__pickup-meta-row">
+                                        <User className="mission-brief-v4__pickup-meta-icon" aria-hidden />
+                                        <span>{a?.role ?? "Specialist"}</span>
+                                      </div>
+                                      <div className="mission-brief-v4__pickup-meta-row">
+                                        <Video className="mission-brief-v4__pickup-meta-icon" aria-hidden />
+                                        <span>Mission Studio</span>
+                                      </div>
+                                    </div>
+                                    <div
+                                      className="mission-brief-v4__pickup-cta mission-brief-v4__pickup-cta--primary"
+                                      aria-hidden
+                                    >
+                                      Continue in workspace →
+                                    </div>
+                                  </>
+                                ) : (
+                                  <>
+                                    <p className="mission-brief-v4__pickup-ago">
+                                      {formatRelativeTime(rec.createdAt)}
+                                    </p>
+                                    <span className="mission-brief-v4__pickup-status">Output ready</span>
+                                    <div
+                                      className="mission-brief-v4__pickup-cta mission-brief-v4__pickup-cta--ghost"
+                                      aria-hidden
+                                    >
+                                      → Open workspace
+                                    </div>
+                                  </>
+                                )}
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </section>
+                  )}
+
+                  {recentLaunches.length > 0 ? <div className="mission-brief-v4__landing-divider" role="separator" /> : null}
+
+                  <section className="mission-brief-v4__landing-zone" aria-label="Choose an agent">
+                    <h2 className="mission-brief-v4__landing-heading">Start a new mission</h2>
+                    <p className="mission-brief-v4__landing-sub">
+                      Each profile ships with its own operating modes and output contracts.
+                    </p>
+                  </section>
+
                 <div className="mission-brief-v4__agent-grid">
                   {TACIT_AGENTS.map((a) => {
                     const p = getDispatchProfile(a.id);
                     const selected = dispatchState.agentId === a.id;
+                    const modeChips =
+                      a.id === "eagle"
+                        ? ["Execute", "Facilitate"]
+                        : p?.modes?.slice(0, 2).map((m) => m.label) ?? [];
+                    const missionLines =
+                      p?.outputContracts?.slice(0, 2).map((o) => o.label) ?? a.specialties.slice(0, 2);
+                    const domainLines = a.specialties.slice(0, 2);
+                    const inLines =
+                      a.id === "eagle"
+                        ? ["PDF contracts", "DOCX amendments", "Meeting link"]
+                        : ["Meeting link", "Session recording", "Stakeholder notes"];
+                    const outLines =
+                      p?.outputContracts?.slice(0, 3).map((o) => o.label) ??
+                      ["Mission brief", "Action items", "Audit artifacts"];
                     return (
                       <button
                         key={a.id}
@@ -417,71 +694,69 @@ export function MissionBriefV4({
                         className={`mission-brief-v4__agent-card${selected ? " mission-brief-v4__agent-card--selected" : ""}`}
                         onClick={() => dispatchAction({ type: "SELECT_AGENT", agentId: a.id })}
                       >
-                        <AgentAvatar agent={a} size="md" />
-                        <div className="mission-brief-v4__agent-meta">
-                          <div className="mission-brief-v4__agent-card-name">{a.name}</div>
-                          <div className="mission-brief-v4__agent-card-role">{a.role}</div>
-                          {a.id === "eagle" ? (
-                            <div className="mission-brief-v4__badges">
-                              <span className="mission-brief-v4__mode-badge mission-brief-v4__mode-badge--d">
-                                PDF · PNG · JPEG
-                              </span>
-                              <span className="mission-brief-v4__mode-badge mission-brief-v4__mode-badge--e">
-                                Upload &amp; extract
-                              </span>
-                            </div>
-                          ) : p?.modes?.length ? (
-                            <div className="mission-brief-v4__badges">
-                              {p.modes.slice(0, 4).map((m, idx) => (
-                                <span
-                                  key={m.id}
-                                  className={`mission-brief-v4__mode-badge ${modeBadgeModifier(m, idx)}`}
-                                >
-                                  {m.label}
-                                </span>
-                              ))}
-                            </div>
-                          ) : (
-                            <span className="mission-brief-v4__soon">Missions coming soon</span>
-                          )}
+                        <div className="mission-brief-v4__agent-card-top">
+                          <div className="mission-brief-v4__agent-meta">
+                            <div className="mission-brief-v4__agent-card-name">{a.name.toUpperCase()}</div>
+                            <div className="mission-brief-v4__agent-card-role">{a.role}</div>
+                          </div>
+                          <div className="mission-brief-v4__agent-avatar-corner" aria-hidden>
+                            <AgentAvatar agent={a} size="lg" />
+                          </div>
                         </div>
+
+                        <div className="mission-brief-v4__agent-card-divider" />
+
+                        <div className="mission-brief-v4__agent-card-sections">
+                          <div className="mission-brief-v4__badges mission-brief-v4__badges--mission">
+                            {modeChips.length > 0 ? (
+                              modeChips.map((label, idx) => (
+                                <span
+                                  key={`${a.id}-chip-${label}`}
+                                  className={`mission-brief-v4__mode-badge mission-brief-v4__mode-badge--${idx === 0 ? "e" : "d"}`}
+                                >
+                                  {label}
+                                </span>
+                              ))
+                            ) : (
+                              <span className="mission-brief-v4__soon">Coming soon</span>
+                            )}
+                          </div>
+
+                          <div className="mission-brief-v4__agent-section">
+                            <span className="mission-brief-v4__agent-section-label">MISSIONS</span>
+                            <p className="mission-brief-v4__agent-section-value">{missionLines.join(" · ")}</p>
+                          </div>
+                          <div className="mission-brief-v4__agent-section">
+                            <span className="mission-brief-v4__agent-section-label">DOMAIN</span>
+                            <p className="mission-brief-v4__agent-section-value">{domainLines.join(" · ")}</p>
+                          </div>
+                          <div className="mission-brief-v4__agent-section">
+                            <span className="mission-brief-v4__agent-section-label">IN</span>
+                            <p className="mission-brief-v4__agent-section-value">{inLines.join(" · ")}</p>
+                          </div>
+                          <div className="mission-brief-v4__agent-section">
+                            <span className="mission-brief-v4__agent-section-label">OUT</span>
+                            <p className="mission-brief-v4__agent-section-value">{outLines.join(" · ")}</p>
+                          </div>
+                        </div>
+
+                        <button
+                          type="button"
+                          className="mission-brief-v4__agent-launch"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            dispatchAction({ type: "SELECT_AGENT", agentId: a.id });
+                            dispatchAction({ type: "SET_STEP", step: "mode" });
+                          }}
+                        >
+                          ▸ Launch Mission
+                        </button>
                         <span className="mission-brief-v4__check">✓</span>
                       </button>
                     );
                   })}
                 </div>
-                {recentLaunches.length > 0 && (
-                  <>
-                    <div className="mission-brief-v4__recent-title">Recent missions</div>
-                    <div className="mission-brief-v4__recent-list">
-                      {recentLaunches.map((rec) => {
-                        const a = agentById(rec.agentId);
-                        const date = new Date(rec.createdAt).toLocaleString(undefined, {
-                          month: "short",
-                          day: "numeric",
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        });
-                        return (
-                          <button
-                            key={rec.id}
-                            type="button"
-                            className="mission-brief-v4__recent-card"
-                            onClick={() => handleRecentClick(rec)}
-                          >
-                            <div>
-                              <div className="mission-brief-v4__recent-name">{rec.missionTitle}</div>
-                              <div className="mission-brief-v4__recent-meta">
-                                {a?.name ?? rec.agentId} · {date}
-                              </div>
-                            </div>
-                            <ChevronRight className="h-5 w-5 shrink-0 text-muted-foreground" />
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </>
-                )}
                 </div>
               </>
             )}
@@ -494,93 +769,245 @@ export function MissionBriefV4({
             )}
 
             {dispatchState.currentStep === "mode" && (
-              <>
-                <h1 className="mission-brief-v4__screen-title">Mission mode</h1>
+              <div className="mission-brief-v4__wizard-pane mission-brief-v4__wizard-pane--mode">
+                <h1 id="mb-wizard-heading" tabIndex={-1} className="mission-brief-v4__screen-title">
+                  How will input be provided?
+                </h1>
                 <p className="mission-brief-v4__screen-desc">
-                  Pick how this run should behave.{" "}
+                  Select the operating mode for this mission run.{" "}
                   {!profile?.modes?.length && agent
                     ? `${agent.name} does not have hybrid dispatch modes yet.`
                     : ""}
                 </p>
                 {profile?.modes?.length ? (
-                  <div className="mission-brief-v4__mode-grid">
-                    {profile.modes.map((m) => {
-                      const sel = dispatchState.modeId === m.id;
-                      return (
-                        <button
-                          key={m.id}
-                          type="button"
-                          className={`mission-brief-v4__mode-option${sel ? " mission-brief-v4__mode-option--selected" : ""}`}
-                          onClick={() => dispatchAction({ type: "SELECT_MODE", modeId: m.id })}
-                        >
-                          <div className="mission-brief-v4__mode-option-title">{m.label}</div>
-                          <div className="mission-brief-v4__mode-option-desc">{m.description}</div>
-                        </button>
-                      );
-                    })}
-                  </div>
+                  <>
+                    <div className="mission-brief-v4__mode-grid mission-brief-v4__mode-grid--hero">
+                      {getModeUiCards(profile).map(({ id, title, description, details, Icon }) => {
+                        const sel = dispatchState.modeId === id;
+                        const dimmed = dispatchState.modeId !== null && !sel;
+                        return (
+                          <button
+                            key={id}
+                            type="button"
+                            className={cn(
+                              "mission-brief-v4__mode-option",
+                              "mission-brief-v4__mode-option--hero",
+                              sel && "mission-brief-v4__mode-option--selected",
+                              dimmed && "mission-brief-v4__mode-option--dimmed",
+                            )}
+                            onClick={() => dispatchAction({ type: "SELECT_MODE", modeId: id })}
+                          >
+                            <span className="mission-brief-v4__mode-hero-check" aria-hidden>
+                              ✓
+                            </span>
+                            <div className="mission-brief-v4__mode-hero-icon" aria-hidden>
+                              <Icon className="h-6 w-6" />
+                            </div>
+                            <div className="mission-brief-v4__mode-option-title">{title}</div>
+                            <div className="mission-brief-v4__mode-option-desc">{description}</div>
+                            <div className="mission-brief-v4__mode-hero-divider" aria-hidden />
+                            <ul className="mission-brief-v4__mode-hero-details" aria-label={`${title} details`}>
+                              {details.slice(0, 3).map((d) => (
+                                <li key={d}>{d}</li>
+                              ))}
+                            </ul>
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <div className="mission-brief-v4__mode-next" role="note">
+                      <Zap className="h-4 w-4" aria-hidden />
+                      <span>
+                        <strong>Next:</strong>{" "}
+                        {dispatchState.modeId === "facilitate"
+                          ? "Schedule or start your live session."
+                          : "Upload your documents and configure extraction settings."}
+                      </span>
+                    </div>
+                  </>
                 ) : (
                   <div className="mission-brief-v4__placeholder">
                     Missions for this agent are coming soon. Select another agent or check back later.
                   </div>
                 )}
-              </>
+              </div>
             )}
 
             {dispatchState.currentStep === "mission" && (
-              <>
-                <h1 className="mission-brief-v4__screen-title">Mission brief</h1>
+              <div className="mission-brief-v4__wizard-pane mission-brief-v4__wizard-pane--mission">
+                <h1 id="mb-wizard-heading" tabIndex={-1} className="mission-brief-v4__screen-title">
+                  What is the mission?
+                </h1>
                 <p className="mission-brief-v4__screen-desc">
-                  Name this run and add context your team will see in the workspace.
+                  Choose from this agent&apos;s mission repertoire.
                 </p>
-                <div className="mission-brief-v4__field">
-                  <label className="mission-brief-v4__label" htmlFor="mb-v4-title">
-                    Title
-                  </label>
-                  <input
-                    id="mb-v4-title"
-                    className="mission-brief-v4__input"
-                    value={dispatchState.missionTitle}
-                    onChange={(e) =>
-                      dispatchAction({ type: "SET_MISSION", missionTitle: e.target.value })
-                    }
-                    placeholder="e.g. Q1 renewal playbook — Acme Corp"
-                  />
-                </div>
-                <div className="mission-brief-v4__field">
-                  <label className="mission-brief-v4__label" htmlFor="mb-v4-brief">
-                    Context (optional)
-                  </label>
-                  <textarea
-                    id="mb-v4-brief"
-                    className="mission-brief-v4__textarea"
-                    value={dispatchState.missionBrief}
-                    onChange={(e) =>
-                      dispatchAction({ type: "SET_MISSION", missionBrief: e.target.value })
-                    }
-                    placeholder="Goals, scope, links, or constraints for this mission."
-                  />
-                </div>
-              </>
+                {(() => {
+                  const templates = missionTemplatesForAgent(dispatchState.agentId);
+                  const selected =
+                    templates.find((t) => t.id === dispatchState.missionTemplateId) ?? null;
+                  const filtered = missionMenuQuery.trim()
+                    ? templates.filter((t) =>
+                        t.name.toLowerCase().includes(missionMenuQuery.trim().toLowerCase()),
+                      )
+                    : templates;
+                  return (
+                    <>
+                      <div className="mission-brief-v4__field">
+                        <label className="mission-brief-v4__label" htmlFor="mb-v4-mission-trigger">
+                          Mission
+                        </label>
+                        <div
+                          className="mission-brief-v4__combo"
+                          onBlur={(e) => {
+                            if (!e.currentTarget.contains(e.relatedTarget as Node | null)) {
+                              setMissionMenuOpen(false);
+                              setMissionMenuQuery("");
+                            }
+                          }}
+                        >
+                          <button
+                            id="mb-v4-mission-trigger"
+                            type="button"
+                            className={cn(
+                              "mission-brief-v4__combo-trigger",
+                              !dispatchState.missionTemplateId && "mission-brief-v4__combo-trigger--placeholder",
+                            )}
+                            aria-haspopup="listbox"
+                            aria-expanded={missionMenuOpen}
+                            onClick={() => setMissionMenuOpen((o) => !o)}
+                          >
+                            <span className="mission-brief-v4__combo-value">
+                              {selected?.name ?? "— Select a mission —"}
+                            </span>
+                            <span className="mission-brief-v4__combo-chevron" aria-hidden>
+                              ▾
+                            </span>
+                          </button>
+
+                          {missionMenuOpen ? (
+                            <div className="mission-brief-v4__combo-pop" role="dialog" aria-label="Choose a mission">
+                              <div className="mission-brief-v4__combo-search">
+                                <input
+                                  autoFocus
+                                  value={missionMenuQuery}
+                                  onChange={(e) => setMissionMenuQuery(e.target.value)}
+                                  className="mission-brief-v4__combo-search-input"
+                                  placeholder="Search missions…"
+                                />
+                              </div>
+                              <div className="mission-brief-v4__combo-list" role="listbox" aria-label="Mission options">
+                                {filtered.length ? (
+                                  filtered.map((t) => {
+                                    const isSel = t.id === dispatchState.missionTemplateId;
+                                    return (
+                                      <button
+                                        key={t.id}
+                                        type="button"
+                                        role="option"
+                                        aria-selected={isSel}
+                                        className={cn(
+                                          "mission-brief-v4__combo-option",
+                                          isSel && "mission-brief-v4__combo-option--selected",
+                                        )}
+                                        onClick={() => {
+                                          dispatchAction({
+                                            type: "SET_MISSION_TEMPLATE",
+                                            missionTemplateId: t.id,
+                                          });
+                                          dispatchAction({ type: "SET_MISSION", missionTitle: t.name });
+                                          setMissionMenuOpen(false);
+                                          setMissionMenuQuery("");
+                                        }}
+                                      >
+                                        <div className="mission-brief-v4__combo-option-title">{t.name}</div>
+                                        {t.defaultOutputs?.length ? (
+                                          <div className="mission-brief-v4__combo-option-meta">
+                                            {t.defaultOutputs.slice(0, 3).join(" · ")}
+                                          </div>
+                                        ) : null}
+                                      </button>
+                                    );
+                                  })
+                                ) : (
+                                  <div className="mission-brief-v4__combo-empty">No missions match your search.</div>
+                                )}
+                              </div>
+                            </div>
+                          ) : null}
+                        </div>
+                      </div>
+
+                      {selected ? (
+                        <div className="mission-brief-v4__mission-preview" aria-label="Default outputs for this mission">
+                          <div className="mission-brief-v4__mission-preview-title">
+                            Default outputs for this mission
+                          </div>
+                          <div className="mission-brief-v4__mission-preview-chips">
+                            {selected.defaultOutputs.map((o) => (
+                              <span key={o} className="mission-brief-v4__mission-output-chip">
+                                {o}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      ) : null}
+
+                      <div className="mission-brief-v4__field">
+                        <label className="mission-brief-v4__label" htmlFor="mb-v4-brief">
+                          Additional context <span className="mission-brief-v4__label-optional">(optional)</span>
+                        </label>
+                        <textarea
+                          id="mb-v4-brief"
+                          className="mission-brief-v4__textarea"
+                          value={dispatchState.missionBrief}
+                          onChange={(e) =>
+                            dispatchAction({ type: "SET_MISSION", missionBrief: e.target.value })
+                          }
+                          placeholder="Any specific instructions or parameters for this run…"
+                          rows={3}
+                        />
+                      </div>
+                    </>
+                  );
+                })()}
+              </div>
             )}
 
             {dispatchState.currentStep === "input" && (
-              <>
-                <h1 className="mission-brief-v4__screen-title">Inputs</h1>
+              <div className="mission-brief-v4__wizard-pane">
+                <h1 id="mb-wizard-heading" tabIndex={-1} className="mission-brief-v4__screen-title">
+                  What goes into this run?
+                </h1>
                 <p className="mission-brief-v4__screen-desc">
                   {dispatchState.agentId === "lexa" ? (
                     <>
                       Optional notes about what you’ll process. Use{" "}
-                      <strong>Execution</strong> after launch to attach contract files, or open the full contract
-                      workspace from there.
+                      <strong>Launch</strong> to attach contract files, or open the full contract workspace
+                      afterward.
                     </>
                   ) : (
                     <>
-                      Describe what you will attach or connect for this run. File upload wiring can plug in here
-                      later.
+                      Capture the systems, documents, or stakeholders involved so the handoff to execution is
+                      explicit.
                     </>
                   )}
                 </p>
+                {dispatchState.modeId === "facilitate" && (
+                  <div className="mission-brief-v4__field">
+                    <label className="mission-brief-v4__label" htmlFor="mb-v4-meeting-link">
+                      Meeting link
+                    </label>
+                    <input
+                      id="mb-v4-meeting-link"
+                      className="mission-brief-v4__input"
+                      value={dispatchState.meetingLink}
+                      onChange={(e) =>
+                        dispatchAction({ type: "SET_MEETING_LINK", meetingLink: e.target.value })
+                      }
+                      placeholder="https://zoom.us/j/… or https://meet.google.com/…"
+                    />
+                  </div>
+                )}
                 <div className="mission-brief-v4__field">
                   <label className="mission-brief-v4__label" htmlFor="mb-v4-input">
                     Notes
@@ -595,68 +1022,90 @@ export function MissionBriefV4({
                     placeholder="Documents, systems, SMEs, or data sources involved."
                   />
                 </div>
-              </>
+              </div>
             )}
 
             {dispatchState.currentStep === "outputContract" && (
-              <>
-                <h1 className="mission-brief-v4__screen-title">Output contract</h1>
+              <div className="mission-brief-v4__wizard-pane">
+                <h1 id="mb-wizard-heading" tabIndex={-1} className="mission-brief-v4__screen-title">
+                  What should we produce?
+                </h1>
                 <p className="mission-brief-v4__screen-desc">
-                  Choose the primary artifact shape for downstream automation and review.
+                  Pick the primary deliverable shape—reports, structured JSON, approvals, or handoff packets—for
+                  automation and review downstream.
                 </p>
-                {(profile?.outputContracts?.length ? profile.outputContracts : []).map((o) => {
-                  const sel = dispatchState.outputContractId === o.id;
-                  return (
-                    <button
-                      key={o.id}
-                      type="button"
-                      className={`mission-brief-v4__mode-option${sel ? " mission-brief-v4__mode-option--selected" : ""}`}
-                      style={{ marginBottom: "0.65rem" }}
-                      onClick={() =>
-                        dispatchAction({ type: "SET_OUTPUT_CONTRACT", outputContractId: o.id })
-                      }
-                    >
-                      <div className="mission-brief-v4__mode-option-title">{o.label}</div>
-                      <div className="mission-brief-v4__mode-option-desc">{o.description}</div>
-                    </button>
-                  );
-                })}
+                <div className="mission-brief-v4__output-contract-list">
+                  {(profile?.outputContracts?.length ? profile.outputContracts : []).map((o) => {
+                    const sel = dispatchState.outputContractId === o.id;
+                    return (
+                      <button
+                        key={o.id}
+                        type="button"
+                        className={`mission-brief-v4__mode-option mission-brief-v4__output-contract-option${sel ? " mission-brief-v4__mode-option--selected" : ""}`}
+                        onClick={() =>
+                          dispatchAction({ type: "SET_OUTPUT_CONTRACT", outputContractId: o.id })
+                        }
+                      >
+                        <div className="mission-brief-v4__mode-option-title">{o.label}</div>
+                        <div className="mission-brief-v4__mode-option-desc">{o.description}</div>
+                      </button>
+                    );
+                  })}
+                </div>
                 {!profile?.outputContracts?.length && (
                   <div className="mission-brief-v4__placeholder">No contracts defined for this agent.</div>
                 )}
-              </>
+              </div>
             )}
 
             {dispatchState.currentStep === "review" && (
-              <>
-                <h1 className="mission-brief-v4__screen-title">Review & launch</h1>
+              <div className="mission-brief-v4__wizard-pane">
+                <h1 id="mb-wizard-heading" tabIndex={-1} className="mission-brief-v4__screen-title">
+                  Ready to launch
+                </h1>
                 <p className="mission-brief-v4__screen-desc">
-                  Confirm details before launching. You can go back to any step to adjust.
+                  Double-check the contract with the rail summary. You can jump back to any completed step from
+                  the left.
                 </p>
-                <div className="mission-brief-v4__review-block">
-                  <h3>Agent</h3>
-                  <p>{agent?.name ?? "—"}</p>
+                <div className="mission-brief-v4__review-summary">
+                  <div className="mission-brief-v4__review-summary-grid">
+                    <div className="mission-brief-v4__review-block mission-brief-v4__review-block--compact">
+                      <h3>Agent</h3>
+                      <p>{agent?.name ?? "—"}</p>
+                    </div>
+                    <div className="mission-brief-v4__review-block mission-brief-v4__review-block--compact">
+                      <h3>Mode</h3>
+                      <p>{selectedMode?.label ?? "—"}</p>
+                    </div>
+                    <div className="mission-brief-v4__review-block mission-brief-v4__review-block--span">
+                      <h3>Mission</h3>
+                      <p>{dispatchState.missionTitle || "—"}</p>
+                      {dispatchState.missionBrief ? (
+                        <p className="mission-brief-v4__review-brief-secondary">{dispatchState.missionBrief}</p>
+                      ) : null}
+                    </div>
+                    <div className="mission-brief-v4__review-block mission-brief-v4__review-block--compact">
+                      <h3>Inputs</h3>
+                      <p>
+                        {dispatchState.modeId === "facilitate" && dispatchState.meetingLink.trim()
+                          ? `Meeting link: ${dispatchState.meetingLink.trim()}`
+                          : null}
+                        {dispatchState.modeId === "facilitate" && dispatchState.meetingLink.trim() ? (
+                          <br />
+                        ) : null}
+                        {dispatchState.inputNotes.trim() || "No notes added."}
+                      </p>
+                    </div>
+                    <div className="mission-brief-v4__review-block mission-brief-v4__review-block--compact">
+                      <h3>Output</h3>
+                      <p>
+                        {profile?.outputContracts.find((o) => o.id === dispatchState.outputContractId)?.label ??
+                          "—"}
+                      </p>
+                    </div>
+                  </div>
                 </div>
-                <div className="mission-brief-v4__review-block">
-                  <h3>Mode</h3>
-                  <p>{selectedMode?.label ?? "—"}</p>
-                </div>
-                <div className="mission-brief-v4__review-block">
-                  <h3>Mission</h3>
-                  <p>{dispatchState.missionTitle || "—"}</p>
-                  {dispatchState.missionBrief ? <p className="text-muted-foreground mt-2 text-sm">{dispatchState.missionBrief}</p> : null}
-                </div>
-                <div className="mission-brief-v4__review-block">
-                  <h3>Inputs</h3>
-                  <p>{dispatchState.inputNotes.trim() || "No notes added."}</p>
-                </div>
-                <div className="mission-brief-v4__review-block">
-                  <h3>Output</h3>
-                  <p>
-                    {profile?.outputContracts.find((o) => o.id === dispatchState.outputContractId)?.label ?? "—"}
-                  </p>
-                </div>
-              </>
+              </div>
             )}
 
             {dispatchState.currentStep === "execution" && agent && experience === "meeting" && (
@@ -791,12 +1240,33 @@ export function MissionBriefV4({
                         />
                       </div>
                       {sessionsError && (
-                        <p className="mission-brief-v4__session-error">{sessionsError} (showing sample data if any)</p>
+                        <div className="mission-brief-v4__session-alert mission-brief-v4__session-alert--error">
+                          <AlertCircle className="mission-brief-v4__session-alert-icon h-4 w-4 shrink-0" aria-hidden />
+                          <p>{sessionsError}</p>
+                          <p className="mission-brief-v4__session-alert-hint">
+                            Check your connection or try again. Some environments fall back to sample data.
+                          </p>
+                        </div>
                       )}
                       {sessionsLoading ? (
-                        <p className="mission-brief-v4__session-loading">Loading sessions…</p>
+                        <div className="mission-brief-v4__session-skeleton" aria-busy="true" aria-label="Loading sessions">
+                          <div className="mission-brief-v4__session-skeleton-row" />
+                          <div className="mission-brief-v4__session-skeleton-row" />
+                          <div className="mission-brief-v4__session-skeleton-row" />
+                          <p className="mission-brief-v4__session-loading-caption">
+                            <Loader2 className="mission-brief-v4__session-loading-icon mr-1.5 inline h-3.5 w-3.5 animate-spin" />
+                            Loading sessions…
+                          </p>
+                        </div>
                       ) : filteredPickerSessions.length === 0 ? (
-                        <p className="mission-brief-v4__session-empty">No sessions found for {agent.name}.</p>
+                        <div className="mission-brief-v4__session-empty-state">
+                          <p className="mission-brief-v4__session-empty-title">No sessions match</p>
+                          <p className="mission-brief-v4__session-empty-desc">
+                            {sessionQuery.trim()
+                              ? "Try a different search or clear the filter."
+                              : `No sessions found for ${agent.name}.`}
+                          </p>
+                        </div>
                       ) : (
                         <ul className="mission-brief-v4__session-list">
                           {filteredPickerSessions.map((s) => (
@@ -866,38 +1336,46 @@ export function MissionBriefV4({
             )}
 
             {dispatchState.currentStep === "outputReview" && (
-              <>
+              <div className="mission-brief-v4__wizard-pane mission-brief-v4__wizard-pane--wide">
                 <h1 className="mission-brief-v4__screen-title">Output review</h1>
                 <p className="mission-brief-v4__screen-desc">
-                  Inspect artifacts, approve exports, or send results to your downstream systems.
+                  Inspect artifacts, approve exports, or send results to downstream systems once the run
+                  finishes.
                 </p>
                 <div className="mission-brief-v4__placeholder">
                   Structured outputs, diff view, and export actions will appear here after the run completes.
                 </div>
-              </>
+              </div>
             )}
           </div>
 
-          <footer className="mission-brief-v4__footer">
-            <button
-              type="button"
-              className="mission-brief-v4__btn mission-brief-v4__btn--ghost"
-              disabled={!canGoBack(dispatchState)}
-              onClick={() => dispatchAction({ type: "GO_BACK" })}
-            >
-              Back
-            </button>
-            {dispatchState.currentStep !== "eagleWorkspace" && (
-              <button
-                type="button"
-                className="mission-brief-v4__btn mission-brief-v4__btn--primary"
-                disabled={!canProceed(dispatchState) || dispatchState.currentStep === "outputReview"}
-                onClick={onContinue}
-              >
-                {continueLabel}
-              </button>
-            )}
-          </footer>
+          {dispatchState.currentStep !== "agent" && (
+            <footer className="mission-brief-v4__footer mission-brief-v4__footer--light">
+              <div />
+              <div className="mission-brief-v4__footer-right">
+                <p className="mission-brief-v4__footer-hint">
+                  Step {curIdx + 1} of {ord.length}
+                </p>
+                <div className="mission-brief-v4__meeting-actions">
+                  <button
+                    type="button"
+                    className="mission-brief-v4__btn mission-brief-v4__btn--ghost mission-brief-v4__btn--ghost-light"
+                    onClick={() => dispatchAction({ type: "GO_BACK" })}
+                    disabled={curIdx === 0}
+                  >
+                    Back
+                  </button>
+                  <button
+                    type="button"
+                    className="mission-brief-v4__btn mission-brief-v4__btn--primary"
+                    onClick={() => dispatchAction({ type: "GO_FORWARD" })}
+                  >
+                    Continue
+                  </button>
+                </div>
+              </div>
+            </footer>
+          )}
         </div>
       </div>
     </div>

@@ -116,13 +116,26 @@ const Dashboard = () => {
   const missionBriefActive = currentView === "dashboard" && hybridDispatchEnabled;
 
   return (
-    <div className="relative isolate flex min-h-screen min-h-dvh flex-col overflow-x-hidden bg-dashboard-canvas text-foreground dark:bg-dashboard-canvas">
-      <div className="pointer-events-none absolute inset-0 -z-10 bg-[linear-gradient(180deg,hsl(var(--dashboard-surface-muted)),hsl(var(--dashboard-canvas))_40%)] dark:bg-[radial-gradient(120%_80%_at_50%_0%,hsl(var(--dashboard-surface-muted)),hsl(var(--dashboard-canvas))_60%)]" />
+    <div
+      className={`relative isolate flex flex-col bg-dashboard-canvas text-foreground dark:bg-dashboard-canvas ${
+        missionBriefActive
+          ? "dashboard--mission-studio h-dvh max-h-dvh min-h-0 overflow-hidden"
+          : "min-h-screen min-h-dvh overflow-x-hidden"
+      }`}
+    >
+      <div
+        className={`pointer-events-none absolute inset-0 -z-10 bg-[linear-gradient(180deg,hsl(var(--dashboard-surface-muted)),hsl(var(--dashboard-canvas))_40%)] dark:bg-[radial-gradient(120%_80%_at_50%_0%,hsl(var(--dashboard-surface-muted)),hsl(var(--dashboard-canvas))_60%)] ${missionBriefActive ? "opacity-0" : ""}`}
+        aria-hidden="true"
+      />
       <DashboardHeader />
 
       {/* Main Content — min-h-0 + flex-1 so Mission Brief can own internal scroll without a second page scrollbar */}
       <main
-        className={`flex min-h-0 w-full max-w-none flex-1 flex-col px-3 pb-10 sm:px-5 lg:px-6 ${missionBriefActive ? "pt-3 sm:pt-4" : "pt-7 sm:pt-9"}`}
+        className={
+          missionBriefActive
+            ? "flex min-h-0 w-full max-w-none flex-1 flex-col overflow-hidden px-0 py-0"
+            : "flex min-h-0 w-full max-w-none flex-1 flex-col px-3 pb-10 pt-7 sm:px-5 sm:pt-9 lg:px-6"
+        }
       >
         {currentView === "dashboard" && hybridDispatchEnabled && (
           <MissionBriefV4
