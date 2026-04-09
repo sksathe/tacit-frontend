@@ -74,16 +74,16 @@ All colors MUST be HSL.
     --dashboard-header-background: 226 72% 28%;
     --dashboard-header-border: 226 65% 22%;
 
-    --dashboard-canvas: 220 33% 95%;
-    --dashboard-surface: 220 40% 99%;
-    --dashboard-surface-muted: 220 30% 97%;
+    --dashboard-canvas: 38 28% 96%;
+    --dashboard-surface: 36 40% 99%;
+    --dashboard-surface-muted: 34 24% 95%;
     --dashboard-rail-bg: 226 72% 28%;
     --dashboard-rail-border: 226 65% 22%;
     --dashboard-rail-active: 217 92% 60%;
     --dashboard-metric-highlight-from: 216 91% 61%;
     --dashboard-metric-highlight-to: 226 80% 57%;
-    --dashboard-text-strong: 222 52% 14%;
-    --dashboard-text-muted: 220 14% 42%;
+    --dashboard-text-strong: 221 41% 14%;
+    --dashboard-text-muted: 220 12% 38%;
 
     --chart-1: 226 72% 46%;
     --chart-2: 199 89% 48%;
@@ -149,6 +149,18 @@ All colors MUST be HSL.
     --primary-dashboard: 160 84% 49%;
     --primary-dashboard-foreground: 0 0% 9%;
     --primary-dashboard-glow: 160 84% 55%;
+    --dashboard-header-background: 222 27% 8%;
+    --dashboard-header-border: 220 20% 16%;
+    --dashboard-canvas: 222 28% 5%;
+    --dashboard-surface: 220 24% 8%;
+    --dashboard-surface-muted: 220 20% 10%;
+    --dashboard-rail-bg: 224 32% 9%;
+    --dashboard-rail-border: 220 18% 17%;
+    --dashboard-rail-active: 158 68% 45%;
+    --dashboard-metric-highlight-from: 155 71% 40%;
+    --dashboard-metric-highlight-to: 164 84% 52%;
+    --dashboard-text-strong: 42 40% 96%;
+    --dashboard-text-muted: 220 12% 72%;
     --chart-1: 142 76% 46%;
     --chart-2: 217 91% 60%;
     --logo-link-glow: 239 84% 67% / 0.67;
