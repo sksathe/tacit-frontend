@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { ChevronDown, LogOut, Moon, Sun } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { toggleStoredTheme } from "@/lib/theme-storage";
 
 export function DashboardHeader() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -12,8 +13,7 @@ export function DashboardHeader() {
   const navigate = useNavigate();
 
   const toggleTheme = () => {
-    document.documentElement.classList.toggle("dark");
-    setDarkMode(document.documentElement.classList.contains("dark"));
+    setDarkMode(toggleStoredTheme());
   };
 
   useEffect(() => {

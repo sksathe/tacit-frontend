@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useEffect } from "react";
+import { initTheme } from "@/lib/theme-storage";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Index from "./pages/Index";
@@ -22,8 +23,7 @@ const queryClient = new QueryClient();
 
 const App = () => {
   useEffect(() => {
-    // Set dark mode by default to match Supabase theme
-    document.documentElement.classList.add('dark');
+    initTheme();
 
     // Test Supabase connection
     const testSupabaseConnection = async () => {

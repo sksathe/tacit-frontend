@@ -4870,3 +4870,393 @@ html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__layou
   color: hsl(var(--muted-foreground));
 }
 
+/* Compact landing cards: fit more agents above the fold */
+.mission-brief-v4 .mission-brief-v4__screen--agent .mission-brief-v4__agent-grid {
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 0.7rem;
+}
+
+.mission-brief-v4 .mission-brief-v4__screen--agent .mission-brief-v4__agent-card {
+  min-height: 192px;
+  padding: 0.72rem 0.78rem 0.68rem;
+}
+
+.mission-brief-v4 .mission-brief-v4__screen--agent .mission-brief-v4__agent-card-top {
+  gap: 0.6rem;
+}
+
+.mission-brief-v4 .mission-brief-v4__screen--agent .mission-brief-v4__agent-card-name {
+  font-size: 0.94rem;
+}
+
+.mission-brief-v4 .mission-brief-v4__screen--agent .mission-brief-v4__agent-card-role {
+  font-size: 0.7rem;
+  margin-bottom: 0.3rem;
+}
+
+.mission-brief-v4 .mission-brief-v4__screen--agent .mission-brief-v4__agent-card-sections {
+  gap: 0.22rem;
+}
+
+.mission-brief-v4 .mission-brief-v4__screen--agent .mission-brief-v4__agent-section-label {
+  font-size: 0.55rem;
+}
+
+.mission-brief-v4 .mission-brief-v4__screen--agent .mission-brief-v4__agent-section-value {
+  font-size: 0.66rem;
+  line-height: 1.25;
+}
+
+.mission-brief-v4 .mission-brief-v4__screen--agent .mission-brief-v4__mode-badge {
+  font-size: 0.58rem;
+  padding: 0.14rem 0.38rem;
+}
+
+.mission-brief-v4 .mission-brief-v4__screen--agent .mission-brief-v4__agent-launch {
+  margin-top: 0.34rem;
+  height: 1.62rem;
+  font-size: 0.64rem;
+}
+
+.mission-brief-v4 .mission-brief-v4__screen--agent .mission-brief-v4__agent-avatar-corner > * {
+  transform: scale(0.84);
+  transform-origin: top right;
+}
+
+/* v5.2 light theme: ivory + royal/navy with preserved metallic feel */
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 {
+  --mb-v52-ivory: 38 42% 97%;
+  --mb-v52-ivory-2: 42 30% 94%;
+  --mb-v52-navy: 224 62% 26%;
+  --mb-v52-royal: 224 72% 44%;
+  --mb-v52-steel: 220 20% 38%;
+}
+
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__layout {
+  background:
+    radial-gradient(130% 95% at 100% 0%, hsl(var(--mb-v52-ivory-2) / 0.85) 0%, transparent 56%),
+    linear-gradient(180deg, hsl(var(--mb-v52-ivory)), hsl(var(--mb-v52-ivory-2)));
+  border-color: hsl(var(--mb-v52-navy) / 0.22);
+  box-shadow:
+    0 22px 48px -34px hsl(var(--mb-v52-navy) / 0.45),
+    0 1px 0 hsl(0 0% 100% / 0.8) inset;
+}
+
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__sidebar {
+  background:
+    linear-gradient(160deg, hsl(var(--mb-v52-navy) / 0.95), hsl(var(--mb-v52-royal) / 0.9));
+  border-right-color: hsl(var(--mb-v52-navy) / 0.72);
+}
+
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__main {
+  background: linear-gradient(180deg, hsl(var(--mb-v52-ivory) / 0.88), hsl(var(--mb-v52-ivory-2) / 0.95));
+}
+
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__agent-card,
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__mode-option,
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__pickup-card,
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__review-block {
+  background:
+    linear-gradient(180deg, hsl(0 0% 100% / 0.92), hsl(var(--mb-v52-ivory) / 0.9));
+  border-color: hsl(var(--mb-v52-navy) / 0.2);
+  box-shadow:
+    0 12px 28px -24px hsl(var(--mb-v52-navy) / 0.38),
+    0 1px 0 hsl(0 0% 100% / 0.95) inset;
+}
+
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__agent-card:hover,
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__mode-option:hover {
+  border-color: hsl(var(--mb-v52-royal) / 0.45);
+  box-shadow:
+    0 16px 32px -24px hsl(var(--mb-v52-royal) / 0.35),
+    0 1px 0 hsl(0 0% 100% / 0.95) inset;
+}
+
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__agent-card-name,
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__screen-title {
+  color: hsl(223 45% 18%);
+}
+
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__agent-card-role,
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__screen-desc,
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__agent-section-value {
+  color: hsl(var(--mb-v52-steel));
+}
+
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__agent-launch,
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__btn--primary {
+  background: linear-gradient(135deg, hsl(var(--mb-v52-royal)), hsl(var(--mb-v52-navy)));
+  border-color: hsl(var(--mb-v52-navy) / 0.8);
+  color: hsl(0 0% 100%);
+}
+
+/* Light v5.2 accessibility + blue-accent pass (remove green/neon) */
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 {
+  --primary: 224 72% 44%;
+  --primary-glow: 223 76% 56%;
+  --accent: 224 72% 44%;
+  --ring: 224 72% 44%;
+  --mb-v4-accent: hsl(224 72% 44%);
+  --mb52-accent-ring: hsl(224 72% 44% / 0.26);
+}
+
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__sidebar {
+  --mb-sidebar-bg: 223 65% 32%;
+  --mb-sidebar-border: 223 58% 26%;
+  --mb-sidebar-text: 0 0% 100%;
+  --mb-sidebar-muted: 215 42% 92%;
+  --mb-sidebar-step-upcoming: 224 48% 14%;
+  --mb-sidebar-step-upcoming-border: 223 42% 24%;
+  --mb-sidebar-step-active: 224 76% 60%;
+  --mb-sidebar-step-done: 223 72% 52%;
+}
+
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__sidebar .mission-brief-v4__agent-label,
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__sidebar .mission-brief-v4__context-title,
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__sidebar .mission-brief-v4__ctx-label,
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__sidebar .mission-brief-v4__step-label,
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__sidebar .mission-brief-v4__agent-role,
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__sidebar .mission-brief-v4__ctx-value {
+  color: hsl(var(--mb-sidebar-muted));
+}
+
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__sidebar .mission-brief-v4__agent-name--active,
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__sidebar .mission-brief-v4__step--current .mission-brief-v4__step-label,
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__sidebar .mission-brief-v4__step--done .mission-brief-v4__step-label,
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__sidebar .mission-brief-v4__ctx-value--filled {
+  color: hsl(var(--mb-sidebar-text));
+}
+
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__btn--primary:hover:not(:disabled) {
+  background: linear-gradient(180deg, hsl(224 74% 52%) 0%, hsl(223 67% 40%) 100%);
+  border-color: hsl(223 60% 34%);
+}
+
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__step--done .mission-brief-v4__step-num {
+  background: hsl(223 72% 52%);
+  border-color: hsl(223 72% 52%);
+  color: hsl(0 0% 100%);
+}
+
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__agent-card--selected {
+  border-color: hsl(224 72% 44%);
+  box-shadow: 0 0 0 1px hsl(224 72% 44% / 0.35);
+}
+
+/* Light v5.2 pickup cards: remove green strip, improve readability */
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__pickup-card {
+  border-color: hsl(224 24% 84%);
+  background:
+    linear-gradient(180deg, hsl(0 0% 100% / 0.96), hsl(38 40% 98% / 0.94));
+  box-shadow:
+    0 10px 24px -20px hsl(224 38% 32% / 0.26),
+    0 1px 0 hsl(0 0% 100% / 0.9) inset;
+}
+
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__pickup-card--featured {
+  border-top-color: hsl(224 72% 44%);
+}
+
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__pickup-card--featured::before {
+  background: linear-gradient(90deg, hsl(224 74% 46%), hsl(222 68% 36%));
+}
+
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__pickup-title,
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__pickup-meta-row,
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__pickup-meta-icon {
+  color: hsl(223 42% 24%);
+}
+
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__pickup-role,
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__pickup-time {
+  color: hsl(220 18% 42%);
+}
+
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__pickup-status {
+  border-color: hsl(224 56% 72%);
+  background: hsl(224 62% 96%);
+  color: hsl(224 66% 38%);
+}
+
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__pickup-cta--primary {
+  background: linear-gradient(180deg, hsl(224 74% 48%), hsl(223 68% 38%));
+  border-color: hsl(223 63% 33%);
+  color: hsl(0 0% 100%);
+}
+
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__pickup-cta--ghost {
+  border-color: hsl(222 20% 72%);
+  background: linear-gradient(180deg, hsl(220 22% 20%), hsl(220 24% 13%));
+  color: hsl(215 18% 88%);
+}
+
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__pickup-ribbon {
+  background: linear-gradient(180deg, hsl(224 74% 50%) 0%, hsl(223 68% 40%) 52%, hsl(223 62% 34%) 100%);
+  color: hsl(0 0% 100%);
+  border-bottom-color: hsl(223 58% 30% / 0.7);
+}
+
+/* Light mode setup screens: fix dark leftovers and improve readability */
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__content--configure-light {
+  background: linear-gradient(180deg, hsl(38 42% 97%), hsl(36 30% 95%));
+  color: hsl(223 40% 18%);
+}
+
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__content--configure-light .mission-brief-v4__screen-title,
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__content--configure-light #mb-wizard-heading {
+  color: hsl(223 46% 17%);
+}
+
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__content--configure-light .mission-brief-v4__screen-desc,
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__content--configure-light .mission-brief-v4__label {
+  color: hsl(220 18% 38%);
+}
+
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__content--configure-light .mission-brief-v4__mode-option--hero {
+  border-color: hsl(223 28% 78%);
+  background:
+    radial-gradient(120% 80% at 80% 12%, hsl(224 74% 56% / 0.12) 0%, transparent 50%),
+    radial-gradient(100% 75% at 20% -8%, hsl(0 0% 100% / 0.9) 0%, transparent 58%),
+    linear-gradient(180deg, hsl(0 0% 100% / 0.98) 0%, hsl(38 38% 97% / 0.95) 100%);
+  box-shadow:
+    0 10px 22px -20px hsl(223 40% 30% / 0.35),
+    0 1px 0 hsl(0 0% 100% / 0.95) inset;
+}
+
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__content--configure-light .mission-brief-v4__mode-option--hero:hover {
+  border-color: hsl(224 58% 58%);
+  box-shadow:
+    0 14px 26px -22px hsl(223 45% 32% / 0.38),
+    0 0 0 1px hsl(224 72% 44% / 0.18),
+    0 1px 0 hsl(0 0% 100% / 0.95) inset;
+}
+
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__content--configure-light .mission-brief-v4__mode-option--hero.mission-brief-v4__mode-option--selected {
+  border-color: hsl(224 72% 44%);
+  box-shadow:
+    0 0 0 1px hsl(224 72% 44% / 0.28),
+    0 16px 30px -22px hsl(223 50% 34% / 0.45);
+}
+
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__mode-option--hero .mission-brief-v4__mode-option-title {
+  color: hsl(223 40% 19%);
+}
+
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__mode-option--hero .mission-brief-v4__mode-option-desc,
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__mode-hero-details li {
+  color: hsl(220 18% 38%);
+}
+
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__progress-strip--light {
+  background: linear-gradient(180deg, hsl(0 0% 100% / 0.96), hsl(38 40% 97% / 0.94));
+  border-color: hsl(223 24% 82%);
+  box-shadow: 0 12px 26px -22px hsl(223 40% 32% / 0.28);
+}
+
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__progress-bar-fill {
+  background: linear-gradient(90deg, hsl(224 74% 50%), hsl(223 67% 38%));
+}
+
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__footer,
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__footer--light {
+  background: linear-gradient(180deg, hsl(38 34% 95%), hsl(35 26% 92%));
+  border-top-color: hsl(223 24% 82%);
+  box-shadow: 0 -10px 20px -20px hsl(223 32% 35% / 0.22);
+}
+
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__footer--light .mission-brief-v4__btn--primary {
+  box-shadow: 0 8px 20px -14px hsl(224 72% 44% / 0.45);
+}
+
+/* Light mode mission screen parity (mission select + preview + textarea) */
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52
+  .mission-brief-v4__content--configure-light
+  .mission-brief-v4__wizard-pane--mission
+  .mission-brief-v4__screen-title {
+  color: hsl(223 46% 17%);
+}
+
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52
+  .mission-brief-v4__content--configure-light
+  .mission-brief-v4__wizard-pane--mission
+  .mission-brief-v4__screen-desc,
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52
+  .mission-brief-v4__content--configure-light
+  .mission-brief-v4__wizard-pane--mission
+  .mission-brief-v4__label {
+  color: hsl(220 18% 38%);
+}
+
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__content--configure-light .mission-brief-v4__combo-trigger {
+  border-color: hsl(223 24% 78%);
+  background:
+    radial-gradient(100% 85% at 12% 0%, hsl(0 0% 100% / 0.92) 0%, transparent 56%),
+    linear-gradient(180deg, hsl(0 0% 100% / 0.98), hsl(38 35% 96% / 0.95));
+  color: hsl(223 40% 19%);
+  box-shadow:
+    0 10px 22px -20px hsl(223 40% 32% / 0.32),
+    0 1px 0 hsl(0 0% 100% / 0.95) inset;
+}
+
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__content--configure-light .mission-brief-v4__combo-pop {
+  border-color: hsl(223 24% 80%);
+  background:
+    radial-gradient(120% 80% at 80% 12%, hsl(224 74% 56% / 0.11) 0%, transparent 52%),
+    linear-gradient(180deg, hsl(0 0% 100% / 0.98), hsl(38 36% 96% / 0.95));
+  box-shadow:
+    0 16px 28px -20px hsl(223 38% 30% / 0.3),
+    0 1px 0 hsl(0 0% 100% / 0.95) inset;
+}
+
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__content--configure-light .mission-brief-v4__combo-search {
+  border-bottom-color: hsl(223 20% 84%);
+}
+
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__content--configure-light .mission-brief-v4__combo-search-input {
+  border-color: hsl(223 20% 80%);
+  background: hsl(0 0% 100% / 0.86);
+  color: hsl(223 36% 22%);
+}
+
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__content--configure-light .mission-brief-v4__combo-option {
+  color: hsl(223 36% 22%);
+}
+
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__content--configure-light .mission-brief-v4__combo-option:hover {
+  border-color: hsl(223 24% 76%);
+  background: hsl(224 56% 95%);
+}
+
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__content--configure-light .mission-brief-v4__mission-preview {
+  border-color: hsl(223 24% 80%);
+  background:
+    radial-gradient(120% 80% at 80% 12%, hsl(224 72% 56% / 0.1) 0%, transparent 50%),
+    linear-gradient(180deg, hsl(0 0% 100% / 0.98), hsl(38 34% 96% / 0.95));
+  box-shadow:
+    0 12px 24px -20px hsl(223 40% 30% / 0.26),
+    0 1px 0 hsl(0 0% 100% / 0.95) inset;
+}
+
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__content--configure-light .mission-brief-v4__mission-output-chip {
+  border-color: hsl(223 24% 76%);
+  background: hsl(0 0% 100% / 0.88);
+  color: hsl(223 40% 22%);
+  box-shadow: 0 1px 0 hsl(0 0% 100% / 0.92) inset;
+}
+
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__content--configure-light .mission-brief-v4__textarea {
+  border-color: hsl(223 22% 80%);
+  background:
+    radial-gradient(100% 85% at 12% 0%, hsl(0 0% 100% / 0.88) 0%, transparent 56%),
+    linear-gradient(180deg, hsl(0 0% 100% / 0.98), hsl(38 32% 96% / 0.94));
+  color: hsl(223 38% 20%);
+}
+
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__landing-heading {
+  color: hsl(223 46% 17%);
+}
+
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__landing-sub {
+  color: hsl(220 18% 38%);
+}
+
