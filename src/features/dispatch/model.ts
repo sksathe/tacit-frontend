@@ -20,6 +20,9 @@ export const STEP_ORDER: DispatchStepId[] = [
   "review",
 ];
 
+/** Facilitate mode: skip input/output/review and go straight to meeting setup. */
+export const STEP_ORDER_FACILITATE: DispatchStepId[] = ["agent", "mode", "mission", "execution"];
+
 /** Eagle: choose agent → upload & extract only (no mode / mission / launch wizard). */
 export const STEP_ORDER_EAGLE: DispatchStepId[] = ["agent", "eagleWorkspace"];
 
@@ -114,6 +117,9 @@ export function orderedSteps(state: DispatchState): DispatchStepId[] {
   if (state.agentId === "eagle") {
     return STEP_ORDER_EAGLE;
   }
+  if (state.modeId === "facilitate") {
+    return STEP_ORDER_FACILITATE;
+  }
   const pre = STEP_ORDER;
   return state.launched ? [...pre, ...POST_LAUNCH_STEP_ORDER] : pre;
 }
@@ -122,7 +128,7 @@ function clampStepToOrder(state: DispatchState): DispatchStepId {
   const ord = orderedSteps(state);
   if (ord.includes(state.currentStep)) return state.currentStep;
   if (state.agentId === "eagle") return "eagleWorkspace";
-  if (state.currentStep === "outputContract") return "input";
+  if (state.currentStep === "outputContract") return state.modeId === "facilitate" ? "mission" : "input";
   return ord[0] ?? "agent";
 }
 
@@ -191,6 +197,12 @@ export function dispatchReducer(state: DispatchState, action: DispatchAction): D
       const ord = orderedSteps(state);
       const idx = ord.indexOf(state.currentStep);
       if (idx < 0) return state;
+      if (state.currentStep === "mission" && state.modeId === "facilitate") {
+        return {
+          ...state,
+          currentStep: "execution",
+        };
+      }
       if (state.currentStep === "review" && !state.launched) {
         return {
           ...state,

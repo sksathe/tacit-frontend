@@ -214,14 +214,21 @@ export function MissionBriefV4({
 
   const onContinue = () => {
     if (!canProceed(dispatchState)) return;
-    if (dispatchState.currentStep === "review") {
+    if (
+      dispatchState.currentStep === "review" ||
+      (dispatchState.currentStep === "mission" && dispatchState.modeId === "facilitate")
+    ) {
       appendLaunch();
     }
     dispatchAction({ type: "GO_FORWARD" });
   };
 
   const continueLabel =
-    dispatchState.currentStep === "review" ? "Launch mission" : "Continue";
+    dispatchState.currentStep === "review"
+      ? "Launch mission"
+      : dispatchState.currentStep === "mission" && dispatchState.modeId === "facilitate"
+        ? "Set up meeting"
+        : "Continue";
 
   const preLaunchStepCount = dispatchState.launched
     ? ord.length - POST_LAUNCH_STEP_ORDER.length
@@ -280,6 +287,7 @@ export function MissionBriefV4({
         <aside
           className={[
             "mission-brief-v4__sidebar",
+            "mission-brief-v4__left-panel",
             eagleOutputFocus ? "mission-brief-v4__sidebar--collapsed" : "",
             eagleSidebarCanMinify ? "mission-brief-v4__sidebar--can-minify" : "",
           ]
@@ -380,10 +388,10 @@ export function MissionBriefV4({
           </button>
         </aside>
 
-        <div className="mission-brief-v4__main">
+        <div className="mission-brief-v4__main mission-brief-v4__right-panel">
           <div
             className={cn(
-              "mission-brief-v4__content",
+              "mission-brief-v4__content mission-brief-v4__step-content",
               dispatchState.currentStep === "eagleWorkspace" &&
                 eagleFileLabel &&
                 "mission-brief-v4__content--eagle-split-fill",
@@ -391,10 +399,13 @@ export function MissionBriefV4({
           >
             {dispatchState.currentStep === "agent" && (
               <>
-                <h1 className="mission-brief-v4__screen-title">Choose your agent</h1>
-                <p className="mission-brief-v4__screen-desc">
-                  Select who will run this mission. Modes and output options depend on the agent profile.
-                </p>
+                <div className="mission-brief-v4__screen mission-brief-v4__screen--agent">
+                  <div className="mission-brief-v4__screen-header">
+                    <h1 className="mission-brief-v4__screen-title">Choose your agent</h1>
+                    <p className="mission-brief-v4__screen-desc">
+                      Select who will run this mission. Modes and output options depend on the agent profile.
+                    </p>
+                  </div>
                 <div className="mission-brief-v4__agent-grid">
                   {TACIT_AGENTS.map((a) => {
                     const p = getDispatchProfile(a.id);
@@ -471,6 +482,7 @@ export function MissionBriefV4({
                     </div>
                   </>
                 )}
+                </div>
               </>
             )}
 
@@ -891,3 +903,4 @@ export function MissionBriefV4({
     </div>
   );
 }
+

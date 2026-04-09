@@ -2525,3 +2525,154 @@ html:not(.dark) .mission-brief-v4__chip--active {
     row-gap: 0.12rem;
   }
 }
+
+/* v5.2 structure integration: left rail + right panel shell */
+.mission-brief-v4__layout {
+  min-height: min(760px, calc(100dvh - 9.5rem));
+}
+
+.mission-brief-v4__left-panel {
+  width: clamp(248px, 19vw, 286px);
+  flex-shrink: 0;
+  height: 100%;
+  overflow-y: auto;
+}
+
+.mission-brief-v4__right-panel {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.mission-brief-v4__step-content {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.mission-brief-v4__screen {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.mission-brief-v4__screen-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.mission-brief-v4__footer {
+  border-top: 1px solid hsl(var(--border) / 0.6);
+  padding-top: 0.8rem;
+  padding-bottom: 0.2rem;
+  margin-top: 0.35rem;
+}
+
+/* rail primitives from v5.2 */
+.mission-brief-v4__agent-block {
+  padding: 1.25rem 1.15rem 1rem;
+}
+
+.mission-brief-v4__steps {
+  padding: 0.95rem 0.85rem;
+}
+
+.mission-brief-v4__context {
+  padding: 0.9rem 1rem 1rem;
+}
+
+.mission-brief-v4__step-num {
+  width: 1.55rem;
+  height: 1.55rem;
+  font-size: 0.64rem;
+}
+
+/* card normalization */
+.mission-brief-v4__agent-card,
+.mission-brief-v4__mode-option,
+.mission-brief-v4__recent-card,
+.mission-brief-v4__review-block {
+  border-radius: 0.82rem;
+}
+
+.mission-brief-v4__agent-card {
+  align-items: flex-start;
+  gap: 0.85rem;
+}
+
+.mission-brief-v4__agent-card .mission-brief-v4__agent-meta {
+  padding-top: 0.05rem;
+}
+
+.mission-brief-v4__mode-badge {
+  font-size: 0.64rem;
+  line-height: 1.1;
+}
+
+.mission-brief-v4__recent-card {
+  align-items: flex-start;
+}
+
+.mission-brief-v4__review-block {
+  padding: 0.9rem 1rem;
+}
+
+/* post-launch and workspace container parity */
+.mission-brief-v4__hero {
+  margin-bottom: 0.8rem;
+}
+
+.mission-brief-v4__meeting-actions,
+.mission-brief-v4__doc-section,
+.mission-brief-v4__session-panel,
+.mission-brief-v4__placeholder {
+  border-radius: 0.85rem;
+}
+
+.mission-brief-v4__doc-section,
+.mission-brief-v4__session-panel {
+  border: 1px solid hsl(var(--border) / 0.55);
+  background: hsl(var(--card) / 0.7);
+  padding: 0.8rem;
+}
+
+.mission-brief-v4__dropzone {
+  border-radius: 0.75rem;
+}
+
+.mission-brief-v4__session-item {
+  border-radius: 0.68rem;
+}
+
+html:not(.dark) .mission-brief-v4__footer {
+  border-top-color: hsl(var(--dashboard-rail-border) / 0.25);
+}
+
+.dark .mission-brief-v4__footer {
+  border-top-color: hsl(var(--dashboard-rail-border));
+}
+
+.dark .mission-brief-v4__doc-section,
+.dark .mission-brief-v4__session-panel {
+  border-color: hsl(var(--dashboard-rail-border));
+  background: hsl(var(--dashboard-surface));
+}
+
+@media (max-width: 960px) {
+  .mission-brief-v4__layout {
+    min-height: 0;
+  }
+
+  .mission-brief-v4__left-panel {
+    width: 100%;
+    max-height: 23rem;
+    border-right: 0;
+    border-bottom: 1px solid hsl(var(--border) / 0.65);
+  }
+
+  .mission-brief-v4__footer {
+    margin-top: 0;
+  }
+}
