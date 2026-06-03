@@ -1,0 +1,95 @@
+VERIFICATION & VALIDATION TEST REPORT (SUMMARY)
+====================================
+Document No : LC-VV-HCP5000-005
+Product     : HemaCount Pro 5000 Hematology Analyzer
+Test Site   : LabCorp R&D Laboratory, Burlington NC + 3 external clinical sites
+Author      : Dr. Kevin Adeyemi, V&V Lead
+Date        : 2025-06-30
+Status      : FINAL – APPROVED
+
+─────────────────────────────────────────────
+1. PRECISION STUDY (CLSI EP5-A3)
+─────────────────────────────────────────────
+Protocol: 3 levels of control (low/normal/high), 2 runs/day × 20 days, duplicate measurements
+Site: LabCorp Burlington (n=1 instrument)
+
+Parameter   Level     Mean     Within-run CV%   Between-day CV%   Specification
+─────────────────────────────────────────────────────────────────────────────────
+WBC         Low       2.14     0.82%            1.21%             ≤ 2.0% PASS
+WBC         Normal    7.85     0.64%            0.98%             ≤ 2.0% PASS
+WBC         High      32.10    1.05%            1.44%             ≤ 2.0% PASS
+RBC         Normal    4.52     0.41%            0.63%             ≤ 1.5% PASS
+HGB         Normal    13.8     0.28%            0.39%             ≤ 1.0% PASS
+PLT         Low       48.3     1.94%            2.31%             ≤ 3.0% PASS
+PLT         Normal    235      1.42%            1.87%             ≤ 3.0% PASS
+
+CONCLUSION: All parameters meet precision specifications.
+
+─────────────────────────────────────────────
+2. LINEARITY STUDY (CLSI EP6)
+─────────────────────────────────────────────
+Protocol: Dilution series from high to low across reportable range, 5 concentrations, n=3 replicates
+
+Parameter   Reportable Range Tested       R²       Linearity Deviation   Result
+────────────────────────────────────────────────────────────────────────────────
+WBC         0.1 – 150 × 10³/µL           0.9998   0.3%                  PASS
+RBC         0.5 – 8.0 × 10⁶/µL          0.9999   0.2%                  PASS
+HGB         1.0 – 25.0 g/dL              0.9999   0.1%                  PASS
+PLT         10 – 2000 × 10³/µL           0.9996   0.9%                  PASS
+
+─────────────────────────────────────────────
+3. METHOD COMPARISON (3-SITE CLINICAL STUDY)
+─────────────────────────────────────────────
+Reference method: Manual microscopic 200-cell differential (board-certified hematologist)
+Sites: Mayo Clinic Rochester MN, Cleveland Clinic OH, UCSF Medical Center CA
+Total samples: 1,200 (400 per site), includes abnormal population enrichment
+
+Parameter   Pearson r   Bias %   95% CI           Conclusion
+────────────────────────────────────────────────────────────────
+WBC         0.998       -0.4%    -1.1 to +0.3%    PASS
+NEU%        0.994       +0.7%    -1.5 to +2.9%    PASS
+LYM%        0.991       -0.5%    -2.1 to +1.1%    PASS
+MON%        0.987       +0.9%    -1.8 to +3.6%    PASS
+EOS%        0.982       +1.2%    -2.0 to +4.4%    PASS
+HGB         0.999       -0.1%    -0.3 to +0.1%    PASS
+PLT         0.996       +1.5%    -2.0 to +5.0%    PASS
+
+─────────────────────────────────────────────
+4. CARRYOVER STUDY (CLSI EP10)
+─────────────────────────────────────────────
+Protocol: High sample (WBC ~100 × 10³/µL) followed by 3 low samples (WBC ~2 × 10³/µL)
+Carryover calculated: 0.08%   Specification: ≤ 0.5%   PASS
+
+─────────────────────────────────────────────
+5. INTERFERENCE STUDY (CLSI EP7)
+─────────────────────────────────────────────
+Interferent        Concentration Tested   Parameter Affected   Bias Observed   Acceptable?
+────────────────────────────────────────────────────────────────────────────────────────────
+Hemolysis          H+3 (5g/L Hgb)         WBC, PLT             +1.2%, -0.8%   YES
+Lipemia            L+3 (1500 mg/dL)       HGB                  +0.3%          YES
+Icterus            I+3 (20 mg/dL bilirubin)HGB                 +0.5%          YES
+High WBC (>100)    120 × 10³/µL           PLT                  PLT clump flag  FLAG CORRECT
+
+─────────────────────────────────────────────
+6. USABILITY VALIDATION (IEC 62366-1)
+─────────────────────────────────────────────
+Participants : 24 laboratory technicians across 3 clinical sites (8 per site)
+Tasks tested :
+  T1 – Startup and QC run
+  T2 – Patient sample loading (open tube and closed tube modes)
+  T3 – Result review and release
+  T4 – Reagent replacement
+  T5 – Error resolution (simulated clog)
+  T6 – LIS interface result transmission
+
+Critical task failures: 0
+Use errors (non-critical): 3 (reagent door direction confusion – resolved by updated labeling)
+Summative evaluation: PASSED
+
+─────────────────────────────────────────────
+7. ELECTRICAL SAFETY (IEC 60601-1)
+─────────────────────────────────────────────
+Test lab: TÜV SÜD, Munich, Germany
+Certificate: IEC 60601-1 3rd edition + AMD1 (2012) + AMD2 (2020)
+EMC: IEC 60601-1-2 4th edition (Group 1, Class A)
+Result: PASSED. Report No. TUV-2024-HCP5000-ES-001

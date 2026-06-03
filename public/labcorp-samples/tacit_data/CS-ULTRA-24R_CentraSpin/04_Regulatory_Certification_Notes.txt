@@ -1,0 +1,51 @@
+REGULATORY CERTIFICATION NOTES
+====================================
+Document No : LC-RA-CSULTRA-004
+Product     : CentraSpin Ultra 24R (CS-ULTRA-24R)
+Author      : Sarah Okonkwo / Linda Frost
+Date        : 2025-08-01
+Status      : INTERNAL WORKING DOCUMENT
+
+─────────────────────────────────────────────
+USA — UL/CSA Joint Listing
+─────────────────────────────────────────────
+Standard  : ANSI/UL 61010-2-020 (Electrical Equipment for Laboratory Use – Centrifuges)
+            CSA C22.2 No. 61010-2-020 (Canada joint certification)
+Test lab  : UL Product Safety, 333 Pfingsten Rd, Northbrook, IL 60062
+File No   : UL-E498321
+Cert date : 2025-05-15
+Notes     : Annual production surveillance by UL required. UL mark on label.
+            Product change notification required before any design modification.
+
+─────────────────────────────────────────────
+EU — CE Machinery Directive 2006/42/EC
+─────────────────────────────────────────────
+Self-declaration (no Notified Body required for this equipment category).
+Harmonised standard: EN 61010-2-020:2019 (IEC 61010-2-020)
+DoC signed by: Thomas Baker, Engineering Director
+Date of DoC : 2025-06-01
+DoC ref     : CE-MD-2025-CSULTRA-SELF
+Technical file: Maintained at LabCorp HQ Burlington NC. Available to market authorities.
+EU Rep      : LabCorp Europe GmbH, Eschborn, Germany
+
+─────────────────────────────────────────────
+UK — UKCA Self-Declaration
+─────────────────────────────────────────────
+Post-Brexit UKCA marking required (cannot use CE mark alone in UK after Dec 31, 2024).
+Standard  : BS EN 61010-2-020:2019
+DoC ref   : UKCA-2025-CSULTRA
+UK Responsible Person: LabCorp UK Ltd, 1 Forbury Square, Reading RG1 3EU
+
+─────────────────────────────────────────────
+CHINA — NMPA Registration
+─────────────────────────────────────────────
+NMPA treats clinical-use centrifuges as Class II medical devices.
+Registration No: NMPA-20253200001 (2025-11-20). Valid 5 years (to 2030-11-19).
+Agent/Sponsor  : LabCorp China Ltd, Beijing
+CRO            : Sinopharm MedTech Consulting (submission management)
+Chinese standard: GB 4793.14 / YY/T 0092-2021
+Chinese IFU    : Full simplified Chinese translation. Reviewed by Sinopharm.
+Local test     : Performance testing at NMPA-approved testing centre (CAICT, Beijing).
+                 Results: Speed accuracy, noise, electrical safety all PASSED.
+Post-market    : Annual adverse event report to NMPA. Field safety corrective actions
+                 must be reported within 30 days of initiation.

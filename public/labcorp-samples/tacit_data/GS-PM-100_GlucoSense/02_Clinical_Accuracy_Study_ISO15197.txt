@@ -1,0 +1,82 @@
+SYSTEM ACCURACY STUDY REPORT (ISO 15197:2015)
+====================================
+Document No : LC-CAS-GSPM100-002
+Product     : GlucoSense Patient Monitor (GS-PM-100) + Test Strips (GS-STRIP-50)
+Reference   : YSI 2950 glucose analyzer (NIST-traceable)
+Study Sites : LabCorp POC Lab Burlington NC + Atlanta GA Clinical Site
+Author      : Dr. Rachel Kim + Dr. Kevin Adeyemi
+Date        : 2025-01-20
+Status      : FINAL – APPROVED
+
+─────────────────────────────────────────────
+1. STUDY DESIGN (ISO 15197:2015 Section 6.3)
+─────────────────────────────────────────────
+Subjects   : 100 subjects with diabetes (Type 1: 45, Type 2: 53, Gestational: 2)
+             + 50 subjects without diabetes (glucose control range)
+Age range  : 18–82 years. Pediatric (age 2–17): separate study, n=50.
+Specimens  : Fresh capillary blood from fingertip (primary site)
+             Forearm and palm results recorded as secondary claims
+Glucose range covered: 20–600 mg/dL (enriched at extremes with glucose-spiked samples)
+Device lots : 3 production lots tested (Lot A, B, C)
+Operators  : 2 trained lab operators + 2 HCP (nurse/physician) + lay users (self-test)
+
+─────────────────────────────────────────────
+2. SYSTEM ACCURACY RESULTS
+─────────────────────────────────────────────
+Total measurements: 1,127 paired results (device vs. YSI reference)
+
+Zone A (< 100 mg/dL): Within ± 15 mg/dL of reference
+  Results in zone: 99.4% (specification: ≥ 95%)  PASS
+
+Zone B (≥ 100 mg/dL): Within ± 15% of reference
+  Results in zone: 99.1% (specification: ≥ 95%)  PASS
+
+Overall (combined): 99.2% within ISO 15197 criteria  PASS
+
+Glucose Range       N      % Within ISO 15197   Notes
+───────────────────────────────────────────────────────────────
+20–50 mg/dL         48     97.9%                Near-hypoglycemia
+51–100 mg/dL        189    99.5%                Normal-low
+101–200 mg/dL       412    99.3%                Normal-high
+201–400 mg/dL       320    99.1%                Hyperglycemia
+401–600 mg/dL       158    98.7%                Severe hyperglycemia
+
+─────────────────────────────────────────────
+3. HAEMATOCRIT INTERFERENCE (ISO 15197:2015 Section 6.6)
+─────────────────────────────────────────────
+Protocol: Glucose ~100 mg/dL and ~400 mg/dL, HCT adjusted to 20%, 30%, 42%, 55%, 65%.
+
+HCT%    100 mg/dL Bias   400 mg/dL Bias   Acceptable (< ±10% or < ±10 mg/dL)?
+─────────────────────────────────────────────────────────────────────────────────
+20%     +3.1%             +2.8%            YES – PASS
+30%     +0.8%             +0.7%            YES – PASS
+42%     Reference          Reference
+55%     -1.2%             -0.9%            YES – PASS
+65%     -3.8%             -3.1%            YES – PASS
+
+Dual-channel HCT correction algorithm effective. All HCT range results PASS.
+
+─────────────────────────────────────────────
+4. INTERFERENCE TESTING (ISO 15197:2015 Section 6.7)
+─────────────────────────────────────────────
+Interfering substance    Conc. tested    Bias at 100 mg/dL   Bias at 400 mg/dL   Result
+─────────────────────────────────────────────────────────────────────────────────────────
+Acetaminophen            20 mg/dL        +1.4 mg/dL           +0.9%               PASS
+Ascorbic Acid (Vit C)    30 mg/dL        +2.1 mg/dL           +1.2%               PASS
+Uric Acid                15 mg/dL        +0.3 mg/dL           +0.2%               PASS
+Bilirubin                20 mg/dL        -0.5 mg/dL           -0.3%               PASS
+Lipids (triglycerides)   300 mg/dL       -1.1 mg/dL           -0.7%               PASS
+Galactose                100 mg/dL       No interference (FAD-GDH enzyme)          PASS
+Maltose                  100 mg/dL       No interference (FAD-GDH enzyme)          PASS
+Xylose                   100 mg/dL       No interference (FAD-GDH enzyme)          PASS
+
+Note: FAD-GDH enzyme selected specifically to avoid maltose/galactose cross-reactivity
+(concern with PQQ-GDH systems). Documented in design rationale.
+
+─────────────────────────────────────────────
+5. CONCLUSION
+─────────────────────────────────────────────
+The GlucoSense Patient Monitor + GS-STRIP-50 test strips meet the system accuracy
+requirements of ISO 15197:2015 across the full measurement range, all HCT conditions,
+and all interference conditions tested. Results support FDA 510(k) clearance (CLIA Waived
+accuracy data) and EU IVDR Class C clinical performance requirements.

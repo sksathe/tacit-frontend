@@ -1,0 +1,77 @@
+LABELING REVIEW & APPROVAL CHECKLIST
+====================================
+Document No : LC-LAB-HCP5000-007
+Product     : HemaCount Pro 5000 (HCP-5000)
+Review Date : 2024-11-10
+Reviewer    : Sarah Okonkwo (RA) + Sandra Lim (QA)
+Label Rev   : 1.3
+Status      : APPROVED
+
+─────────────────────────────────────────────
+A. DEVICE LABEL (INSTRUMENT EXTERIOR)
+─────────────────────────────────────────────
+Requirement                                   EN   FR   Status
+─────────────────────────────────────────────────────────────
+Product name and model                        ✓    ✓    PASS
+Manufacturer name and address                 ✓    ✓    PASS
+EC Authorised Representative name/address     ✓    ✓    PASS
+Country of manufacture (USA)                  ✓    ✓    PASS
+Catalogue number (REF: HCP-5000)              ✓    ✓    PASS
+Serial number field (SN:)                     ✓    ✓    PASS
+Date of manufacture (yyyy-mm)                 ✓    ✓    PASS
+IVD symbol (EN ISO 15223-1)                   ✓    ✓    PASS
+Caution/Warning symbol (⚠)                    ✓    ✓    PASS
+Biohazard symbol (☣)                          ✓    ✓    PASS
+Temperature limits (storage and operating)    ✓    ✓    PASS
+Humidity limits                               ✓    ✓    PASS
+Electrical rating (V, Hz, W)                  ✓    ✓    PASS
+CE mark with NB number (0123)                 ✓    N/A  PASS
+UKCA mark                                     ✓    N/A  PASS
+UDI-DI (GS1 DataMatrix barcode)               ✓    ✓    PASS
+WEEE symbol (disposal info)                   ✓    ✓    PASS
+"For In Vitro Diagnostic Use Only" statement  ✓    ✓    PASS
+IP rating (IP21)                              ✓    ✓    PASS
+
+─────────────────────────────────────────────
+B. IFU CONTENT REVIEW (ENGLISH MASTER)
+─────────────────────────────────────────────
+Section                                              Present?   Correct?
+──────────────────────────────────────────────────────────────────────────
+Intended use statement                               ✓          ✓
+Principle of measurement                             ✓          ✓
+Specimen requirements (collection, anticoagulant)    ✓          ✓
+Reagents – composition and handling                  ✓          ✓
+Calibration instructions                             ✓          ✓
+Quality control procedure (Westgard rules)           ✓          ✓
+Operating procedure (step-by-step)                   ✓          ✓
+Reference intervals (age/sex stratified)             ✓          ✓
+Limitations (interferences, exclusions)              ✓          ✓
+Expected values                                      ✓          ✓
+Performance characteristics summary                  ✓          ✓
+Warnings and precautions (biohazard, electrical)     ✓          ✓
+Troubleshooting table                                ✓          ✓
+Maintenance schedule                                 ✓          ✓
+Symbols glossary                                     ✓          ✓
+Contact information / technical support              ✓          ✓
+Revision history                                     ✓          ✓
+
+─────────────────────────────────────────────
+C. TRANSLATION COMPLETENESS
+─────────────────────────────────────────────
+Language    Required For    IFU Complete   Back-Translated   QA Signed
+──────────────────────────────────────────────────────────────────────
+English     US, AU, CA      ✓              N/A (master)      S. Okonkwo
+French      CA, EU          ✓              ✓                 S. Lim
+German      EU              ✓ (eIFU)       ✓                 S. Lim
+Spanish     EU              ✓ (eIFU)       ✓                 S. Lim
+Italian     EU              ✓ (eIFU)       ✓                 S. Lim
+Japanese    JP              In progress    Pending           PENDING
+
+─────────────────────────────────────────────
+D. SIGN-OFF
+─────────────────────────────────────────────
+Name                  Role             Signature        Date
+────────────────────────────────────────────────────────────
+Sarah Okonkwo         Director RA      S. Okonkwo       2024-11-10
+Sandra Lim            QA Manager       S. Lim           2024-11-10
+Dr. Priya Nair        Product Manager  P. Nair          2024-11-12

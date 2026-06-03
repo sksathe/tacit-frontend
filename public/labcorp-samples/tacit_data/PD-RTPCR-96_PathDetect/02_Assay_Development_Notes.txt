@@ -1,0 +1,80 @@
+ASSAY DEVELOPMENT & OPTIMIZATION NOTES
+====================================
+Document No : LC-RD-PDRTPCR-002
+Product     : PathDetect RT-PCR Kit (PD-RTPCR-96)
+Author      : Dr. Mei Lin, Sr. Scientist – Molecular Assay Development
+Date        : 2024-03-20
+Status      : INTERNAL RESEARCH RECORD
+
+─────────────────────────────────────────────
+1. PRIMER/PROBE DESIGN RATIONALE
+─────────────────────────────────────────────
+All primer/probe sets designed using Primer3 + NCBI BLAST against GenBank database
+(accessed January 2024). Conserved regions identified from 500+ sequences per target.
+
+Target          Gene Region    Channel    LoD Achieved
+────────────────────────────────────────────────────────
+Influenza A     Matrix (M)     FAM        180 copies/mL
+Influenza B     NS gene        HEX        210 copies/mL
+RSV A/B         N gene         ROX        240 copies/mL  (cross-reactive to both subtypes)
+SARS-CoV-2      N gene (N2)    Cy5        150 copies/mL
+MS2 IC          MS2 coat prot  Cy5.5      N/A (process ctrl)
+
+─────────────────────────────────────────────
+2. MASTER MIX FORMULATION (PROPRIETARY – CONFIDENTIAL)
+─────────────────────────────────────────────
+Base            : One-Step RT-PCR master mix (LabCorp in-house)
+RT enzyme       : MMLV reverse transcriptase variant (thermostable, 55°C optimum)
+DNA polymerase  : Hot-start Taq with anti-Taq antibody (specificity enhancement)
+dNTPs           : 0.2 mM each
+MgCl2           : 3.5 mM (optimized for multiplex)
+Formamide       : 1.5% v/v (reduces secondary structure in GC-rich targets)
+Enhancers       : BSA 0.1 mg/mL, Betaine 0.5M, DMSO 3%
+
+Note: Formamide requires GHS reproductive toxicant labeling (H361) on all packaging.
+Refer to SDS: LC-SDS-PDRTPCR-MM-001. Operators must be informed via IFU.
+
+─────────────────────────────────────────────
+3. THERMAL CYCLING CONDITIONS
+─────────────────────────────────────────────
+Step              Temperature   Time       Cycles
+──────────────────────────────────────────────────
+RT                50°C          20 min     1
+Initial denat.    95°C          2 min      1
+Denaturation      95°C          10 sec     45
+Annealing/ext.    60°C          30 sec     45
+Plate read        60°C          (each anneal step)
+
+─────────────────────────────────────────────
+4. LOT-TO-LOT CONSISTENCY (3 DEVELOPMENT LOTS)
+─────────────────────────────────────────────
+Lot     FluA Ct (mean)   FluB Ct (mean)   RSV Ct (mean)   CoV2 Ct (mean)
+───────────────────────────────────────────────────────────────────────────
+Lot 1   28.4 ± 0.3       29.1 ± 0.4       28.8 ± 0.3      27.9 ± 0.2
+Lot 2   28.5 ± 0.2       29.0 ± 0.3       28.9 ± 0.4      28.1 ± 0.3
+Lot 3   28.3 ± 0.3       29.2 ± 0.4       28.7 ± 0.3      27.8 ± 0.2
+CV%     0.4%             0.3%             0.3%            0.4%
+
+All Ct CVs well below 2% target. Lot-to-lot consistency confirmed ACCEPTABLE.
+
+─────────────────────────────────────────────
+5. CROSS-REACTIVITY / INCLUSIVITY PANEL
+─────────────────────────────────────────────
+No cross-reactivity detected with:
+  Adenovirus types 1,2,3,5,7, Rhinovirus A/B/C, hMPV, Parainfluenza 1/2/3/4,
+  Bordetella pertussis, Legionella pneumophila, Streptococcus pneumoniae,
+  MERS-CoV, HCoV-NL63, HCoV-229E, HCoV-OC43
+
+Inclusivity: 95 clinical isolates/sequence variants of each target (sourced from
+ATCC, BEI Resources, clinical biobanks) all detected at or below stated LoD.
+
+─────────────────────────────────────────────
+6. STABILITY DATA SUMMARY
+─────────────────────────────────────────────
+Condition                Duration    Result
+───────────────────────────────────────────────────────────────────────────────
+-20°C (sealed, dark)     18 months   No degradation; Ct shift < 0.5 cycles PASS
+4°C (setup conditions)   8 hours     No degradation; Ct shift < 0.3 cycles PASS
+3 freeze-thaw cycles     N/A         < 0.5 Ct shift; no false positives    PASS
+25°C (stress)            72 hours    Ct shift > 2.0 cycles – NOT ACCEPTABLE
+  Note: 25°C shipping must be limited to < 48 hours with cold pack validation

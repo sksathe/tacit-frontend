@@ -1,0 +1,76 @@
+DESIGN REVIEW MEETING MINUTES
+====================================
+Meeting     : CDR-003 Critical Design Review
+Product     : HemaCount Pro 5000 (HCP-5000)
+Date        : 2024-08-22
+Location    : LabCorp HQ – Conference Room B3 + Video (Teams)
+Facilitator : James Whitfield, VP Engineering
+Minutes by  : Sandra Lim, Project Coordinator
+Attendees   : Dr. Priya Nair (PM), Marcus Chen (Engineering), Dr. Anjali Sharma (CSO),
+              Sarah Okonkwo (RA), Dr. Kevin Adeyemi (V&V), Tom Baker (Manufacturing),
+              Linda Frost (Quality/QMS), Robert Jeon (Software Lead)
+
+─────────────────────────────────────────────
+AGENDA ITEM 1 – Fluidics carryover issue (carry-forward from CDR-002)
+─────────────────────────────────────────────
+M. Chen: Updated rinse algorithm (3-step rinse vs original 2-step) has reduced WBC
+carryover from 0.31% to 0.08%. Verified on 20 instrument units in manufacturing.
+Decision: CLOSED. New rinse protocol locked into FW version 2.1.4.
+
+ACTION: K. Adeyemi to update V&V protocol to reflect 3-step rinse as standard.
+DUE: 2024-09-05  OWNER: K. Adeyemi
+
+─────────────────────────────────────────────
+AGENDA ITEM 2 – Reagent RFID read failure rate
+─────────────────────────────────────────────
+R. Jeon: Production data shows 0.3% RFID read failure at cold temperatures (< 17°C).
+Risk: Operator receives "unrecognised reagent" error at startup in cold labs.
+Proposed fix: Software retry loop (3 attempts) before error escalation + warm-up reminder.
+L. Frost: Risk acceptable if retry loop documented and failure rate in FMEA updated.
+Decision: Implement retry loop in FW 2.1.5. Update FMEA item 3.
+
+ACTION: R. Jeon – implement RFID retry logic. L. Frost – update FMEA.
+DUE: 2024-09-15  OWNERS: R. Jeon, L. Frost
+
+─────────────────────────────────────────────
+AGENDA ITEM 3 – Regulatory labeling for EU bilingual IFU
+─────────────────────────────────────────────
+S. Okonkwo: EU IVDR allows IFU on website (eIFU) for professional-use IVDs if
+paper summary included. Proposes eIFU for DE, FR, ES, IT to reduce print costs.
+Dr. P. Nair: Agreed if paper card with URL and QR code included in box.
+Decision: eIFU approach for EU. English, German, French, Spanish, Italian available at
+labcorp.com/ifu/hcp5000. Paper card to include URL + QR code + critical safety info.
+
+ACTION: S. Okonkwo – file eIFU notification with TÜV SÜD by 2024-10-01.
+DUE: 2024-10-01  OWNER: S. Okonkwo
+
+─────────────────────────────────────────────
+AGENDA ITEM 4 – Canadian French translation review
+─────────────────────────────────────────────
+S. Okonkwo: Translation vendor (Lionbridge) completed EN→FR for device label.
+Back-translation reviewed by internal French-speaking RA staff. 2 minor discrepancies.
+  - "intended use" – back-translation used "utilisation prévue" (correct, approved)
+  - Warning: "ne pas réutiliser" vs "usage unique" – decided: "usage unique" preferred.
+Decision: Label text locked. Tom Baker to update label print file rev 1.3.
+
+ACTION: T. Baker – update label file. S. Okonkwo – update label review record.
+DUE: 2024-09-20  OWNERS: T. Baker, S. Okonkwo
+
+─────────────────────────────────────────────
+AGENDA ITEM 5 – Japan PMDA pre-submission strategy
+─────────────────────────────────────────────
+Dr. A. Sharma: PMDA consultation meeting scheduled Oct 2024. Key questions:
+  (a) Acceptability of overseas clinical data (US 3-site study)
+  (b) Japanese-language IFU requirement (full translation mandatory for PMDA)
+  (c) Local QMS audit requirement
+S. Okonkwo: Previous LabCorp product (2021) required full Japanese IFU and
+local distributor listed as MAH (Marketing Authorization Holder).
+Decision: Engage CRO (SYMBIOSIS Japan) to manage PMDA filing. Budget to be confirmed.
+
+ACTION: S. Okonkwo – initiate SYMBIOSIS engagement by 2024-10-15.
+DUE: 2024-10-15  OWNER: S. Okonkwo
+
+─────────────────────────────────────────────
+NEXT MEETING
+─────────────────────────────────────────────
+CDR-004: Scheduled 2024-09-26. Focus: final label artwork review + V&V sign-off.

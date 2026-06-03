@@ -1,0 +1,15 @@
+Item No,Component / Process,Potential Failure Mode,Potential Effect of Failure,Severity (1-5),Potential Cause,Occurrence (1-5),Current Controls,Detection (1-5),RPN,Recommended Action,Residual RPN
+1,Sampling Needle,Needle clog during aspiration,Incorrect or missing result reported,4,Dried blood or fibrin clot in sample,3,Clot detect algorithm + error flag,2,24,Add ultrasonic agitation pre-aspiration,12
+2,Sampling Needle,Needle bend/damage,Sample volume inaccuracy,4,Tube misalignment or operator error,2,Tube sensor detects misload,2,16,Auto-retract on resistance spike,8
+3,Reagent System,Reagent expiry not enforced,Degraded reagent used; false results,5,RFID chip failure,1,RFID mandatory read at startup,1,5,Dual check: RFID + visual expiry label,5
+4,Lyse Reagent,Incomplete lysis,WBC differential errors; ghost cells,4,Low reagent concentration or cold reagent,2,QC flagging; onboard process control,2,16,Reagent temperature sensor + warm-up,8
+5,Flow Cell,Air bubble in flow cell,Erroneous impedance events; spurious counts,3,Leak in diluent path; loose fitting,3,Bubble detect optical sensor,2,18,Tighten fittings; add auto-flush cycle,9
+6,HGB Photometer,Lamp intensity drift,HGB result out of calibration,4,Lamp aging,2,Daily calibration verification,2,16,Implement auto-lamp-compensation,8
+7,Waste Container,Waste overflow,Biohazardous spill in lab,5,Sensor failure; full indicator missed,1,Dual float sensor + hard stop,1,5,Annual sensor validation in PM,5
+8,Touchscreen,Screen freeze during result review,Operator cannot release results,2,Software exception,2,Watchdog timer auto-restart,1,4,Add manual restart hotkey,2
+9,LIS Interface,Data transmission failure,Patient results not reaching EMR,4,Network timeout; wrong HL7 config,3,Retry queue + alarm after 3 failures,2,24,Add audible alert + result hold flag,12
+10,Barcode Scanner,Misread sample ID,Wrong result linked to patient,5,Damaged label; low contrast,2,Manual entry fallback + worklist match,2,20,Dual-read confirmation for STAT samples,10
+11,Electrical PSU,Overvoltage event,Instrument damage; data loss,3,Mains surge,1,Surge protection on PSU input,1,3,Add UPS recommendation in IFU,3
+12,Sample Probe,Carryover between samples,Previous patient result contaminates next,4,Insufficient rinse volume,2,Carryover validation per CLSI EP10,2,16,Extended rinse cycle selectable by lab,8
+13,Software – QC Module,QC rule misconfigured by operator,Westgard violation not flagged,4,Lack of operator training,3,Mandatory QC setup wizard,2,24,Lock QC settings to supervisor role,12
+14,Label / IFU,Missing safety warning in translation,User unaware of biohazard risk,5,Translation gap in non-English IFU,1,Translation review by certified agency,1,5,Back-translation check mandatory,5

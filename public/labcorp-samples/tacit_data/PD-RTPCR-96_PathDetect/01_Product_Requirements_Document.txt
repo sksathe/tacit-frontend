@@ -1,0 +1,68 @@
+PRODUCT REQUIREMENTS DOCUMENT (PRD)
+====================================
+Document No : LC-PRD-PDRTPCR-001
+Product     : PathDetect RT-PCR Kit
+Model Code  : PD-RTPCR-96
+Author      : Dr. Elena Vasquez, Director Molecular R&D
+Reviewed by : Dr. Anjali Sharma, CSO
+Date        : 2023-11-15
+Revision    : 1.0
+Status      : APPROVED
+
+─────────────────────────────────────────────
+1. PRODUCT OVERVIEW
+─────────────────────────────────────────────
+The PathDetect RT-PCR Kit is a multiplexed qualitative real-time RT-PCR assay for the
+simultaneous detection and differentiation of four respiratory pathogens from a single
+patient specimen. Developed in response to post-pandemic demand for consolidated
+respiratory panel testing and shortage of supply-chain-robust domestic assay options.
+
+Target pathogens: Influenza A, Influenza B, RSV A/B, SARS-CoV-2
+Target markets  : USA (De Novo), EU (IVDR Class C), Japan (Shonin), Brazil (ANVISA)
+
+─────────────────────────────────────────────
+2. INTENDED USE (DRAFT)
+─────────────────────────────────────────────
+"The PathDetect RT-PCR Kit is a qualitative in vitro nucleic acid amplification test
+for the detection and differentiation of Influenza A RNA, Influenza B RNA, Respiratory
+Syncytial Virus (RSV) A and B RNA, and SARS-CoV-2 RNA in nasopharyngeal swab (NPS)
+and oropharyngeal swab (OPS) specimens collected from symptomatic patients presenting
+with signs and symptoms of respiratory infection. The assay is intended for use on
+compatible real-time PCR instruments in professional laboratory settings.
+A negative result does not exclude infection. FOR PROFESSIONAL USE ONLY."
+
+─────────────────────────────────────────────
+3. PERFORMANCE TARGETS
+─────────────────────────────────────────────
+Metric                       Target         Minimum Acceptance
+────────────────────────────────────────────────────────────────
+Clinical sensitivity         ≥ 98%          ≥ 95%
+Clinical specificity         ≥ 99%          ≥ 97%
+LoD (each target)            ≤ 250 copies/mL As low as feasible
+Time from extraction to result ≤ 90 min     ≤ 120 min
+Lot-to-lot CV (Ct value)     ≤ 2%           ≤ 3%
+Stability (unopened, -20°C)  18 months      12 months
+
+─────────────────────────────────────────────
+4. DESIGN INPUTS
+─────────────────────────────────────────────
+4.1 Primer/probe design: conserved regions, TaqMan chemistry, FAM/HEX/ROX/Cy5 channels
+4.2 Internal control: MS2 phage RNA – monitors extraction efficiency and inhibition
+4.3 Controls included per kit: positive control (synthetic RNA), negative control (water)
+4.4 Compatible instruments: Applied Biosystems 7500 Fast, Bio-Rad CFX96, Roche LightCycler 480
+4.5 Extraction compatibility: validated with QIAGEN EZ1, Thermo MagMAX, Roche MagnaPure
+4.6 Kit format: 96-well plate (8×12), foil-sealed reaction strips
+4.7 Cold chain: -20°C transport and storage; components stable 8 hrs at 4°C during setup
+4.8 Formamide in master mix: must carry reproductive toxicant labeling (GHS08 pictogram)
+
+─────────────────────────────────────────────
+5. REGULATORY STRATEGY
+─────────────────────────────────────────────
+USA    : FDA De Novo (novel device without predicate). EUA bridge possible for
+         faster access while De Novo under review. De Novo granted DEN240112 (2025-05-15).
+EU     : IVDR 2017/746 Class C (high individual risk, low public risk).
+         Notified Body: BSI Group (NB 0086). Clinical performance study across 3 EU sites.
+Japan  : PMDA Shonin. Approval PMDA-23200BZX01234 received 2025-09-30.
+         Full Japanese IFU and local CRO (SYMBIOSIS Japan) used for PMDA filing.
+Brazil : ANVISA Class III registration. Local technical responsible (RTB) required.
+         Registration ANVISA-80012690001 issued 2025-12-10. Validity: 5 years.

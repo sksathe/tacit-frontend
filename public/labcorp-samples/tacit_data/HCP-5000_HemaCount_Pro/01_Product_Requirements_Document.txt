@@ -1,0 +1,89 @@
+PRODUCT REQUIREMENTS DOCUMENT (PRD)
+=====================================
+Document No : LC-PRD-HCP5000-001
+Product     : HemaCount Pro 5000 Hematology Analyzer
+Model Code  : HCP-5000
+Author      : Dr. Priya Nair, Sr. Product Manager
+Reviewed by : James Whitfield, VP Engineering
+Date        : 2024-04-10
+Revision    : 1.4
+Status      : APPROVED
+
+─────────────────────────────────────────────
+1. PRODUCT OVERVIEW
+─────────────────────────────────────────────
+The HemaCount Pro 5000 is a fully automated 5-part differential hematology analyzer
+designed for mid-to-high volume clinical and reference laboratories. It replaces the
+legacy HemaCount 3200 platform and addresses customer complaints around throughput,
+carryover, and connectivity.
+
+Target markets: USA, European Union, Canada, Australia.
+
+─────────────────────────────────────────────
+2. INTENDED USE STATEMENT (DRAFT)
+─────────────────────────────────────────────
+"The HemaCount Pro 5000 is intended for the quantitative determination of hematological
+parameters in EDTA-anticoagulated whole blood specimens obtained from adult and pediatric
+patients. Results are intended to aid in the diagnosis and monitoring of hematological
+conditions. FOR IN VITRO DIAGNOSTIC USE ONLY."
+
+Operator profile: Licensed medical laboratory scientists (MLS), laboratory technicians
+operating under supervision, trained point-of-care staff.
+
+─────────────────────────────────────────────
+3. PERFORMANCE REQUIREMENTS
+─────────────────────────────────────────────
+Parameter           Target               Acceptance Limit
+──────────────────────────────────────────────────────────
+Throughput          ≥ 80 samples/hr      Min 75 samples/hr
+WBC imprecision     CV ≤ 1.5%           CV ≤ 2.0%
+RBC imprecision     CV ≤ 1.0%           CV ≤ 1.5%
+HGB imprecision     CV ≤ 0.5%           CV ≤ 1.0%
+PLT imprecision     CV ≤ 2.5%           CV ≤ 3.0%
+Carryover (WBC)     ≤ 0.2%              ≤ 0.5%
+Linearity WBC       0.1–150 × 10³/µL    Per CLSI EP6
+Sample volume       ≤ 25 µL             ≤ 30 µL
+Startup time        ≤ 5 min             ≤ 8 min
+
+─────────────────────────────────────────────
+4. DESIGN INPUTS
+─────────────────────────────────────────────
+4.1 Electrical supply: Universal 100-240V AC, 50/60Hz auto-switching.
+4.2 Operating environment: 15-30°C, 20-80% RH non-condensing, altitude ≤ 3000m.
+4.3 Dimensions must fit standard lab benchtop: ≤ 500mm wide, ≤ 600mm deep, ≤ 550mm high.
+4.4 Must support bidirectional LIS connectivity (ASTM/HL7 over TCP/IP and serial RS-232).
+4.5 Onboard QC: Levey-Jennings charts, Westgard rules (1-2s, 1-3s, 2-2s, R-4s, 4-1s, 10x).
+4.6 Sample modes: whole blood (closed/open tube), pre-diluted, capillary.
+4.7 Reagent system: proprietary 3-reagent pack (Diluent, Lyse, Rinse) with RFID tracking.
+4.8 Touch display: ≥ 10 inch color touchscreen, IP-rated against aerosol splash.
+4.9 Waste management: internal 5L waste container with full-detection sensor.
+4.10 Built-in thermal printer for stat result tickets.
+
+─────────────────────────────────────────────
+5. REGULATORY STRATEGY (SUMMARY)
+─────────────────────────────────────────────
+USA        : 510(k) – predicate K183221 (competitor 5-part analyzer). Target: FDA clearance
+             within 14 months of design freeze. CLIA: moderate complexity.
+EU         : EU IVD Regulation 2017/746 Class IIa. Notified Body: TÜV SÜD (NB 0123).
+             Technical File per Annex II. Performance evaluation per IVDR Annex XIII.
+Canada     : Medical Devices Regulations (SOR/98-282) Class II license via Health Canada.
+Australia  : TGA ARTG inclusion via AIMD pathway. Reliance on FDA 510(k) acceptable.
+Japan      : PMDA consultation initiated Q3 2024. Shonin approval anticipated Q2 2026.
+
+─────────────────────────────────────────────
+6. USER NEEDS SUMMARY
+─────────────────────────────────────────────
+[UN-001] Lab managers need throughput ≥ 80 samples/hr to replace manual diff workflows.
+[UN-002] Operators need < 5 min startup time to support shift changeover efficiency.
+[UN-003] IT teams need HL7/FHIR LIS integration without custom middleware.
+[UN-004] Biosafety officers need closed-tube sampling to minimize aerosol exposure.
+[UN-005] Purchasing needs reagent cost-per-test ≤ $0.80 at full utilization.
+[UN-006] Lab directors need onboard QC with Westgard rule flagging and audit trail.
+
+─────────────────────────────────────────────
+7. EXCLUSIONS / OUT OF SCOPE
+─────────────────────────────────────────────
+- Reticulocyte counting (planned for HCP-6000 platform)
+- Slide preparation automation (separate accessory module, separate 510k)
+- Home or self-test use (professional lab use only)
+- Body fluids analysis (separate intended use, not validated in this submission)

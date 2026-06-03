@@ -285,5 +285,41 @@ export const TACIT_AGENTS: TacitAgent[] = [
       "subscription contracts",
       "billing terms extraction"
     ]
-  }
+  },
+  {
+    id: "manu",
+    name: "MANU",
+    tagline: "Turn technical source documents into approved, traceable product manuals.",
+    icon: "📘",
+    role: "Manual Intelligence Agent",
+    persona: "Methodical • Compliance-aware • Evidence-driven • Enterprise-ready",
+    description:
+      "MANU ingests mixed technical source documents from LabCorp product, engineering, risk, regulatory, and quality teams—then generates structured manual drafts with source traceability, risk-to-warning mapping, and approval routing.",
+    background:
+      "Client: LabCorp. Domain: Equipment Manual Authoring, Compliance, Approval, and Translation QA. Primary mode: Execute. MANU is built for regulated documentation workflows—not generic summarization.",
+    specialties: [
+      "Product manual generation from document bundles",
+      "Manual update & revision with change tracking",
+      "Risk-to-manual coverage QA (FMEA → warnings)",
+      "Regulatory compliance mapping by market",
+      "Translation accuracy QA against approved English source",
+      "Auditable export packages with traceability matrices",
+    ],
+    keywords: [
+      "manu",
+      "labcorp",
+      "manual",
+      "equipment manual",
+      "fmea",
+      "regulatory",
+      "compliance",
+      "translation qa",
+      "traceability",
+      "product documentation",
+      "validation",
+      "labeling",
+      "quality",
+      "approval workflow",
+    ],
+  },
 ];

@@ -1,0 +1,162 @@
+{
+  "_schema_version": "1.0",
+  "_description": "Extraction template for medical device manual pipeline. Extract fields from tacit source documents into this structure. Use null for fields not found.",
+  "document_id": null,
+  "product_name": null,
+  "product_code": null,
+  "device_category": null,
+  "manufacturer": null,
+  "manufacturer_address": null,
+  "version": null,
+  "revision_date": null,
+  "document_status": null,
+  "intended_use": null,
+  "device_class": {
+    "_note": "Key = regulatory region (e.g. USA_FDA, EU_MDR, Canada_HC, Australia_TGA, Japan_PMDA, India_CDSCO, Saudi_SFDA, China_NMPA, Brazil_ANVISA)",
+    "USA_FDA": null,
+    "EU_MDR": null,
+    "Canada_HC": null,
+    "Australia_TGA": null,
+    "Japan_PMDA": null,
+    "India_CDSCO": null,
+    "Saudi_SFDA": null,
+    "China_NMPA": null,
+    "Brazil_ANVISA": null
+  },
+  "regulatory_approvals": [
+    {
+      "country": null,
+      "country_code": null,
+      "language": null,
+      "regulatory_body": null,
+      "regulatory_class": null,
+      "approval_type": null,
+      "approval_number": null,
+      "approval_date": null,
+      "expiry_date": null,
+      "distribution_status": null,
+      "labeling_standard": null
+    }
+  ],
+  "technical_specifications": {
+    "_note": "All technical spec fields from engineering documents. Units in comments or field names.",
+    "dimensions_mm": null,
+    "weight_kg": null,
+    "power_supply": null,
+    "power_consumption_watts": null,
+    "operating_temperature_celsius": null,
+    "storage_temperature_celsius": null,
+    "humidity_percent_rh": null,
+    "sample_volume_ul": null,
+    "measurement_range": null,
+    "result_time_seconds": null,
+    "connectivity": [],
+    "display": null,
+    "certifications": []
+  },
+  "safety_warnings": [],
+  "contraindications": [],
+  "maintenance_schedule": {
+    "daily": [],
+    "weekly": [],
+    "monthly": [],
+    "annually": []
+  },
+  "symbols_used": [
+    {
+      "symbol": null,
+      "meaning": null
+    }
+  ],
+  "ifu_languages": {
+    "_note": "Map each market/country to language(s) and IFU format (paper / eIFU / both)",
+    "USA": {
+      "languages": [
+        "English"
+      ],
+      "format": "paper"
+    },
+    "EU": {
+      "languages": [],
+      "format": null
+    },
+    "Canada": {
+      "languages": [
+        "English",
+        "French"
+      ],
+      "format": "paper"
+    },
+    "Australia": {
+      "languages": [
+        "English"
+      ],
+      "format": "paper"
+    },
+    "Japan": {
+      "languages": [
+        "Japanese"
+      ],
+      "format": "paper"
+    },
+    "India": {
+      "languages": [
+        "English",
+        "Hindi"
+      ],
+      "format": "paper"
+    },
+    "Saudi Arabia": {
+      "languages": [
+        "Arabic",
+        "English"
+      ],
+      "format": "paper"
+    },
+    "Brazil": {
+      "languages": [
+        "Portuguese"
+      ],
+      "format": "paper"
+    },
+    "China": {
+      "languages": [
+        "Simplified Chinese"
+      ],
+      "format": "paper"
+    },
+    "UK": {
+      "languages": [
+        "English"
+      ],
+      "format": "paper"
+    }
+  },
+  "ec_representative": {
+    "name": null,
+    "address": null
+  },
+  "performance_data": {
+    "_note": "Key clinical/analytical performance claims from V&V or clinical study reports",
+    "sensitivity_percent": null,
+    "specificity_percent": null,
+    "precision_cv_percent": null,
+    "accuracy_statement": null,
+    "linearity_range": null,
+    "lod": null
+  },
+  "quality_control": {
+    "positive_control": null,
+    "negative_control": null,
+    "internal_control": null,
+    "qc_frequency": null
+  },
+  "risk_summary": {
+    "_note": "Top residual risks from FMEA with residual RPN and mitigations",
+    "high_priority_risks": []
+  },
+  "translation_status": {
+    "_note": "Completion and approval status of IFU translations per language",
+    "languages": {}
+  }
+}

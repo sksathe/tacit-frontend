@@ -1,0 +1,90 @@
+REGULATORY AFFAIRS WORKING NOTES
+====================================
+Document No : LC-RA-HCP5000-002
+Product     : HemaCount Pro 5000 (HCP-5000)
+Author      : Sarah Okonkwo, Director Regulatory Affairs
+Date        : 2024-09-05  (updated 2025-02-14)
+Status      : INTERNAL WORKING DOCUMENT – NOT FOR SUBMISSION
+
+─────────────────────────────────────────────
+USA — FDA 510(k) SUBMISSION
+─────────────────────────────────────────────
+Submission type   : Traditional 510(k)
+Predicate device  : Siemens ADVIA 2120i (K183221) – cleared 2018
+Product code      : GKT (automated differential cell counter)
+Regulation        : 21 CFR 864.5380
+CLIA complexity   : Moderate (target – confirmed with clinical sites)
+Submission date   : 2025-01-15
+FDA acknowledgment: 2025-01-28  (ACC No: 25-011-1482)
+Clearance received: 2025-08-10  Cleared as K243891
+
+Key 510(k) sections completed:
+  ✓ Device description and intended use
+  ✓ Substantial equivalence comparison table
+  ✓ Performance data: precision, accuracy, linearity, carryover, interference
+  ✓ Biocompatibility per ISO 10993-1 (reagent contact surfaces)
+  ✓ Electrical safety – IEC 60601-1 3rd edition + IEC 60601-1-2 (EMC)
+  ✓ Software documentation per FDA SW guidance (Level C)
+  ✓ Labeling review – 21 CFR 809.10 compliant
+
+Issues resolved during review:
+  - FDA requested clarification on WBC differential reference method (Issue 1 letter, 2025-03-20)
+    Resolution: Submitted additional data from 3-site clinical study using
+    manual microscopic differential as comparator. N=400 per site. (Submitted 2025-05-10)
+  - Relabeling required: "sample volume" claim updated from 20µL to 20±2µL
+
+─────────────────────────────────────────────
+EU — IVDR 2017/746 CLASS IIa TECHNICAL FILE
+─────────────────────────────────────────────
+Notified Body     : TÜV SÜD Product Service GmbH (NB No. 0123)
+Application date  : 2024-11-01
+Certificate issued: 2025-09-20   Cert No: CE-MDR-2025-HCP5000-0123
+Expiry            : 2030-09-19
+
+Documents in Technical File (Annex II):
+  ✓ Device description and specification (Annex II, §1)
+  ✓ UDI and labeling (Annex II, §2)  – UDI-DI assigned: 05412345678901
+  ✓ Design and manufacturing information (Annex II, §3)
+  ✓ General Safety and Performance Requirements (GSPR) checklist (Annex I)
+  ✓ Benefit-risk analysis (EN ISO 14971:2019)
+  ✓ Performance evaluation report (Annex XIII) – based on 3 EU clinical sites
+  ✓ Post-market surveillance plan (PMSP) and PSUR schedule
+  ✓ EU Declaration of Conformity
+
+Harmonised standards applied:
+  EN ISO 18113-1:2022 (IVD – vocabulary)
+  EN ISO 18113-4:2022 (IVD – labeling)
+  IEC 61010-1:2010+A1 (electrical safety)
+  IEC 61010-2-101:2018 (IVD electrical safety)
+  EN 61326-2-6:2013 (EMC for IVD)
+
+EC Authorised Representative: LabCorp Europe GmbH, Eschborn, Germany
+EUDAMED registration: EUDAMED actor ID EU-ECON-000028341
+
+─────────────────────────────────────────────
+CANADA — Health Canada Class II License
+─────────────────────────────────────────────
+Application type  : Class II Medical Device License
+Regulation        : SOR/98-282 (Medical Devices Regulations)
+Application date  : 2025-03-10
+License issued    : 2025-11-01   MDL No: MDL-98521
+Annual review     : November each year
+
+Documents submitted:
+  ✓ Device description and intended use
+  ✓ Safety and effectiveness evidence (reliance on FDA 510(k) K243891)
+  ✓ QMS certificate – ISO 13485:2016 (cert from BSI, scope covers HCP-5000)
+  ✓ Bilingual labeling (English/French) verified by external translation agency
+
+─────────────────────────────────────────────
+AUSTRALIA — TGA ARTG Inclusion
+─────────────────────────────────────────────
+Pathway           : Approved Overseas Comparator (FDA cleared Class II IVD)
+Application date  : 2025-04-20
+ARTG inclusion    : 2025-10-05   ARTG No: ARTG-412987
+Sponsor           : LabCorp Australia Pty Ltd, Sydney NSW
+
+Notes:
+  - TGA accepted reliance on FDA clearance K243891 as primary evidence
+  - Australian-specific labeling reviewed: required inclusion of "Australian sponsor" details
+  - ARTG entry type: IVD Class 3 (TGA classification mapping to IVDR Class IIa)

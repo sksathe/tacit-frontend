@@ -1,0 +1,70 @@
+PRODUCT REQUIREMENTS DOCUMENT (PRD)
+====================================
+Document No : LC-PRD-GSPM100-001
+Product     : GlucoSense Patient Monitor
+Model Code  : GS-PM-100
+Author      : Dr. Rachel Kim, Director POC Products
+Reviewed by : Dr. Anjali Sharma, CSO
+Date        : 2023-09-01
+Revision    : 4.0
+Status      : APPROVED
+
+─────────────────────────────────────────────
+1. PRODUCT OVERVIEW
+─────────────────────────────────────────────
+The GlucoSense Patient Monitor is a handheld point-of-care blood glucose meter for
+both self-monitoring by patients with diabetes and professional use in clinical settings.
+Target: replace older GlucoSense Classic (GS-80) with improved accuracy (ISO 15197:2015
+system accuracy), smaller sample volume, Bluetooth connectivity, and multi-language UI.
+
+Target markets: USA, EU, India, Saudi Arabia.
+
+─────────────────────────────────────────────
+2. INTENDED USE
+─────────────────────────────────────────────
+"The GlucoSense Patient Monitor is intended for the quantitative measurement of glucose
+in fresh capillary whole blood drawn from the fingertip, palm, or forearm of adults and
+children ≥ 2 years of age with diabetes mellitus. The device is intended for self-testing
+by patients and for use by healthcare professionals for monitoring of glycaemic control.
+The device is not intended for diagnosis of diabetes or for use with venous or arterial blood
+without independent validation. FOR IN VITRO DIAGNOSTIC USE ONLY."
+
+─────────────────────────────────────────────
+3. PERFORMANCE REQUIREMENTS
+─────────────────────────────────────────────
+Parameter                        Target              Acceptance (per ISO 15197:2015)
+────────────────────────────────────────────────────────────────────────────────────
+System accuracy (< 100 mg/dL)   ≥ 99% within ±15    ≥ 95% within ±15 mg/dL of ref
+System accuracy (≥ 100 mg/dL)   ≥ 99% within ±12%   ≥ 95% within ±15% of ref
+Measurement range                20–600 mg/dL         20–600 mg/dL
+Sample volume                    ≤ 0.5 µL             ≤ 0.6 µL
+Time to result                   ≤ 5 seconds          ≤ 10 seconds
+Memory                           ≥ 500 results        ≥ 360 results
+Battery life                     ≥ 1,000 tests        ≥ 500 tests
+Haematocrit range                15–65%               20–60%
+
+─────────────────────────────────────────────
+4. DESIGN INPUTS
+─────────────────────────────────────────────
+4.1 Measurement: Electrochemical amperometric detection, FAD-GDH enzyme on strip electrode.
+    (FAD-GDH not affected by oxygen tension — avoids oxygen interference of GOD-based strips)
+4.2 Anti-interference: Corrects for haematocrit via dual-channel measurement.
+4.3 Display: High-contrast LCD with backlight, readable in bright sunlight.
+4.4 UI language: English (default), Arabic, Hindi, German, French, Spanish, Polish selectable.
+4.5 Connectivity: USB Micro-B (data download), optional Bluetooth LE 4.2.
+4.6 Strip coding: No coding required (factory calibration pre-set on strip chip).
+4.7 Data management: 500 test memory with date/time, pre/post meal markers, 14/30-day average.
+4.8 Battery: 2 × AAA (user-replaceable). Low battery alert at < 5% remaining.
+4.9 Environmental: Operating 10–40°C; storage -20 to +55°C; altitude up to 4,500m.
+4.10 Ingress: IP22 (splash-proof from vertical and diagonal directions).
+
+─────────────────────────────────────────────
+5. REGULATORY STRATEGY
+─────────────────────────────────────────────
+USA   : 510(k) – predicate K202847 (cleared glucose meter). Cleared K251047 (2025-03-18).
+        CLIA: Waived complexity status (critical for OTC patient self-test market).
+EU    : IVDR Class C (self-test IVD). NB: SGS (NB 1639). CE-IVDR-2025-GSPM100-1639.
+India : CDSCO MD-13 license (Class B). Filed via local distributor MedEquip India Pvt Ltd.
+        License CDSCO-MD13-2025-LCB-0091 (2025-10-22). Valid 5 years.
+Saudi : SFDA medical device registration. Certificate SFDA-MD-2025-LCB-88412 (2025-12-01).
+        Valid 3 years. Arabic IFU mandatory. SFDA requires local establishment license.

@@ -1,0 +1,66 @@
+CLINICAL PERFORMANCE STUDY REPORT
+====================================
+Document No : LC-CPS-PDRTPCR-003
+Product     : PathDetect RT-PCR Kit (PD-RTPCR-96)
+Study Type  : Prospective multi-site clinical performance evaluation
+Sites       : USA (n=2), EU Germany (n=1), EU Netherlands (n=1)
+Author      : Dr. Kevin Adeyemi, Clinical Affairs
+Date        : 2024-12-15
+Status      : FINAL – APPROVED
+
+─────────────────────────────────────────────
+1. STUDY DESIGN
+─────────────────────────────────────────────
+Objective: Establish clinical sensitivity and specificity vs. comparator method (CDC
+           approved multiplex RT-PCR or individual gold-standard assays per target).
+Specimens: Archived residual NPS/OPS specimens from symptomatic patients
+           (influenza season Oct 2023 – Mar 2024)
+Total N   : 1,847 specimens
+Positives : Flu A (n=312), Flu B (n=187), RSV (n=203), SARS-CoV-2 (n=289)
+Negatives : 856 specimens negative for all four targets
+
+─────────────────────────────────────────────
+2. CLINICAL PERFORMANCE RESULTS
+─────────────────────────────────────────────
+Target          Sensitivity (95% CI)      Specificity (95% CI)      PPV      NPV
+──────────────────────────────────────────────────────────────────────────────────────
+Influenza A     98.7% (96.6–99.6%)        99.5% (98.9–99.8%)        98.4%    99.6%
+Influenza B     98.4% (95.5–99.6%)        99.7% (99.2–99.9%)        98.9%    99.5%
+RSV A/B         97.5% (94.3–99.2%)        99.3% (98.7–99.7%)        97.1%    99.5%
+SARS-CoV-2      99.3% (97.6–99.9%)        99.8% (99.4–100%)         99.7%    99.5%
+
+All targets meet pre-defined acceptance criteria (sensitivity ≥ 95%, specificity ≥ 97%).
+
+─────────────────────────────────────────────
+3. DISCORDANT RESULT ANALYSIS
+─────────────────────────────────────────────
+Influenza A discordants (n=4 false negatives, n=8 false positives comparator):
+  - 4 FN: all had Ct > 38 in comparator (very low viral load), suggest near-LoD samples.
+    Resolution: Specimens re-extracted; PathDetect confirmed negative → clinically acceptable.
+  - 8 FP comparator: PathDetect positive, comparator negative. Re-tested with third method
+    (sequencing). PathDetect correct in 7/8 cases → improved sensitivity over comparator.
+
+─────────────────────────────────────────────
+4. REPRODUCIBILITY (MULTI-SITE)
+─────────────────────────────────────────────
+Panel of 20 specimens (10 positive at 3× LoD, 10 negative) tested at all 4 sites × 3 days
+× 2 operators × 2 instruments per site.
+
+Overall agreement: 100% across all sites, operators, days, instruments.
+Between-site Ct CV: FluA 1.2%, FluB 1.4%, RSV 1.3%, CoV2 0.9% — all ≤ 2% specification.
+
+─────────────────────────────────────────────
+5. INTERNAL CONTROL PERFORMANCE
+─────────────────────────────────────────────
+MS2 internal control detected in 100% of valid runs.
+IC inhibition observed in 3/1847 specimens (0.16%) – all correctly flagged as invalid.
+Re-extraction resolved inhibition in all 3 cases.
+
+─────────────────────────────────────────────
+6. CONCLUSION
+─────────────────────────────────────────────
+The PathDetect RT-PCR Kit demonstrates clinical sensitivity and specificity meeting
+or exceeding regulatory acceptance criteria for all four targets across all four sites.
+The assay is suitable for professional laboratory use for detection of respiratory
+pathogens in symptomatic patients. Results support FDA De Novo application and IVDR
+Class C technical file.

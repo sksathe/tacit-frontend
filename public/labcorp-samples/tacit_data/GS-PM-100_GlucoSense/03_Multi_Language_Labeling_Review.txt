@@ -1,0 +1,82 @@
+MULTI-LANGUAGE LABELING REVIEW RECORD
+====================================
+Document No : LC-LAB-GSPM100-003
+Product     : GlucoSense Patient Monitor (GS-PM-100)
+Review Date : 2025-08-15
+Reviewer    : Sarah Okonkwo (RA) + Translation QA team
+Label Rev   : 4.1
+Status      : APPROVED
+
+─────────────────────────────────────────────
+TARGET MARKET LANGUAGE REQUIREMENTS
+─────────────────────────────────────────────
+Country / Region   Languages Required             Regulatory Basis
+───────────────────────────────────────────────────────────────────────────
+USA                English                        21 CFR 809.10
+EU (all members)   EN + DE + FR + ES + IT + PL    EU IVDR; eIFU where allowed
+India              English + Hindi                 CDSCO MDR 2017
+Saudi Arabia       Arabic + English               SFDA MD regulation
+(Future – Brazil)  Portuguese                     ANVISA RDC 214 (planned)
+
+─────────────────────────────────────────────
+DEVICE LABEL CONTENT REVIEW (all languages)
+─────────────────────────────────────────────
+Element                               EN   DE   FR   ES   IT   PL   AR   HI
+─────────────────────────────────────────────────────────────────────────────────
+Product name (unchanged, brand)       ✓    ✓    ✓    ✓    ✓    ✓    ✓    ✓
+Model number (GS-PM-100)              ✓    ✓    ✓    ✓    ✓    ✓    ✓    ✓
+Intended use brief statement          ✓    ✓    ✓    ✓    ✓    ✓    ✓    ✓
+Manufacturer name + address           ✓    ✓    ✓    ✓    ✓    ✓    ✓    ✓
+EC Authorised Representative          ✓    ✓    ✓    ✓    ✓    ✓    N/A  N/A
+REF, LOT, SN fields                   ✓    ✓    ✓    ✓    ✓    ✓    ✓    ✓
+Date of manufacture                   ✓    ✓    ✓    ✓    ✓    ✓    ✓    ✓
+IVD symbol                            ✓    ✓    ✓    ✓    ✓    ✓    ✓    ✓
+Biohazard ☣                          ✓    ✓    ✓    ✓    ✓    ✓    ✓    ✓
+Warning ⚠                            ✓    ✓    ✓    ✓    ✓    ✓    ✓    ✓
+Temperature storage limits            ✓    ✓    ✓    ✓    ✓    ✓    ✓    ✓
+"For IVD Use Only" statement          ✓    ✓    ✓    ✓    ✓    ✓    ✓    ✓
+Keep away from children (< 6 yrs)     ✓    ✓    ✓    ✓    ✓    ✓    ✓    ✓
+CE mark + NB number (1639)            ✓    ✓    ✓    ✓    ✓    ✓    N/A  N/A
+UDI-DI barcode                        ✓    ✓    ✓    ✓    ✓    ✓    ✓    ✓
+WEEE ♻ symbol                        ✓    ✓    ✓    ✓    ✓    ✓    N/A  N/A
+SFDA registration number              N/A  N/A  N/A  N/A  N/A  N/A  ✓    N/A
+CDSCO license number                  N/A  N/A  N/A  N/A  N/A  N/A  N/A  ✓
+
+─────────────────────────────────────────────
+TRANSLATION QUALITY REVIEW
+─────────────────────────────────────────────
+Language    Vendor              Completed     Back-trans   Deviations   Resolved
+──────────────────────────────────────────────────────────────────────────────────────
+German      Lionbridge GmbH     2025-04-10    ✓            1 minor      ✓
+  Deviation: "Warnhinweis" preferred over "Warnung" for regulatory term. Corrected.
+French      Lionbridge GmbH     2025-04-10    ✓            0            N/A
+Spanish     Lionbridge GmbH     2025-04-15    ✓            0            N/A
+Italian     Lionbridge GmbH     2025-04-15    ✓            1 minor      ✓
+  Deviation: "solo per uso professionale" corrected to "per uso diagnostico in vitro".
+Polish      TransPerfect        2025-05-01    ✓            0            N/A
+Arabic      Al-Mutarjim LLC     2025-06-01    ✓            2 minor      ✓
+  Deviation 1: RTL text alignment issue in lay-flat IFU. Corrected in print file.
+  Deviation 2: Arabic term for "capillary blood" standardised with SFDA glossary.
+Hindi       BharatTrans Pvt Ltd 2025-07-01    ✓            1 minor      ✓
+  Deviation: "capillary blood" rendered as "केशिका रक्त" – confirmed by CDSCO consultant.
+
+─────────────────────────────────────────────
+IFU FORMAT DECISIONS
+─────────────────────────────────────────────
+USA     : Full paper IFU in English. Included in every retail and professional pack.
+EU      : Paper IFU: EN + DE. eIFU (web): FR, ES, IT, PL per EU IVDR Reg 207/2012.
+          eIFU URL: labcorp.com/ifu/gs-pm-100  QR code on label.
+India   : Full paper IFU in English + Hindi. Dual-language single document.
+          CDSCO requires paper IFU (no eIFU allowed per MDR 2017).
+Saudi   : Full paper IFU in Arabic + English. Right-to-left layout for Arabic sections.
+          SFDA approval of Arabic IFU text required before market entry.
+          SFDA confirmed approval of Arabic IFU text: 2025-11-10.
+
+─────────────────────────────────────────────
+SIGN-OFF
+─────────────────────────────────────────────
+Name                Role             Signature        Date
+────────────────────────────────────────────────────────────
+Sarah Okonkwo       Director RA      S. Okonkwo       2025-08-15
+Dr. Rachel Kim      Director POC     R. Kim           2025-08-16
+Linda Frost         QA Manager       L. Frost         2025-08-17

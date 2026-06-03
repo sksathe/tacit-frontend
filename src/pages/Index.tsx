@@ -59,6 +59,16 @@ const Index = () => {
                 <FileText className="mr-2 h-5 w-5" />
                 Contract Rev Rec POC
               </Button>
+
+              <Button
+                size="lg"
+                variant="secondary"
+                className="h-12 rounded-lg border-primary/40 px-8 text-base font-semibold text-primary hover:bg-primary/10 sm:min-w-[220px]"
+                onClick={() => navigate("/manu")}
+              >
+                <FileText className="mr-2 h-5 w-5" />
+                MANU · LabCorp POC
+              </Button>
             </div>
 
             <div className="mx-auto grid max-w-2xl grid-cols-3 gap-3 pt-12 sm:gap-5">

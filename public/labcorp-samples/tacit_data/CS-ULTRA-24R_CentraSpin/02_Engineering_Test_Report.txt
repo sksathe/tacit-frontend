@@ -1,0 +1,86 @@
+ENGINEERING TEST & PERFORMANCE REPORT
+====================================
+Document No : LC-ENG-CSULTRA-002
+Product     : CentraSpin Ultra 24R (CS-ULTRA-24R)
+Author      : Marcus Chen, Principal Engineer
+Test Dates  : 2024-08-01 to 2024-10-15
+Status      : FINAL – APPROVED
+
+─────────────────────────────────────────────
+1. SPEED ACCURACY AND STABILITY
+─────────────────────────────────────────────
+Protocol: Set speed at 10 points from 500 to 15,000 RPM. Measure actual RPM with
+          calibrated optical tachometer (NIST-traceable). n=5 repetitions per point.
+
+Set RPM     Measured RPM (mean ± SD)   Error    Specification
+──────────────────────────────────────────────────────────────
+500         501 ± 3                    +0.2%    ± 50 RPM PASS
+1,000       1001 ± 4                   +0.1%    PASS
+3,000       2998 ± 8                   -0.1%    PASS
+5,000       5002 ± 12                  +0.0%    PASS
+8,000       7998 ± 15                  -0.0%    PASS
+10,000      10004 ± 18                 +0.0%    PASS
+12,000      11997 ± 20                 -0.0%    PASS
+15,000      14998 ± 22                 -0.0%    PASS
+
+All speed accuracy tests PASSED. Tachometer calibration traceable to NIST cert #2024-TAC-0091.
+
+─────────────────────────────────────────────
+2. TEMPERATURE ACCURACY AND RECOVERY
+─────────────────────────────────────────────
+Protocol: Set temperature at -20, 0, 4, 10, 20, 37, 40°C. Measure with
+          calibrated thermocouple at rotor cavity center.
+
+Set °C    Measured °C (mean)   Error    Spec (±2°C)
+────────────────────────────────────────────────────────
+-20       -19.7                +0.3°C   PASS
+0         0.2                  +0.2°C   PASS
+4         4.1                  +0.1°C   PASS
+10        10.3                 +0.3°C   PASS
+20        20.4                 +0.4°C   PASS
+37        37.2                 +0.2°C   PASS
+40        40.1                 +0.1°C   PASS
+
+Cooling time from ambient (22°C) to 4°C: 7 min 34 sec. Specification: ≤ 10 min. PASS.
+
+─────────────────────────────────────────────
+3. NOISE LEVEL
+─────────────────────────────────────────────
+Measured at 1m distance, operator position, per IEC 61010-2-020 method.
+Full rotor (24 × 50mL, water-filled, balanced), 15,000 RPM.
+Measured: 51.3 dB(A). Specification: < 55 dB(A). PASS.
+
+─────────────────────────────────────────────
+4. IMBALANCE DETECTION AND SHUTDOWN
+─────────────────────────────────────────────
+Protocol: Introduce 10g, 20g, 30g, 50g imbalance loads. Verify shutdown trigger.
+10g imbalance: vibration flag after 30 sec. Alert displayed. No shutdown.
+20g imbalance: vibration flag after 15 sec. Warning alert. No shutdown.
+30g imbalance: shutdown triggered at 8,000 RPM within 45 sec. PASS (> 20% threshold).
+50g imbalance: shutdown triggered at 3,200 RPM within 12 sec. PASS.
+
+─────────────────────────────────────────────
+5. LID INTERLOCK SAFETY TEST
+─────────────────────────────────────────────
+Test: Attempt to open lid at multiple speed points during a spin.
+Result: Lid locked at all speeds > 0 RPM. Electronic interlock + mechanical bolt engaged.
+Manual override (emergency key): Functions correctly; only accessible by trained tech.
+PASS per IEC 61010-2-020 clause 8.4.
+
+─────────────────────────────────────────────
+6. ROTOR RFID ENFORCEMENT
+─────────────────────────────────────────────
+Tested: Rotor A (max 15,000 RPM) and Rotor B (max 6,000 RPM, swing-bucket).
+Scenario: Set run to 10,000 RPM with Rotor B installed.
+Result: System read RFID chip, identified max 6,000 RPM for Rotor B,
+        auto-capped set speed to 6,000 RPM, displayed warning to operator.
+PASS — speed limit enforcement verified for all 8 rotor types in product family.
+
+─────────────────────────────────────────────
+7. ELECTRICAL SAFETY (UL/CSA JOINT CERTIFICATION)
+─────────────────────────────────────────────
+Standard: ANSI/UL 61010-2-020 + CSA C22.2 No. 61010-2-020
+Test lab : UL Northbrook, IL
+Certificate: UL-E498321 (dated 2025-05-15)
+Results  : PASSED. No deviations. Dielectric withstand, ground continuity,
+           leakage current all within limits.

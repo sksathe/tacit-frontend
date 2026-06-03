@@ -1,0 +1,101 @@
+ENGINEERING DESIGN SPECIFICATION
+====================================
+Document No : LC-ENG-HCP5000-003
+Product     : HemaCount Pro 5000 Hematology Analyzer
+Author      : Marcus Chen, Principal Engineer – Fluidics
+Reviewed by : Dr. Anjali Sharma, Chief Scientific Officer
+Date        : 2024-06-18
+Revision    : 2.3
+Status      : APPROVED FOR PRODUCTION
+
+─────────────────────────────────────────────
+1. MEASUREMENT TECHNOLOGY
+─────────────────────────────────────────────
+Method: Impedance (DC) + Light Scatter (3-angle laser) + Absorbance (HGB)
+
+WBC Differential:
+  Technology     : Semiconductor laser 650nm, forward scatter (FS), side scatter (SS),
+                   side fluorescence (SFL) using polymethine dye staining
+  5-part diff    : NEU, LYM, MON, EOS, BAS
+  Abnormal flags : Blasts, immature granulocytes, NRBC, platelet clumps
+
+RBC / PLT:
+  Technology     : DC impedance with hydrodynamic focusing
+  PLT-O          : Optical platelet channel (reticulocyte-rich plasma interference flag)
+
+HGB:
+  Method         : SLS (Sodium Lauryl Sulfate) cyanide-free photometry at 550nm
+  Advantage      : Eliminates cyanide waste disposal regulatory burden
+
+─────────────────────────────────────────────
+2. FLUIDIC ARCHITECTURE
+─────────────────────────────────────────────
+Sample aspiration : Rotating needle, 20µL ± 0.5µL from closed or open EDTA tube
+Dilution ratios   : WBC channel 1:375; RBC/PLT channel 1:62,500
+Flow cell         : Quartz cuvette, hydrodynamically focused, 80µm aperture (RBC)
+Waste path        : 3-way valve → internal 5L waste container → sensor trigger at 4.8L
+Reagents          :
+  - Diluent (isotonic saline base, 20L bag)
+  - Lyse (SLS-based, 500mL bottle)
+  - Rinse (enzymatic cleaner, 500mL bottle)
+  RFID chip on each reagent pack: lot number, expiry, volume remaining
+
+─────────────────────────────────────────────
+3. ELECTRICAL & ELECTRONICS
+─────────────────────────────────────────────
+Main board        : ARM Cortex-A72 SoC, 4GB LPDDR4 RAM, 64GB eMMC storage
+Power supply      : Medical-grade PSU, 100-240V AC, 50/60Hz, 180W max, Class I
+EMC               : Designed to EN 61326-2-6 Group 1 Class A
+Display           : 10.1" capacitive touchscreen, 1920×1200, IPS panel
+Motor control     : Dedicated DSP board, stepper and DC brush motors
+Connectivity      :
+  - USB 3.0 × 2 (results export, barcode scanner, keyboard)
+  - Ethernet RJ-45 10/100/1000 Mbps (LIS bidirectional)
+  - RS-232 serial (legacy LIS)
+  - Internal: SPI bus for RFID reader
+Safety circuits   : Watchdog timer, thermal cutoffs on PSU and laser, lid interlock switch
+
+─────────────────────────────────────────────
+4. SOFTWARE ARCHITECTURE
+─────────────────────────────────────────────
+OS                : Embedded Linux (kernel 5.15 LTS, read-only root filesystem)
+Application       : Qt 6.4 C++ GUI + Python 3.11 analysis engine
+Data storage      : SQLite local DB, patient data encrypted AES-256
+LIS protocol      : ASTM E1394 and HL7 2.5.1 over TCP/IP (configurable)
+Security          : Role-based access (admin, supervisor, operator), audit log
+Software class    : FDA SaMD Class B / IEC 62304 Class B (non-safety-critical)
+Cybersecurity     : Input validation, no external network access, USB port lockable
+
+─────────────────────────────────────────────
+5. MATERIALS & BIOCOMPATIBILITY
+─────────────────────────────────────────────
+Patient-contacting parts:
+  - Sampling needle: 316L stainless steel
+  - Sample tubing: Silicone (platinum-cured, USP Class VI)
+  - Flow cell: Optical-grade quartz
+ISO 10993-1 assessment: Biological risk acceptable, no novel materials.
+Cytotoxicity, sensitization, and hemolysis tested per ISO 10993-5/-10/-4.
+
+─────────────────────────────────────────────
+6. ENVIRONMENTAL & PACKAGING
+─────────────────────────────────────────────
+Operating        : 15–30°C, 20–80% RH, 700–1060 hPa
+Storage/transport: -20 to +55°C, ≤ 90% RH (non-condensing)
+Ingress          : IP21 (splash from above protected)
+Packaging        : Double-wall corrugated cardboard, foam inserts (ISTA 2A tested)
+Weight (packed)  : 38 kg
+Shelf life       : Instrument 10 years; Reagents 18 months (unopened), 30 days (opened)
+
+─────────────────────────────────────────────
+7. LABELING REQUIREMENTS (ENGINEERING INPUTS)
+─────────────────────────────────────────────
+Required symbols (per EN ISO 15223-1):
+  IVD, Manufacturer, Date of manufacture, Use-by date, REF, LOT,
+  SN, Caution/Warning (⚠), Biological risk (☣), Temperature limits,
+  Humidity limits, Fragile, This way up, EC REP, UDI carrier (GS1 DataMatrix)
+
+Languages required per market:
+  USA        : English only
+  EU         : EN, DE, FR, ES, IT (IFU on website acceptable per IVDR)
+  Canada     : EN + FR (bilingual mandatory on device label)
+  Australia  : English only

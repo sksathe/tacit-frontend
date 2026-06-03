@@ -1,0 +1,60 @@
+DESIGN REVIEW MEETING MINUTES
+====================================
+Meeting     : PDR-004 Pre-Design-Freeze Review
+Product     : GlucoSense Patient Monitor (GS-PM-100)
+Date        : 2024-07-18
+Location    : LabCorp HQ – Room A4 + Teams Video
+Facilitator : Dr. Rachel Kim, Director POC Products
+Minutes by  : Sandra Lim, Project Coordinator
+Attendees   : Dr. R. Kim (PM), T. Baker (Mfg), L. Frost (QA), S. Okonkwo (RA),
+              Dr. K. Adeyemi (Clinical), R. Jeon (SW), B. Patel (Mech. Eng.)
+
+─────────────────────────────────────────────
+AGENDA ITEM 1 – Arabic IFU layout for Saudi market
+─────────────────────────────────────────────
+S. Okonkwo: Arabic IFU requires full RTL (right-to-left) layout. Vendor Al-Mutarjim LLC
+confirmed competency. SFDA requires Arabic text approved before market entry.
+Design decision: Separate Arabic IFU booklet (not bilingual flip-book) to avoid
+layout conflicts. Both EN and AR versions included in KSA packaging.
+Action: S. Okonkwo to engage Al-Mutarjim by 2024-08-01.
+
+─────────────────────────────────────────────
+AGENDA ITEM 2 – CLIA Waiver status (USA)
+─────────────────────────────────────────────
+S. Okonkwo: FDA CLIA waiver application requires simplified instructions understandable
+by lay users. Usability study with lay users needed (IEC 62366-1 + FDA OTC guidance).
+Dr. K. Adeyemi: Will run lay-user study (n=30 untrained subjects) at Burlington site.
+Key task: Self-lancing, strip insertion, result reading, meal marker entry.
+Design risk: meter UI must be operable without reading IFU (zero-training scenario).
+Action: R. Jeon to add animated first-use tutorial to firmware. Due 2024-09-01.
+
+─────────────────────────────────────────────
+AGENDA ITEM 3 – Indian Hindi IFU regulatory review
+─────────────────────────────────────────────
+S. Okonkwo: CDSCO requires paper IFU in English + Hindi (no eIFU exemption).
+Back-translation review by Hindi-speaking physician mandatory per CDSCO guidance.
+Translation vendor identified: BharatTrans Pvt Ltd, Pune. Regulatory consultant: Dr. Meera Joshi.
+Action: S. Okonkwo – engage BharatTrans by 2024-09-15. Dr. Joshi to review final Hindi IFU.
+
+─────────────────────────────────────────────
+AGENDA ITEM 4 – Bluetooth LE app compatibility
+─────────────────────────────────────────────
+R. Jeon: GlucoSense Connect app (iOS 16+ / Android 11+) certified with BT SIG.
+Concern raised: some older Android versions (8, 9) still prevalent in India market.
+Decision: USB download always supported as mandatory fallback. Bluetooth listed as optional.
+IFU to clearly state: "Bluetooth feature requires iOS 16 or Android 11 and above."
+Action: R. Jeon – add iOS/Android version requirement to IFU and app store listing.
+
+─────────────────────────────────────────────
+AGENDA ITEM 5 – Strip enzyme selection final confirmation
+─────────────────────────────────────────────
+Dr. R. Kim: FAD-GDH enzyme confirmed. Advantages: no oxygen interference, no
+maltose/galactose cross-reactivity (avoids PQQ-GDH issues with peritoneal dialysis patients).
+L. Frost: Enzyme sourced from single qualified supplier (Toyobo Japan). Dual-source strategy?
+Decision: Initiate qualification of second enzyme supplier (Sekisui Japan) by Q1 2025.
+Action: T. Baker to initiate supplier qualification for Sekisui enzyme. Due 2025-03-01.
+
+─────────────────────────────────────────────
+NEXT REVIEW
+─────────────────────────────────────────────
+CDR-001: Scheduled 2024-09-12. Focus: design freeze sign-off, final V&V plan.

@@ -1,0 +1,68 @@
+PRODUCT REQUIREMENTS DOCUMENT (PRD)
+====================================
+Document No : LC-PRD-CSULTRA-001
+Product     : CentraSpin Ultra 24R Refrigerated Centrifuge
+Model Code  : CS-ULTRA-24R
+Author      : Thomas Baker, Engineering Director – Instruments
+Reviewed by : James Whitfield, VP Engineering
+Date        : 2024-01-08
+Revision    : 3.0
+Status      : APPROVED
+
+─────────────────────────────────────────────
+1. PRODUCT OVERVIEW
+─────────────────────────────────────────────
+The CentraSpin Ultra 24R is a high-performance refrigerated benchtop centrifuge for
+clinical and research laboratories. It replaces the legacy CS-3000 model and introduces
+significantly improved cooling performance, a wider rotor ecosystem, and digital
+connectivity for laboratory information integration. Complies with IEC 61010-2-020
+(laboratory centrifuges) safety requirements globally.
+
+Target markets: USA, European Union, United Kingdom, China (NMPA).
+
+─────────────────────────────────────────────
+2. INTENDED USE
+─────────────────────────────────────────────
+Intended for separation and processing of biological specimens including whole blood,
+serum, plasma, urine sediment, cell cultures, and density gradient separations in
+clinical and research laboratory environments. Operated by trained laboratory personnel.
+NOT intended for ultracentrifugation. NOT for use with flammable or explosive materials.
+
+─────────────────────────────────────────────
+3. KEY PERFORMANCE REQUIREMENTS
+─────────────────────────────────────────────
+Parameter                  Target         Acceptance
+────────────────────────────────────────────────────────────────
+Max speed (RPM)            15,000         ≥ 14,000
+Max RCF (× g)              21,382         ≥ 20,000
+Speed accuracy             ± 50 RPM       ± 100 RPM
+Temperature range          -20°C to +40°C -10°C to +40°C
+Temperature accuracy       ± 1°C          ± 2°C
+Cooling time to 4°C        ≤ 10 min       ≤ 15 min
+Capacity                   24 × 50mL OR 48 × 15mL
+Noise level                < 55 dB(A)     < 60 dB(A)
+Acceleration profiles      ≥ 10           ≥ 6
+Deceleration profiles      ≥ 10           ≥ 6
+
+─────────────────────────────────────────────
+4. DESIGN INPUTS
+─────────────────────────────────────────────
+4.1 Motor: Brushless DC maintenance-free motor rated to 20,000 RPM with imbalance detection.
+4.2 Lid interlock: Electronic AND mechanical dual-lock; prevents lid opening while rotor moving.
+4.3 Rotor identification: RFID chip on each rotor; software enforces speed limits per rotor type.
+4.4 Refrigeration: Eco-friendly HFO-1234yf refrigerant (GWP < 1). No CFCs.
+4.5 Bowl: Stainless steel with decontamination drain port.
+4.6 Display: Backlit LCD, rotor profile storage (up to 50 user-defined programs).
+4.7 Connectivity: RS-232 serial port for data logging to LIMS.
+4.8 Safety: Automatic rotor over-speed protection; unbalance detection shuts down at 20% imbalance.
+4.9 Certifications required: UL (USA/CA), CE Machinery Directive (EU), UKCA (UK), NMPA (CN).
+4.10 Foot print: Benchtop ≤ 450mm × 600mm. Weight ≤ 50kg.
+
+─────────────────────────────────────────────
+5. REGULATORY CLASSIFICATION
+─────────────────────────────────────────────
+USA     : Not regulated as medical device (general lab equipment). Requires UL 61010-2-020 listing.
+EU      : CE marking under Machinery Directive 2006/42/EC (self-declaration). EN 61010-2-020.
+UK      : UKCA self-declaration (post-Brexit). BS EN 61010-2-020:2019.
+China   : NMPA Class II medical device registration (NMPA regulates centrifuges used clinically).
+Canada  : CSA C22.2 No. 61010-2-020. Included in UL joint certification.

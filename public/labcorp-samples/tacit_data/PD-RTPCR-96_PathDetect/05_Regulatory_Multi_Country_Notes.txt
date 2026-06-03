@@ -1,0 +1,68 @@
+REGULATORY STRATEGY & SUBMISSION NOTES — MULTI-COUNTRY
+====================================
+Document No : LC-RA-PDRTPCR-005
+Product     : PathDetect RT-PCR Kit (PD-RTPCR-96)
+Author      : Sarah Okonkwo, Director Regulatory Affairs
+Date        : 2025-01-10  (updated 2025-12-20)
+Status      : INTERNAL WORKING DOCUMENT
+
+─────────────────────────────────────────────
+USA — FDA De Novo
+─────────────────────────────────────────────
+Classification : Class II, Product code QKS (Nucleic acid based ID system for
+                 respiratory viruses), Regulation 21 CFR 866.3887
+Decision letter: DEN240112, issued 2025-05-15
+Predicate      : None (De Novo). Special controls established by FDA.
+Key data package sections:
+  ✓ Device description and intended use
+  ✓ Analytical performance: LoD, precision, cross-reactivity, inclusivity
+  ✓ Clinical performance: sensitivity/specificity vs comparator (see CPS report)
+  ✓ Software validation (automated result interpretation)
+  ✓ Labeling per 21 CFR 809.10
+  ✓ Biocompatibility (formamide SDS referenced, not in patient contact)
+Post-market surveillance: Adverse event reporting per 21 CFR 803. MDR threshold:
+  single event causing or likely to cause serious injury.
+
+─────────────────────────────────────────────
+EU — IVDR 2017/746 Class C
+─────────────────────────────────────────────
+Classification : Class C per IVDR Annex VIII Rule 3 (detection of life-threatening
+                 infectious agents – influenza, RSV, SARS-CoV-2)
+NB             : BSI Group UK Ltd (NB 0086) – EU QMD certificate
+Certificate    : CE-IVDR-2025-PDRTPCR-0086, valid 2025-07-01 to 2030-06-30
+Technical File includes:
+  ✓ GSPR checklist (Annex I IVDR)
+  ✓ Performance evaluation report – EU clinical sites (DE + NL)
+  ✓ Reference measurement procedure justification
+  ✓ Scientific validity documentation (peer-reviewed literature)
+  ✓ Post-Market Performance Follow-up (PMPF) plan
+  ✓ PSUR – first report due 2026-07
+EUDAMED: Registered. Actor ID EU-ECON-000028341. Device UDI-DI: 05412345000018
+
+Languages for EU IFU: EN (master) + DE + FR (paper). ES, IT: eIFU on website.
+
+─────────────────────────────────────────────
+JAPAN — PMDA Shonin
+─────────────────────────────────────────────
+Approval No    : PMDA-23200BZX01234 (2025-09-30)
+Approval class : In vitro diagnostic (Class III equivalent)
+MAH            : LabCorp Japan KK (subsidiary)
+CRO            : SYMBIOSIS Japan Inc. (submission management)
+Japanese IFU   : Completed and approved. Filed with PMDA. Distributor: Sysmex Corp.
+Local QMS audit: Completed 2025-06 by PMDA auditor. No critical findings.
+Revalidation   : Japan requires local confirmation study. Performed at Tokyo Medical
+                 University Hospital (n=300 specimens, Apr-Jun 2025).
+                 Results: Sensitivity 98.3%, Specificity 99.6% – all accepted.
+
+─────────────────────────────────────────────
+BRAZIL — ANVISA
+─────────────────────────────────────────────
+Registration No: ANVISA-80012690001 (2025-12-10). Valid 5 years.
+Class          : Class III (in vitro diagnostic for infectious diseases)
+RTB            : Dr. Camila Rodrigues, São Paulo (local technical responsible)
+Distributor    : BioLab Diagnostics Brasil Ltda
+Portuguese IFU : Completed by certified translation agency + back-translated.
+                 Reviewed by RTB and LabCorp RA. Signed off 2025-09-01.
+ANVISA-specific requirement: INMETRO electrical certification not required for
+  in vitro diagnostics (reagent kits). Confirmed with ANVISA consultation 2024-11.
+Annual report  : Due December each year. First due 2026-12.

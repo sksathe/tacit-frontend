@@ -17,6 +17,7 @@ import Dashboard from "./pages/Dashboard";
 import MeetingTypeComingSoon from "./pages/MeetingTypeComingSoon";
 import RachelAutomation from "./pages/RachelAutomation";
 import ContractRevRecPOC from "./pages/ContractRevRecPOC";
+import ManuPOC from "./pages/ManuPOC";
 
 const queryClient = new QueryClient();
 
@@ -73,6 +74,7 @@ const App = () => {
               <Route path="/knowledge-library" element={<KnowledgeLibrary />} />
               <Route path="/email-to-meeting" element={<EmailToMeeting />} />
               <Route path="/contract-revrec" element={<ContractRevRecPOC />} />
+              <Route path="/manu" element={<ManuPOC />} />
               <Route
                 path="/meeting-type/coming-soon"
                 element={
