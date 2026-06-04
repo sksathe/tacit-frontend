@@ -113,7 +113,7 @@ const Login = () => {
               </div>
               <Button
                 type="submit"
-                className="h-11 w-full rounded-lg bg-gradient-primary font-semibold"
+                className="h-11 w-full rounded-lg bg-primary font-semibold text-primary-foreground"
                 disabled={isLoading}
               >
                 {isLoading ? "Please wait..." : isSignUp ? "Sign Up" : "Sign In"}

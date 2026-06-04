@@ -34,6 +34,26 @@ export default {
           foreground: "hsl(var(--primary-dashboard-foreground))",
           glow: "hsl(var(--primary-dashboard-glow))",
         },
+        "dashboard-header": {
+          DEFAULT: "hsl(var(--dashboard-header-background))",
+          border: "hsl(var(--dashboard-header-border))",
+        },
+        "dashboard-canvas": "hsl(var(--dashboard-canvas))",
+        "dashboard-surface": "hsl(var(--dashboard-surface))",
+        "dashboard-surface-muted": "hsl(var(--dashboard-surface-muted))",
+        "dashboard-rail": {
+          DEFAULT: "hsl(var(--dashboard-rail-bg))",
+          border: "hsl(var(--dashboard-rail-border))",
+          active: "hsl(var(--dashboard-rail-active))",
+        },
+        "dashboard-metric": {
+          from: "hsl(var(--dashboard-metric-highlight-from))",
+          to: "hsl(var(--dashboard-metric-highlight-to))",
+        },
+        "dashboard-text": {
+          strong: "hsl(var(--dashboard-text-strong))",
+          muted: "hsl(var(--dashboard-text-muted))",
+        },
         chart: {
           "1": "hsl(var(--chart-1))",
           "2": "hsl(var(--chart-2))",
@@ -126,3 +146,8 @@ export default {
   },
   plugins: [require("tailwindcss-animate"), require("@tailwindcss/typography")],
 } satisfies Config;
+
+
+
+
+

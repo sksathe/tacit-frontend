@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { AutomationOptions } from "./AutomationOptions";
+import { AutomationOptions, type EagleAutomationHandlers } from "./AutomationOptions";
 import { AutomationOutputModal } from "./AutomationOutputModal";
 import { apiClient } from "@/lib/apiClient";
+import { downloadLogisticsExcel, downloadLogisticsJson, logisticsWarningsAsText } from "@/lib/logisticsExport";
+import type { EagleWorkspaceSnapshot } from "@/types/logisticsExtraction";
 
 interface AutomationConfigPanelProps {
   automation: {
@@ -13,6 +15,8 @@ interface AutomationConfigPanelProps {
   } | null;
   agentName?: string;
   onSelectAutomation?: (type: string, title: string, icon: string) => void;
+  /** Eagle: synced from SessionDetailView workspace */
+  eagleWorkspaceSnapshot?: EagleWorkspaceSnapshot | null;
 }
 
 interface AutomationRunResult {
@@ -55,7 +59,14 @@ function getDefaultVisualMode(automationType: string | undefined): "standard" | 
   return "standard";
 }
 
-export function AutomationConfigPanel({ automation, agentName, onSelectAutomation }: AutomationConfigPanelProps) {
+export function AutomationConfigPanel({
+  automation,
+  agentName,
+  onSelectAutomation,
+  eagleWorkspaceSnapshot,
+}: AutomationConfigPanelProps) {
+  const [eagleValidationModalOpen, setEagleValidationModalOpen] = useState(false);
+  const [eagleValidationModalText, setEagleValidationModalText] = useState<string | null>(null);
   const [config, setConfig] = useState(() => ({
     outputTone: "professional",
     targetAudience: "",
@@ -83,6 +94,69 @@ export function AutomationConfigPanel({ automation, agentName, onSelectAutomatio
   }, [automation]);
 
   if (!automation) return null;
+
+  if (agentName === "Eagle") {
+    const snap = eagleWorkspaceSnapshot ?? { processing: false, processResponse: null };
+    const pr = snap.processResponse;
+    const eagleHandlers: EagleAutomationHandlers = {
+      disabled: !pr,
+      canExportExcel: Boolean(pr?.excel_base64),
+      onExportJson: () => {
+        if (!pr) {
+          toast({ title: "Nothing to export", description: "Run an extraction first.", variant: "destructive" });
+          return;
+        }
+        downloadLogisticsJson(pr);
+      },
+      onExportExcel: () => {
+        if (!pr?.excel_base64) {
+          toast({
+            title: "No Excel file",
+            description: "This run did not return a spreadsheet payload.",
+            variant: "destructive",
+          });
+          return;
+        }
+        const nl = pr.normalized_logistics;
+        const lineTables =
+          snap.lineItemTablesDraft ?? nl.tables.filter((t) => t.columns.length > 0 || t.rows.length > 0);
+        downloadLogisticsExcel(pr.excel_base64, pr.excel_filename || "eagle_extraction.xlsx", {
+          lineTables,
+        });
+      },
+      onValidationNotes: () => {
+        setEagleValidationModalText(logisticsWarningsAsText(pr?.normalized_logistics));
+        setEagleValidationModalOpen(true);
+      },
+    };
+
+    return (
+      <section className="space-y-4">
+        <div className="rounded-xl border border-primary/25 bg-card/55 p-4">
+          <h2 className="text-[1.05rem] font-extrabold text-primary">Eagle — exports</h2>
+          <p className="mt-1 text-[0.72rem] text-muted-foreground">
+            Run extraction in the workspace below, then export JSON or Excel and review validation notes.
+          </p>
+          <AutomationOptions
+            layout="grid"
+            className="!mt-4"
+            title="Quick exports"
+            agentName="Eagle"
+            eagleHandlers={eagleHandlers}
+            onOpenConfigDrawer={() => {}}
+            onOpenSummaryPanel={() => {}}
+          />
+        </div>
+        <AutomationOutputModal
+          open={eagleValidationModalOpen}
+          onClose={() => setEagleValidationModalOpen(false)}
+          title="Validation notes"
+          icon="📋"
+          textContent={eagleValidationModalText}
+        />
+      </section>
+    );
+  }
 
   const toMarkdownSummary = (summary: any) => {
     if (typeof summary === "string") return summary;

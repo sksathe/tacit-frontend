@@ -100,7 +100,7 @@ const SessionDemo = () => {
             <div className="grid md:grid-cols-2 gap-4">
               <Card className="border-0 shadow-elegant">
                 <CardContent className="p-4">
-                  <div className="aspect-video bg-gradient-to-br from-primary/10 to-primary-glow/10 rounded-lg flex items-center justify-center relative">
+                  <div className="relative flex aspect-video items-center justify-center rounded-lg bg-primary/10">
                     <div className="text-center">
                       <div className="w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-2">
                         <Users className="h-8 w-8 text-primary" />
@@ -118,10 +118,10 @@ const SessionDemo = () => {
 
               <Card className="border-0 shadow-elegant">
                 <CardContent className="p-4">
-                  <div className="aspect-video bg-gradient-to-br from-accent/10 to-primary/10 rounded-lg flex items-center justify-center relative">
+                  <div className="relative flex aspect-video items-center justify-center rounded-lg bg-primary/10">
                     <div className="text-center">
-                      <div className="w-16 h-16 bg-accent/20 rounded-full flex items-center justify-center mx-auto mb-2">
-                        <Brain className="h-8 w-8 text-accent" />
+                      <div className="mx-auto mb-2 flex h-16 w-16 items-center justify-center rounded-full bg-primary/20">
+                        <Brain className="h-8 w-8 text-primary" />
                       </div>
                       <p className="font-medium">AI Agent</p>
                       <p className="text-sm text-muted-foreground">New Hire Persona</p>
@@ -179,7 +179,7 @@ const SessionDemo = () => {
 
                   <Button 
                     size="lg"
-                    className="bg-gradient-primary hover:shadow-glow transition-smooth"
+                    className="bg-primary text-primary-foreground transition-smooth hover:shadow-glow"
                     onClick={() => navigate("/knowledge-library")}
                   >
                     End Session & Generate Assets

@@ -6,13 +6,15 @@ import { TACIT_AGENTS } from "@/data/agents";
 import { SelectedAgentDescription } from "./SelectedAgentDescription";
 import { AgentAvatar } from "./AgentAvatar";
 import { apiClient } from "@/lib/apiClient";
+import type { SessionModalPrefill } from "./sessionModalPrefill";
 
 interface ScheduleSessionModalProps {
   open: boolean;
   onClose: () => void;
+  prefill?: SessionModalPrefill | null;
 }
 
-export function ScheduleSessionModal({ open, onClose }: ScheduleSessionModalProps) {
+export function ScheduleSessionModal({ open, onClose, prefill = null }: ScheduleSessionModalProps) {
   const [selectedAgent, setSelectedAgent] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchFocused, setIsSearchFocused] = useState(false);
@@ -187,15 +189,40 @@ export function ScheduleSessionModal({ open, onClose }: ScheduleSessionModalProp
     }
   };
 
-  // Reset search when modal closes
+  // Reset when modal closes
   useEffect(() => {
     if (!open) {
       setSearchQuery("");
       setIsSearchFocused(false);
       setMeetingMode("phone");
-      setFormData((prev) => ({ ...prev, meetingUrl: "" }));
+      setSelectedAgent(null);
+      setFormData({
+        sessionTitle: "",
+        sessionDate: "",
+        sessionTime: "",
+        sessionDuration: "",
+        inviteeEmail: "",
+        sessionNotes: "",
+        meetingUrl: "",
+      });
     }
   }, [open]);
+
+  useEffect(() => {
+    if (!open || !prefill) return;
+    if (prefill.initialMeetingMode) setMeetingMode(prefill.initialMeetingMode);
+    if (prefill.initialSessionTitle?.trim()) {
+      setFormData((prev) => ({ ...prev, sessionTitle: prefill.initialSessionTitle!.trim() }));
+    }
+    if (prefill.initialSessionNotes?.trim()) {
+      setFormData((prev) => ({ ...prev, sessionNotes: prefill.initialSessionNotes!.trim() }));
+    }
+    if (prefill.initialAgentId) {
+      setSelectedAgent(prefill.initialAgentId);
+      const ag = agents.find((a) => a.id === prefill.initialAgentId);
+      if (ag) setSearchQuery(ag.name);
+    }
+  }, [open, prefill, agents]);
 
   if (!open) return null;
 

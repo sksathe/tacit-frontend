@@ -29,6 +29,11 @@ const MOCK_SESSIONS: Record<string, { sessionName: string; sessionId: string }[]
     { sessionName: "Metrics Review", sessionId: "SID-chandler-2024-002" },
     { sessionName: "Dashboard Design", sessionId: "SID-chandler-2024-003" },
   ],
+  eagle: [
+    { sessionName: "Inbound BOL batch — LAX", sessionId: "SID-eagle-2024-001" },
+    { sessionName: "Customs doc pack — ORD", sessionId: "SID-eagle-2024-002" },
+    { sessionName: "POD reconciliation — DFW", sessionId: "SID-eagle-2024-003" },
+  ],
 };
 
 export function SessionsSidebar({ isOpen, onClose, onSessionClick }: SessionsSidebarProps) {

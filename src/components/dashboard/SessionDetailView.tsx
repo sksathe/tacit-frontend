@@ -1,11 +1,15 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { TACIT_AGENTS } from "@/data/agents";
 import { GeneratedAssets } from "./GeneratedAssets";
-import { AutomationOptions } from "./AutomationOptions";
+import { AutomationOptions, type EagleAutomationHandlers } from "./AutomationOptions";
 import { AutomationOutputModal } from "./AutomationOutputModal";
+import { EagleAnalysisWorkspace } from "./EagleAnalysisWorkspace";
 import type { SessionItem } from "./AutomateSessionsList";
 import { apiClient } from "@/lib/apiClient";
+import { useToast } from "@/hooks/use-toast";
+import { downloadLogisticsExcel, downloadLogisticsJson, logisticsWarningsAsText } from "@/lib/logisticsExport";
+import type { EagleWorkspaceSnapshot } from "@/types/logisticsExtraction";
 
 const ARTIFACTS_BUCKET = import.meta.env.VITE_SUPABASE_ARTIFACTS_BUCKET || "tacit-artifacts";
 
@@ -97,6 +101,8 @@ interface SessionDetailViewProps {
   hideSessionStrip?: boolean;
   /** When true, hides the compact bottom "Available automations" block. */
   hideCompactAutomationOptions?: boolean;
+  /** Eagle: notify parent (e.g. automation route) for export strip state. */
+  onEagleWorkspaceStateChange?: (snapshot: EagleWorkspaceSnapshot) => void;
 }
 
 function formatDateTime(iso: string | undefined): string {
@@ -355,10 +361,14 @@ export function SessionDetailView({
   compactLayout = false,
   hideSessionStrip = false,
   hideCompactAutomationOptions = false,
+  onEagleWorkspaceStateChange,
 }: SessionDetailViewProps) {
   const navigate = useNavigate();
   const location = useLocation();
+  const { toast } = useToast();
   const isAutomationRoute = /^\/dashboard\/[^/]+\/[^/]+\/[^/]+/.test(location.pathname);
+  const isEagleAgent = session.agentName === "Eagle";
+  const skipRemoteSessionHydration = isEagleAgent && /^SID-/i.test(session.sessionId);
   const [sessionDetails, setSessionDetails] = useState<SessionDetails | null>(null);
   const [detailsLoading, setDetailsLoading] = useState(true);
   const [detailsError, setDetailsError] = useState<string | null>(null);
@@ -380,6 +390,62 @@ export function SessionDetailView({
   const [outputModalText, setOutputModalText] = useState<string | null>(null);
   const [outputModalImage, setOutputModalImage] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [eagleWorkspaceSnapshot, setEagleWorkspaceSnapshot] = useState<EagleWorkspaceSnapshot>({
+    processing: false,
+    processResponse: null,
+  });
+
+  const updateEagleWorkspaceSnapshot = useCallback(
+    (snap: EagleWorkspaceSnapshot) => {
+      setEagleWorkspaceSnapshot(snap);
+      onEagleWorkspaceStateChange?.(snap);
+    },
+    [onEagleWorkspaceStateChange]
+  );
+
+  const eagleHandlers: EagleAutomationHandlers = useMemo(
+    () => ({
+      disabled: !eagleWorkspaceSnapshot.processResponse,
+      canExportExcel: Boolean(eagleWorkspaceSnapshot.processResponse?.excel_base64),
+      onExportJson: () => {
+        const pr = eagleWorkspaceSnapshot.processResponse;
+        if (!pr) {
+          toast({ title: "Nothing to export", description: "Run an extraction first.", variant: "destructive" });
+          return;
+        }
+        downloadLogisticsJson(pr);
+      },
+      onExportExcel: () => {
+        const pr = eagleWorkspaceSnapshot.processResponse;
+        if (!pr?.excel_base64) {
+          toast({
+            title: "No Excel file",
+            description: "This run did not return a spreadsheet payload.",
+            variant: "destructive",
+          });
+          return;
+        }
+        const nl = pr.normalized_logistics;
+        const lineTables =
+          eagleWorkspaceSnapshot.lineItemTablesDraft ??
+          nl.tables.filter((t) => t.columns.length > 0 || t.rows.length > 0);
+        downloadLogisticsExcel(pr.excel_base64, pr.excel_filename || "eagle_extraction.xlsx", {
+          lineTables,
+        });
+      },
+      onValidationNotes: () => {
+        const text = logisticsWarningsAsText(eagleWorkspaceSnapshot.processResponse?.normalized_logistics);
+        setOutputModalTitle("Validation notes");
+        setOutputModalIcon("📋");
+        setOutputModalText(text);
+        setOutputModalImage(null);
+        setOutputModalError(null);
+        setOutputModalLoading(false);
+        setOutputModalOpen(true);
+      },
+    }),
+    [eagleWorkspaceSnapshot, toast]
+  );
 
   // When route automation changes (e.g. Summary → Clarity Scorer), clean slate: show summary panel only for "summary", scroll to top
   useEffect(() => {
@@ -403,6 +469,13 @@ export function SessionDetailView({
   };
 
   useEffect(() => {
+    if (skipRemoteSessionHydration) {
+      setSessionDetails(null);
+      setDetailsError(null);
+      setDetailsLoading(false);
+      return;
+    }
+
     let cancelled = false;
 
     async function loadDetails() {
@@ -428,7 +501,7 @@ export function SessionDetailView({
 
     loadDetails();
     return () => { cancelled = true; };
-  }, [session.sessionId]);
+  }, [session.sessionId, skipRemoteSessionHydration]);
 
   // Resolve recording_path from session details into a signed playable URL.
   useEffect(() => {
@@ -513,6 +586,11 @@ export function SessionDetailView({
 
   // Load persisted automation assets for this session.
   useEffect(() => {
+    if (skipRemoteSessionHydration) {
+      setAssets([]);
+      return;
+    }
+
     let cancelled = false;
 
     async function loadPersistedAssets() {
@@ -552,10 +630,15 @@ export function SessionDetailView({
 
     loadPersistedAssets();
     return () => { cancelled = true; };
-  }, [session.sessionId]);
+  }, [session.sessionId, skipRemoteSessionHydration]);
 
   // Load summary history for this session
   useEffect(() => {
+    if (skipRemoteSessionHydration) {
+      setSummaries([]);
+      return;
+    }
+
     let cancelled = false;
 
     async function loadSummaries() {
@@ -584,7 +667,7 @@ export function SessionDetailView({
 
     loadSummaries();
     return () => { cancelled = true; };
-  }, [session.sessionId]);
+  }, [session.sessionId, skipRemoteSessionHydration]);
 
   useEffect(() => {
     const handleAssetGenerated = (event: CustomEvent) => {
@@ -805,6 +888,200 @@ export function SessionDetailView({
     return null;
   };
 
+  if (isEagleAgent) {
+    return (
+      <>
+        {!hideBreadcrumb && (
+          <div className="mb-5 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+            <button
+              type="button"
+              onClick={onBack}
+              className="cursor-pointer border-none bg-transparent p-0 transition-colors hover:text-primary"
+            >
+              Home
+            </button>
+            {onBackToSessions && (
+              <>
+                <span className="text-primary/40">|</span>
+                <button
+                  type="button"
+                  onClick={onBackToSessions}
+                  className="cursor-pointer border-none bg-transparent p-0 transition-colors hover:text-primary"
+                >
+                  Sessions
+                </button>
+              </>
+            )}
+            <span className="text-primary/40">|</span>
+            <span className="text-muted-foreground">Automate Past Session</span>
+            <span className="text-primary/40">|</span>
+            <span className="text-primary font-semibold">{session.agentName}</span>
+          </div>
+        )}
+
+        {!hideSessionStrip && (
+          <section
+            className={
+              compactLayout
+                ? "mb-4 flex flex-wrap items-center gap-4 rounded-lg border border-primary/20 bg-card/40 px-4 py-3"
+                : "mb-4 rounded-xl border border-primary/25 bg-card/55 p-4"
+            }
+          >
+            {compactLayout ? (
+              <>
+                <span className="text-xs font-semibold text-foreground">{session.sessionName}</span>
+                {sessions.length > 0 && onSessionChange && (
+                  <select
+                    id="session-select-eagle"
+                    value={session.sessionId}
+                    onChange={(e) => {
+                      const s = sessions.find((x) => x.sessionId === e.target.value);
+                      if (s) onSessionChange(s);
+                    }}
+                    className="h-8 max-w-[220px] rounded-lg border border-primary/30 bg-background/70 px-3 text-xs text-foreground outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
+                  >
+                    {sessions.map((s) => (
+                      <option key={s.sessionId} value={s.sessionId}>
+                        {s.sessionName}
+                        {s.startedAt ? ` · ${new Date(s.startedAt).toLocaleDateString()}` : ""}
+                      </option>
+                    ))}
+                  </select>
+                )}
+                <span className="rounded-full border border-primary/35 bg-primary/10 px-2 py-0.5 text-[0.58rem] font-bold uppercase tracking-[0.1em] text-primary">
+                  {session.agentName}
+                </span>
+                <span className="rounded-full border border-primary/35 bg-primary/10 px-2 py-0.5 text-[0.58rem] font-bold uppercase tracking-[0.1em] text-primary">
+                  Logistics extraction
+                </span>
+              </>
+            ) : (
+              <>
+                <div className="mb-3 flex flex-wrap items-end justify-between gap-3">
+                  <div>
+                    <div className="mb-1.5 inline-flex rounded-full border border-primary/30 bg-primary/10 px-2.5 py-0.5 text-[0.6rem] font-bold uppercase tracking-[0.11em] text-primary">
+                      Step 3 of 3
+                    </div>
+                    <h1 className="text-xl font-extrabold tracking-tight text-foreground sm:text-[1.35rem]">
+                      Logistics document workspace
+                    </h1>
+                    <p className="mt-0.5 text-xs text-muted-foreground">
+                      Upload a BOL, packing list, or freight quote to extract structured fields and tables.
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="rounded-full border border-primary/35 bg-primary/10 px-2 py-0.5 text-[0.58rem] font-bold uppercase tracking-[0.1em] text-primary">
+                      {session.agentName}
+                    </span>
+                    <span className="rounded-full border border-primary/35 bg-primary/10 px-2 py-0.5 text-[0.58rem] font-bold uppercase tracking-[0.1em] text-primary">
+                      Logistics extraction
+                    </span>
+                  </div>
+                </div>
+
+                {sessions.length > 0 && onSessionChange && (
+                  <div className="max-w-[26rem]">
+                    <label
+                      htmlFor="session-select-eagle-full"
+                      className="mb-1.5 block text-[0.65rem] font-bold uppercase tracking-[0.1em] text-primary/80"
+                    >
+                      Choose the session
+                    </label>
+                    <select
+                      id="session-select-eagle-full"
+                      value={session.sessionId}
+                      onChange={(e) => {
+                        const s = sessions.find((x) => x.sessionId === e.target.value);
+                        if (s) onSessionChange(s);
+                      }}
+                      className="h-9 w-full rounded-lg border border-primary/30 bg-background/70 px-3 text-sm text-foreground outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
+                    >
+                      {sessions.map((s) => (
+                        <option key={s.sessionId} value={s.sessionId}>
+                          {s.sessionName}
+                          {s.startedAt ? ` · ${new Date(s.startedAt).toLocaleDateString()}` : ""}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+              </>
+            )}
+          </section>
+        )}
+
+        {detailsError && !skipRemoteSessionHydration && (
+          <div className="mb-6 rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">
+            {detailsError}
+          </div>
+        )}
+
+        <EagleAnalysisWorkspace
+          sessionId={session.sessionId}
+          compact={compactLayout}
+          onWorkspaceStateChange={updateEagleWorkspaceSnapshot}
+        />
+
+        {!compactLayout && (
+          <AutomationOptions
+            onOpenConfigDrawer={(type, title, icon) => {
+              const handled = navigateToAutomationRoute(type);
+              if (!handled) {
+                onOpenConfigDrawer(type, title, icon);
+              }
+            }}
+            onOpenSummaryPanel={() => {
+              const handled = navigateToAutomationRoute("summary");
+              if (!handled) {
+                setIsSummaryPanelOpen(true);
+              }
+            }}
+            agentName="Eagle"
+            eagleHandlers={eagleHandlers}
+            layout="stack"
+            className="mt-0"
+            title="Automation Studio"
+          />
+        )}
+
+        {compactLayout && !hideCompactAutomationOptions && (
+          <div className="mt-10 rounded-xl border border-primary/25 bg-card/55 p-4">
+            <AutomationOptions
+              onOpenConfigDrawer={(type, title, icon) => {
+                const handled = navigateToAutomationRoute(type);
+                if (!handled) {
+                  onOpenConfigDrawer(type, title, icon);
+                }
+              }}
+              onOpenSummaryPanel={() => {
+                const handled = navigateToAutomationRoute("summary");
+                if (!handled) {
+                  setIsSummaryPanelOpen(true);
+                }
+              }}
+              agentName="Eagle"
+              eagleHandlers={eagleHandlers}
+              layout="grid"
+              className="mt-0"
+              title="Available automations"
+            />
+          </div>
+        )}
+
+        <AutomationOutputModal
+          open={outputModalOpen}
+          onClose={() => setOutputModalOpen(false)}
+          title={outputModalTitle}
+          icon={outputModalIcon}
+          loading={outputModalLoading}
+          error={outputModalError}
+          textContent={outputModalText}
+          imageUrl={outputModalImage}
+        />
+      </>
+    );
+  }
+
   return (
     <>
       {!hideBreadcrumb && (
@@ -1008,7 +1285,7 @@ export function SessionDetailView({
                       disabled={!audioUrl}
                       className={`mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full border border-primary/25 text-2xl text-primary-foreground shadow-elegant transition-all ${
                         audioUrl
-                          ? "cursor-pointer bg-gradient-primary hover:scale-105 hover:shadow-glow"
+                          ? "cursor-pointer bg-primary hover:scale-105 hover:shadow-glow"
                           : "cursor-not-allowed bg-primary/30 opacity-60"
                       }`}
                     >
@@ -1026,7 +1303,7 @@ export function SessionDetailView({
                         aria-label="Playback progress"
                       >
                         <div
-                          className="h-full rounded-full bg-gradient-primary transition-all duration-300"
+                          className="h-full rounded-full bg-primary transition-all duration-300"
                           style={{ width: `${progress}%` }}
                         />
                       </div>

@@ -32,7 +32,7 @@ const Index = () => {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button 
                 size="lg" 
-                className="h-12 rounded-lg bg-gradient-primary px-8 text-base font-semibold transition-smooth hover:shadow-glow sm:min-w-[220px]"
+                className="h-12 rounded-lg bg-primary px-8 text-base font-semibold text-primary-foreground transition-smooth hover:shadow-glow sm:min-w-[220px]"
                 onClick={() => navigate("/login")}
               >
                 <Brain className="mr-2 h-5 w-5" />
@@ -95,7 +95,7 @@ const Index = () => {
           <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
             <div className="flex items-center space-x-2 mb-4 md:mb-0">
               <Brain className="h-6 w-6 text-primary" />
-              <span className="text-lg font-bold tracking-tight bg-gradient-primary bg-clip-text text-transparent">
+              <span className="text-lg font-bold tracking-tight text-primary">
                 Tacit-AI
               </span>
             </div>

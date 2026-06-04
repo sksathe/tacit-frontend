@@ -1,0 +1,3222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tacit — Mission Brief v5.2</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+/* ─── Color Tokens ─────────────────────────────────────────── */
+:root {
+  /* ─── Backgrounds — Nova/Mist ─── */
+  --bg:            #0c0f11;
+  --surface:       #141a1f;
+  --surface2:      #1c2329;
+  --surface3:      #222b33;
+  --border:        #232c33;
+  --border-hover:  #2e3a44;
+
+  /* ─── Typography ─── */
+  --text:          #eef0f2;
+  --text-muted:    #6b7a85;
+
+  /* ─── Accent — shadcn Emerald ─── */
+  --accent:        #10b981;
+  --accent-dim:    #059669;
+  --accent-light:  #34d399;
+
+  /* ─── Border Radius — Large ─── */
+  --radius:        12px;
+
+  /* ─── Utility ─── */
+  --danger:        #ff5252;
+  --warning:       #ffd740;
+  --transition:    150ms ease;
+
+  /* ─── Typography Scale ─── */
+  --text-display:  40px;
+  --text-title:    22px;
+  --text-body:     17px;
+  --text-small:    13px;
+  --text-micro:    11px;
+
+  /* ─── Emerald Chart Palette ─── */
+  --chart-1:       #6ee7b7;
+  --chart-2:       #34d399;
+  --chart-3:       #10b981;
+  --chart-4:       #059669;
+  --chart-5:       #047857;
+}
+
+/* ─── Reset & Base ──────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; }
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.7;
+  font-size: var(--text-body);
+}
+button { font-family: inherit; cursor: pointer; border: none; outline: none; }
+input, select, textarea { font-family: inherit; outline: none; }
+select option { background: var(--surface2); }
+
+/* ─── Top Nav ─────────────────────────────────────────────────── */
+.nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 64px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 28px;
+  z-index: 200;
+  flex-shrink: 0;
+}
+.nav-logo {
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.nav-logo-dot {
+  width: 9px; height: 9px;
+  background: var(--accent);
+  border-radius: 50%;
+}
+.nav-mission-name {
+  font-size: var(--text-small);
+  font-weight: 500;
+  color: var(--text-muted);
+  max-width: 360px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.nav-right { display: flex; align-items: center; gap: 16px; }
+.nav-avatar {
+  width: 36px; height: 36px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: var(--text-micro); font-weight: 600; color: var(--text-muted);
+}
+
+/* ─── App Shell ───────────────────────────────────────────────── */
+.app-shell {
+  display: flex;
+  height: 100vh;
+  padding-top: 64px;
+  overflow: hidden;
+}
+
+/* ─── Left Panel ──────────────────────────────────────────────── */
+.left-panel {
+  width: 280px;
+  flex-shrink: 0;
+  height: 100%;
+  overflow-y: auto;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+/* Agent section */
+.lp-agent {
+  padding: 24px 20px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  min-height: 96px;
+}
+.lp-agent-avatar {
+  width: 56px; height: 56px;
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 17px; font-weight: 700;
+  letter-spacing: -0.02em;
+  background: var(--surface2);
+  color: var(--text-muted);
+  margin-bottom: 4px;
+  transition: background var(--transition), color var(--transition);
+}
+.lp-agent-name {
+  font-size: var(--text-body);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+  color: var(--text-muted);
+  transition: color var(--transition);
+}
+.lp-agent-domain {
+  font-size: var(--text-micro);
+  font-weight: 500;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+.lp-agent.has-agent .lp-agent-name { color: var(--text); }
+
+.lp-divider { height: 1px; background: var(--border); margin: 0 20px; flex-shrink: 0; }
+
+/* Studio label (shown on landing screen) */
+.lp-studio-label {
+  padding: 20px;
+  display: none;
+}
+.lp-studio-label-text {
+  font-size: var(--text-small);
+  font-weight: 600;
+  color: var(--text-muted);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+/* Vertical step list */
+.lp-steps { padding: 20px; display: flex; flex-direction: column; gap: 4px; }
+.lp-step {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 0;
+  cursor: default;
+}
+.lp-step-num {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: var(--text-micro); font-weight: 600;
+  color: var(--text-muted);
+  flex-shrink: 0;
+  transition: all var(--transition);
+}
+.lp-step-label {
+  font-size: var(--text-small);
+  font-weight: 500;
+  color: var(--text-muted);
+  line-height: 1.4;
+  transition: color var(--transition);
+}
+.lp-step.active .lp-step-num {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #000;
+  box-shadow: 0 0 0 3px rgba(16,185,129,0.18);
+}
+.lp-step.active .lp-step-label { color: var(--text); font-weight: 600; }
+.lp-step.completed .lp-step-num {
+  background: var(--accent-dim);
+  border-color: var(--accent-dim);
+  color: #000;
+  font-size: 0;
+}
+.lp-step.completed .lp-step-num::after { content: '✓'; font-size: 11px; }
+.lp-step.completed .lp-step-label { color: var(--text); }
+
+/* Context summary */
+.lp-context { padding: 20px; flex: 1; }
+.lp-context-title {
+  font-size: var(--text-micro);
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  margin-bottom: 14px;
+}
+.lp-ctx-row {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: 12px;
+}
+.lp-ctx-label {
+  font-size: var(--text-micro);
+  font-weight: 500;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.lp-ctx-value {
+  font-size: var(--text-small);
+  font-weight: 500;
+  color: var(--text-muted);
+  line-height: 1.4;
+  word-break: break-word;
+  transition: color var(--transition);
+}
+.lp-ctx-value.filled { color: var(--text); }
+
+/* ─── Right Panel ─────────────────────────────────────────────── */
+.right-panel {
+  flex: 1;
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+}
+
+/* Step content — scrollable */
+.step-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 48px 64px 32px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+/* Nav footer — sticky bottom */
+.step-nav-bar {
+  height: 72px;
+  flex-shrink: 0;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 64px;
+  gap: 16px;
+}
+.step-nav-bar.hidden { display: none; }
+
+/* ─── Screen Transitions ─────────────────────────────────────── */
+.screen { display: none; }
+.screen.active {
+  display: block;
+  animation: fadeIn 150ms ease forwards;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.screen-header { margin-bottom: 36px; }
+.screen-header h1 {
+  font-size: var(--text-display);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.2;
+  margin-bottom: 10px;
+}
+.screen-header p {
+  color: var(--text-muted);
+  font-size: var(--text-body);
+  line-height: 1.7;
+}
+
+/* ─── Buttons ─────────────────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 52px;
+  padding: 0 32px;
+  border-radius: var(--radius);
+  font-size: var(--text-body);
+  font-weight: 600;
+  transition: all var(--transition);
+  cursor: pointer;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+.btn-primary {
+  background: var(--accent);
+  color: #000;
+  border: 2px solid transparent;
+}
+.btn-primary:hover { background: var(--accent-dim); }
+.btn-primary:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+.btn-secondary {
+  background: transparent;
+  color: var(--text-muted);
+  border: 1.5px solid var(--border);
+}
+.btn-secondary:hover { border-color: var(--border-hover); color: var(--text); }
+.btn-ghost {
+  background: transparent;
+  color: var(--text-muted);
+  border: none;
+  height: auto;
+  padding: 8px 0;
+  font-size: var(--text-small);
+}
+.btn-ghost:hover { color: var(--text); }
+
+/* ─── Agent Cards ────────────────────────────────────────────── */
+.agent-list { display: flex; flex-direction: column; gap: 10px; }
+.agent-card {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 20px 24px;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: border-color var(--transition), background var(--transition);
+  position: relative;
+  overflow: hidden;
+  min-height: 88px;
+}
+.agent-card::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 4px;
+  background: var(--agent-color, var(--border));
+  border-radius: var(--radius) 0 0 var(--radius);
+  transition: background var(--transition);
+}
+.agent-card:hover { border-color: var(--border-hover); background: var(--surface2); }
+.agent-card.selected {
+  border-color: var(--accent);
+  background: rgba(16,185,129,0.04);
+}
+.agent-avatar {
+  width: 48px; height: 48px;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px; font-weight: 700;
+  flex-shrink: 0;
+  letter-spacing: -0.02em;
+}
+.agent-info { flex: 1; min-width: 0; }
+.agent-name { font-size: var(--text-body); font-weight: 600; margin-bottom: 2px; letter-spacing: -0.01em; }
+.agent-role { font-size: var(--text-small); color: var(--text-muted); margin-bottom: 8px; }
+.agent-domain { font-size: var(--text-small); color: var(--text-muted); }
+.mode-badges { display: flex; gap: 6px; flex-wrap: wrap; }
+.mode-badge {
+  padding: 4px 10px;
+  border-radius: calc(var(--radius) / 2);
+  font-size: var(--text-small);
+  font-weight: 600;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+}
+.mode-badge.F { background: rgba(100,149,237,0.15); border-color: rgba(100,149,237,0.3); color: #6495ed; }
+.mode-badge.E { background: rgba(255,152,0,0.12); border-color: rgba(255,152,0,0.3); color: #ffa726; }
+.agent-selected-check {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  background: var(--accent);
+  display: flex; align-items: center; justify-content: center;
+  font-size: var(--text-small);
+  color: #000;
+  opacity: 0;
+  flex-shrink: 0;
+  transition: opacity var(--transition);
+}
+.agent-card.selected .agent-selected-check { opacity: 1; }
+
+/* ─── Agent Grid (v5.2 Netflix Cards — ~40% size reduction) ─── */
+.agent-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+}
+.agent-netflix-card {
+  display: flex;
+  flex-direction: column;
+  min-height: 290px;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.agent-netflix-card:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 16px 48px rgba(0,0,0,0.5);
+  border-color: var(--border-hover);
+}
+.agent-netflix-card.selected {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent);
+}
+.anc-hero {
+  flex: 0 0 108px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 24px 20px 16px;
+}
+.anc-avatar {
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 700;
+  color: var(--bg);
+  flex-shrink: 0;
+}
+.anc-name {
+  font-size: var(--text-body);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  text-align: center;
+  line-height: 1.1;
+}
+.anc-role {
+  font-size: var(--text-micro);
+  color: var(--text-muted);
+  text-align: center;
+  line-height: 1.4;
+}
+.anc-hero-divider {
+  height: 1px;
+  background: var(--border);
+  flex-shrink: 0;
+  margin: 8px 0;
+}
+.anc-detail {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 12px;
+  gap: 8px;
+}
+.anc-modes { display: flex; gap: 6px; flex-wrap: wrap; }
+.anc-section-label {
+  font-size: var(--text-micro);
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  margin-bottom: 4px;
+}
+.anc-mission-item {
+  font-size: var(--text-micro);
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+.anc-row {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.anc-row-label {
+  font-size: var(--text-micro);
+  font-weight: 500;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.anc-row-value {
+  font-size: var(--text-micro);
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+.anc-launch-btn {
+  margin-top: auto;
+  width: 100%;
+  padding: 8px 14px !important;
+  font-size: var(--text-small) !important;
+  height: auto !important;
+}
+
+/* ─── Landing Screen ─────────────────────────────────────────── */
+.landing-zone { margin-bottom: 8px; }
+.landing-zone-heading {
+  font-size: var(--text-title);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin-bottom: 6px;
+  line-height: 1.2;
+}
+.landing-zone-sub {
+  color: var(--text-muted);
+  font-size: var(--text-body);
+  margin-bottom: 20px;
+}
+.landing-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 32px 0;
+}
+.mission-cards-row {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  padding-bottom: 12px;
+  margin-top: 20px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+.mission-landing-card {
+  flex-shrink: 0;
+  width: 256px;
+  padding: 20px;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: border-color var(--transition), background var(--transition);
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.mission-landing-card:hover { border-color: var(--border-hover); background: var(--surface2); }
+.mlc-avatar {
+  width: 40px; height: 40px;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 700;
+  letter-spacing: -0.02em;
+  margin-bottom: 4px;
+}
+.mlc-name {
+  font-size: var(--text-body);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+}
+.mlc-meta { font-size: var(--text-small); color: var(--text-muted); }
+.mlc-timestamp { font-size: var(--text-micro); color: var(--text-muted); }
+.mlc-status-chip {
+  display: inline-block;
+  font-size: var(--text-micro);
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 20px;
+  width: fit-content;
+}
+.mlc-status-chip.status-chip-ready {
+  background: rgba(16,185,129,0.1);
+  color: var(--accent);
+  border: 1px solid rgba(16,185,129,0.2);
+}
+.mlc-status-chip.status-chip-progress {
+  background: rgba(255,215,64,0.1);
+  color: var(--warning);
+  border: 1px solid rgba(255,215,64,0.2);
+}
+.mlc-cta {
+  margin-top: 6px;
+  height: 36px !important;
+  padding: 0 14px !important;
+  font-size: var(--text-small) !important;
+  border-radius: var(--radius);
+}
+.landing-empty {
+  font-size: var(--text-body);
+  color: var(--text-muted);
+  padding: 24px 0;
+}
+.landing-agent-intro { margin-bottom: 20px; }
+
+/* ─── Mode Cards ─────────────────────────────────────────────── */
+.mode-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-bottom: 18px;
+}
+.mode-card {
+  padding: 28px 20px;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  text-align: center;
+  transition: border-color var(--transition), background var(--transition);
+  position: relative;
+  min-height: 160px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.mode-card:hover:not(.disabled) { border-color: var(--border-hover); background: var(--surface2); }
+.mode-card.selected { border-color: var(--accent); background: rgba(16,185,129,0.04); }
+.mode-card.disabled { opacity: 0.35; cursor: not-allowed; pointer-events: none; }
+.mode-icon { font-size: 40px; margin-bottom: 14px; line-height: 1; }
+.mode-name { font-size: var(--text-title); font-weight: 600; margin-bottom: 8px; letter-spacing: -0.01em; line-height: 1.2; }
+.mode-desc { font-size: 15px; color: var(--text-muted); line-height: 1.5; }
+.mode-selected-indicator {
+  position: absolute;
+  top: 14px; right: 14px;
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  background: var(--accent);
+  display: flex; align-items: center; justify-content: center;
+  font-size: var(--text-small);
+  color: #000;
+  opacity: 0;
+  transition: opacity var(--transition);
+}
+.mode-card.selected .mode-selected-indicator { opacity: 1; }
+.mode-unavail-label { font-size: var(--text-micro); color: var(--text-muted); margin-top: 6px; font-style: italic; }
+.mode-context-note {
+  padding: 14px 18px;
+  background: var(--surface2);
+  border-radius: var(--radius);
+  font-size: var(--text-body);
+  color: var(--text-muted);
+  border-left: 3px solid var(--accent);
+  min-height: 48px;
+  line-height: 1.7;
+}
+
+/* ─── Mission Selector ───────────────────────────────────────── */
+.mission-select-wrap { margin-bottom: 28px; }
+.field-label {
+  display: block;
+  font-size: var(--text-small);
+  font-weight: 500;
+  color: var(--text-muted);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+.styled-select {
+  width: 100%;
+  height: 52px;
+  padding: 0 16px;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-size: var(--text-body);
+  font-weight: 500;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  cursor: pointer;
+  transition: border-color var(--transition);
+}
+.styled-select:focus { border-color: var(--accent); }
+.styled-select:hover { border-color: var(--border-hover); }
+
+.mission-preview {
+  padding: 18px;
+  background: var(--surface2);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+}
+.mission-preview-title { font-size: var(--text-small); font-weight: 500; color: var(--text-muted); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.04em; }
+.mission-preview-outputs { display: flex; flex-wrap: wrap; gap: 6px; }
+.output-chip {
+  padding: 4px 12px;
+  background: var(--surface3);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  font-size: var(--text-small);
+  color: var(--text-muted);
+}
+
+.context-field { margin-top: 28px; }
+.styled-textarea {
+  width: 100%;
+  padding: 14px 16px;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-size: var(--text-body);
+  resize: vertical;
+  min-height: 108px;
+  transition: border-color var(--transition);
+  line-height: 1.7;
+}
+.styled-textarea:focus { border-color: var(--accent); }
+.styled-textarea::placeholder { color: var(--text-muted); }
+
+/* ─── Input Form ─────────────────────────────────────────────── */
+.input-form { display: flex; flex-direction: column; gap: 24px; }
+.field-group { display: flex; flex-direction: column; }
+.styled-input {
+  width: 100%;
+  height: 52px;
+  padding: 0 16px;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-size: var(--text-body);
+  transition: border-color var(--transition);
+}
+.styled-input:focus { border-color: var(--accent); }
+.styled-input::placeholder { color: var(--text-muted); }
+.field-hint { font-size: var(--text-small); color: var(--text-muted); margin-top: 7px; line-height: 1.4; }
+
+.input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+
+/* Upload Zone */
+.upload-zone {
+  padding: 48px 28px;
+  border: 2px dashed var(--border);
+  border-radius: var(--radius);
+  text-align: center;
+  cursor: pointer;
+  transition: border-color var(--transition), background var(--transition);
+  background: var(--surface);
+  min-height: 160px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.upload-zone:hover, .upload-zone.drag-over {
+  border-color: var(--accent);
+  background: rgba(16,185,129,0.04);
+}
+.upload-icon { font-size: 36px; margin-bottom: 10px; }
+.upload-primary { font-size: var(--text-title); font-weight: 500; margin-bottom: 6px; }
+.upload-secondary { font-size: var(--text-small); color: var(--text-muted); }
+.upload-hint { font-size: var(--text-small); color: var(--text-muted); margin-top: 10px; }
+.upload-file-input { display: none; }
+
+.uploaded-files { margin-top: 14px; display: flex; flex-direction: column; gap: 6px; width: 100%; }
+.uploaded-file {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 14px;
+  background: var(--surface2);
+  border-radius: var(--radius);
+  font-size: var(--text-small);
+}
+.uploaded-file-icon { font-size: var(--text-body); }
+.uploaded-file-name { flex: 1; font-weight: 500; }
+.uploaded-file-size { color: var(--text-muted); font-size: var(--text-small); }
+
+/* Multi-input tag field */
+.tag-input-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 10px 14px;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  min-height: 52px;
+  align-items: center;
+  cursor: text;
+  transition: border-color var(--transition);
+}
+.tag-input-wrap:focus-within { border-color: var(--accent); }
+.tag-chip {
+  padding: 3px 10px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) / 2);
+  font-size: var(--text-small);
+  display: flex; align-items: center; gap: 5px;
+}
+.tag-chip-remove { cursor: pointer; color: var(--text-muted); font-size: var(--text-body); line-height: 1; }
+.tag-chip-remove:hover { color: var(--danger); }
+.tag-input-inner {
+  flex: 1;
+  min-width: 130px;
+  background: transparent;
+  border: none;
+  color: var(--text);
+  font-size: var(--text-small);
+  outline: none;
+}
+.tag-input-inner::placeholder { color: var(--text-muted); }
+
+/* Range slider */
+.range-wrap { display: flex; flex-direction: column; gap: 10px; }
+.range-labels { display: flex; justify-content: space-between; }
+.range-label { font-size: var(--text-small); color: var(--text-muted); }
+.styled-range {
+  width: 100%;
+  height: 4px;
+  appearance: none;
+  background: var(--surface2);
+  border-radius: 2px;
+  cursor: pointer;
+}
+.styled-range::-webkit-slider-thumb {
+  appearance: none;
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+  border: 2px solid var(--bg);
+}
+
+/* ─── Automation Grid ────────────────────────────────────────── */
+.automations-section { display: flex; flex-direction: column; gap: 28px; }
+.automation-category-title {
+  font-size: var(--text-small);
+  font-weight: 500;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 14px;
+}
+.automation-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+.automation-tile {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 20px;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: border-color var(--transition), background var(--transition);
+}
+.automation-tile:hover { border-color: var(--border-hover); }
+.automation-tile.checked { border-color: rgba(16,185,129,0.4); background: rgba(16,185,129,0.03); }
+.auto-checkbox {
+  width: 22px; height: 22px;
+  border-radius: calc(var(--radius) / 2);
+  border: 1.5px solid var(--border);
+  background: var(--surface2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: var(--text-small); color: #000;
+  flex-shrink: 0;
+  transition: all var(--transition);
+  margin-top: 1px;
+}
+.automation-tile.checked .auto-checkbox { background: var(--accent); border-color: var(--accent); }
+.auto-info { flex: 1; }
+.auto-header { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
+.auto-icon { font-size: 32px; line-height: 1; }
+.auto-name { font-size: var(--text-body); font-weight: 600; letter-spacing: -0.01em; }
+.auto-badge-recommended {
+  font-size: var(--text-micro);
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: calc(var(--radius) / 2);
+  background: rgba(16,185,129,0.1);
+  color: var(--accent);
+  border: 1px solid rgba(16,185,129,0.2);
+}
+.auto-desc { font-size: var(--text-small); color: var(--text-muted); line-height: 1.5; }
+.automation-count { font-size: var(--text-small); color: var(--text-muted); margin-top: 18px; }
+
+/* ─── Review Card ────────────────────────────────────────────── */
+.review-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin-bottom: 28px;
+}
+.review-section {
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border);
+}
+.review-section:last-child { border-bottom: none; }
+.review-section-label { font-size: var(--text-small); font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); margin-bottom: 6px; }
+.review-section-value { font-size: var(--text-body); font-weight: 600; color: var(--text); }
+.review-section-value.accent { color: var(--accent); }
+.review-meta { font-size: var(--text-small); color: var(--text-muted); margin-top: 3px; }
+.review-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.review-chip {
+  padding: 4px 12px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  font-size: var(--text-small);
+  color: var(--text-muted);
+}
+.review-agent-row { display: flex; align-items: center; gap: 14px; }
+.review-agent-avatar {
+  width: 40px; height: 40px;
+  border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: var(--text-small); font-weight: 700;
+  flex-shrink: 0;
+}
+
+/* ─── Execution Screen ───────────────────────────────────────── */
+#screen-exec { text-align: center; padding-top: 32px; }
+.exec-agent-avatar {
+  width: 120px; height: 120px;
+  border-radius: 24px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 40px; font-weight: 700;
+  margin: 0 auto 28px;
+  letter-spacing: -0.02em;
+  border: 3px solid rgba(16,185,129,0.3);
+  box-shadow: 0 0 40px rgba(16,185,129,0.15);
+}
+.exec-title { font-size: var(--text-title); font-weight: 700; margin-bottom: 8px; letter-spacing: -0.02em; line-height: 1.2; }
+.exec-subtitle { font-size: var(--text-body); color: var(--text-muted); margin-bottom: 52px; }
+.exec-progress-wrap { margin-bottom: 52px; max-width: 600px; margin-left: auto; margin-right: auto; }
+.exec-progress-steps {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 18px;
+}
+.exec-step { display: flex; flex-direction: column; align-items: center; gap: 8px; opacity: 0.3; transition: opacity 300ms ease; }
+.exec-step.active { opacity: 1; }
+.exec-step.done { opacity: 0.6; }
+.exec-step-num {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: var(--text-small); font-weight: 600;
+  transition: all 300ms ease;
+}
+.exec-step.active .exec-step-num { border-color: var(--accent); background: rgba(16,185,129,0.1); color: var(--accent); }
+.exec-step.done .exec-step-num { border-color: var(--accent-dim); background: var(--accent-dim); color: #000; font-size: 0; }
+.exec-step.done .exec-step-num::after { content: '✓'; font-size: var(--text-small); }
+.exec-step-label { font-size: var(--text-small); color: var(--text-muted); text-align: center; line-height: 1.4; }
+.exec-progress-bar-wrap { width: 100%; height: 4px; background: var(--surface2); border-radius: 2px; overflow: hidden; }
+.exec-progress-bar { height: 100%; background: linear-gradient(90deg, var(--accent-dim), var(--accent)); border-radius: 2px; transition: width 1.8s ease; width: 0%; }
+.exec-status-text { font-size: var(--text-small); color: var(--text-muted); margin-top: 14px; }
+
+/* ─── Output Review Screen ────────────────────────────────────── */
+.output-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px; }
+.output-back {
+  display: flex; align-items: center; gap: 6px;
+  font-size: var(--text-small); color: var(--text-muted);
+  cursor: pointer; transition: color var(--transition);
+  background: none; border: none;
+}
+.output-back:hover { color: var(--text); }
+.output-title { font-size: var(--text-title); font-weight: 700; letter-spacing: -0.02em; margin-bottom: 5px; line-height: 1.2; }
+.output-meta { font-size: var(--text-small); color: var(--text-muted); }
+.output-agent-badge {
+  display: flex; align-items: center; gap: 8px;
+  padding: 7px 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  font-size: var(--text-small); font-weight: 500;
+}
+.output-agent-dot { width: 9px; height: 9px; border-radius: 50%; }
+.output-table-wrap {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin-bottom: 28px;
+}
+.output-table { width: 100%; border-collapse: collapse; font-size: var(--text-small); }
+.output-table thead tr { background: var(--surface2); border-bottom: 1px solid var(--border); }
+.output-table th { padding: 12px 18px; text-align: left; font-size: var(--text-micro); font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em; white-space: nowrap; }
+.output-table td { padding: 14px 18px; border-bottom: 1px solid var(--border); vertical-align: top; }
+.output-table tr:last-child td { border-bottom: none; }
+.output-table tr:hover td { background: var(--surface2); }
+.confidence-high { color: var(--accent); font-weight: 600; }
+.confidence-med { color: var(--warning); font-weight: 600; }
+.confidence-low { color: var(--danger); font-weight: 600; }
+.output-status-badge { display: inline-flex; align-items: center; padding: 3px 9px; border-radius: calc(var(--radius) / 2); font-size: var(--text-micro); font-weight: 600; }
+.status-pass { background: rgba(16,185,129,0.1); color: var(--accent); }
+.status-warn { background: rgba(255,215,64,0.1); color: var(--warning); }
+.status-fail { background: rgba(255,82,82,0.1); color: var(--danger); }
+.output-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 8px; }
+.output-actions .btn { height: 44px; padding: 0 22px; font-size: var(--text-small); }
+
+/* ─── Toast ───────────────────────────────────────────────────── */
+.toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 300; display: flex; flex-direction: column; gap: 8px; }
+.toast {
+  padding: 14px 18px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: var(--text-small);
+  font-weight: 500;
+  color: var(--text);
+  display: flex; align-items: center; gap: 10px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+  animation: slideIn 200ms ease forwards;
+  max-width: 340px;
+}
+.toast.warning { border-color: rgba(255,215,64,0.3); }
+.toast.success { border-color: rgba(16,185,129,0.3); }
+.toast-icon { font-size: var(--text-body); }
+@keyframes slideIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes slideOut { from { opacity: 1; transform: translateX(0); } to { opacity: 0; transform: translateX(20px); } }
+
+/* ─── Divider ─────────────────────────────────────────────────── */
+.divider { height: 1px; background: var(--border); margin: 28px 0; }
+
+/* ─── Section title ───────────────────────────────────────────── */
+.section-title { font-size: var(--text-small); font-weight: 600; color: var(--text-muted); margin-bottom: 18px; text-transform: uppercase; letter-spacing: 0.05em; }
+
+/* ─── Workspace: Shared ───────────────────────────────────────── */
+.workspace-topbar {
+  padding-bottom: 20px;
+}
+.workspace-back-link {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: var(--text-small);
+  font-weight: 500;
+  cursor: pointer;
+  transition: color var(--transition);
+  padding: 0;
+  font-family: inherit;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.workspace-back-link:hover { color: var(--text); }
+
+/* ─── Workspace: Document (screen-workspace-doc) ─────────────── */
+.workspace-doc-split {
+  display: flex;
+  gap: 0;
+  min-height: 72vh;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.ws-doc-left {
+  width: 45%;
+  flex-shrink: 0;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+}
+.ws-doc-right {
+  flex: 1;
+  background: var(--bg);
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  overflow-y: auto;
+}
+.ws-panel-breadcrumb {
+  font-size: var(--text-micro);
+  font-weight: 500;
+  color: var(--text-muted);
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+.ws-panel-title {
+  font-size: var(--text-title);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin: 0 0 4px 0;
+}
+.ws-panel-sub {
+  font-size: var(--text-small);
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+.ws-doc-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.ws-doc-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: var(--surface2);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+}
+.ws-doc-icon { font-size: var(--text-body); flex-shrink: 0; }
+.ws-doc-info { flex: 1; min-width: 0; }
+.ws-doc-name { font-size: var(--text-small); font-weight: 500; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ws-doc-size { font-size: var(--text-micro); color: var(--text-muted); }
+.ws-doc-view {
+  font-size: var(--text-small);
+  color: var(--text-muted);
+  cursor: pointer;
+  background: none;
+  border: none;
+  font-family: inherit;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: color var(--transition), background var(--transition);
+  flex-shrink: 0;
+}
+.ws-doc-view:hover { color: var(--accent); background: rgba(16,185,129,0.08); }
+.ws-doc-divider { height: 1px; background: var(--border); margin: 4px 0; }
+.ws-doc-preview {
+  flex: 1;
+  min-height: 140px;
+  background: var(--surface2);
+  border-radius: var(--radius);
+  border: 1px dashed var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  overflow: auto;
+}
+.ws-doc-preview-placeholder {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: var(--text-small);
+}
+.ws-add-doc-btn {
+  height: 40px !important;
+  padding: 0 18px !important;
+  font-size: var(--text-small) !important;
+  border-radius: var(--radius);
+  margin-top: auto;
+  flex-shrink: 0;
+}
+.ws-output-card {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  flex: 1;
+  overflow: auto;
+}
+.ws-output-monospace {
+  font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+  font-size: var(--text-small);
+  color: var(--text);
+  white-space: pre;
+  line-height: 1.8;
+}
+.ws-output-actions {
+  display: flex;
+  gap: 12px;
+  flex-shrink: 0;
+}
+.ws-output-actions .btn {
+  height: 44px;
+  padding: 0 22px;
+  font-size: var(--text-small);
+}
+
+/* ─── Workspace: Conversation (screen-workspace-conv) ─────────── */
+.ws-conv-zone-a {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 28px;
+  margin-bottom: 20px;
+}
+.ws-conv-zone-b {
+  padding: 0;
+}
+.ws-zone-heading {
+  font-size: var(--text-title);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin-bottom: 6px;
+  line-height: 1.2;
+}
+.ws-zone-sub {
+  font-size: var(--text-small);
+  color: var(--text-muted);
+  margin-bottom: 20px;
+}
+.ws-conv-sub {
+  font-size: var(--text-small);
+  color: var(--text-muted);
+  margin-bottom: 18px;
+}
+.ws-audio-player {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+  margin-bottom: 16px;
+}
+.ws-audio-title {
+  font-size: var(--text-small);
+  font-weight: 600;
+  margin-bottom: 14px;
+}
+.ws-audio-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.ws-play-btn {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #000;
+  border: none;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px;
+  flex-shrink: 0;
+  font-family: inherit;
+  transition: background var(--transition);
+}
+.ws-play-btn:hover { background: var(--accent-dim); }
+.ws-audio-progress-wrap {
+  flex: 1;
+  height: 4px;
+  background: var(--surface3);
+  border-radius: 2px;
+  overflow: hidden;
+  cursor: pointer;
+}
+.ws-audio-progress-bar {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 2px;
+}
+.ws-audio-time {
+  font-size: var(--text-small);
+  color: var(--text-muted);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.ws-transcript-box {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+}
+.ws-transcript-inner {
+  font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+  font-size: var(--text-small);
+  color: var(--text-muted);
+  white-space: pre-wrap;
+  line-height: 1.9;
+  max-height: 160px;
+  overflow-y: auto;
+  margin-bottom: 12px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+.ws-transcript-btn {
+  font-size: var(--text-small);
+  color: var(--text-muted);
+  height: auto;
+  padding: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  transition: color var(--transition);
+}
+.ws-transcript-btn:hover { color: var(--accent); }
+.ws-automation-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+.ws-auto-card {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: border-color var(--transition);
+}
+.ws-auto-card:hover { border-color: var(--border-hover); }
+.ws-auto-icon { font-size: 28px; line-height: 1; }
+.ws-auto-title { font-size: var(--text-body); font-weight: 600; letter-spacing: -0.01em; }
+.ws-auto-desc { font-size: var(--text-small); color: var(--text-muted); line-height: 1.5; flex: 1; }
+.ws-auto-dest {
+  font-size: var(--text-micro);
+  font-weight: 600;
+  color: var(--text-muted);
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 3px 10px;
+  width: fit-content;
+}
+.ws-auto-run-btn {
+  height: 40px !important;
+  padding: 0 18px !important;
+  font-size: var(--text-small) !important;
+  margin-top: 4px;
+  flex-shrink: 0;
+}
+
+/* ─── Session Confirm Screen ─────────────────────────────────── */
+.session-confirm-wrap {
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 40px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 20px;
+}
+.sc-check {
+  width: 64px; height: 64px;
+  border-radius: 50%;
+  background: rgba(16,185,129,0.12);
+  border: 2px solid var(--accent);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px; color: var(--accent);
+  flex-shrink: 0;
+}
+.sc-heading {
+  font-size: var(--text-title);
+  font-weight: 700;
+  color: var(--text);
+  margin: 0;
+}
+.sc-subhead {
+  font-size: var(--text-small);
+  color: var(--text-muted);
+  margin: 0;
+  line-height: 1.6;
+}
+.sc-details-card {
+  width: 100%;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.sc-detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+}
+.sc-detail-label {
+  font-size: var(--text-micro);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+.sc-detail-value {
+  font-size: var(--text-small);
+  color: var(--text);
+  text-align: right;
+}
+.sc-notify-section {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+}
+.sc-notify-label {
+  font-size: var(--text-small);
+  color: var(--text-muted);
+  margin: 0;
+  align-self: center;
+}
+.sc-notify-options {
+  display: flex;
+  gap: 16px;
+  align-self: center;
+}
+.sc-notify-opt {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--text-small);
+  color: var(--text);
+  cursor: pointer;
+}
+.sc-notify-opt input[type="radio"] { accent-color: var(--accent); }
+.sc-notify-input {
+  width: 100%;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) / 2);
+  padding: 10px 14px;
+  color: var(--text);
+  font-size: var(--text-small);
+  font-family: inherit;
+  box-sizing: border-box;
+}
+.sc-notify-input:focus { outline: none; border-color: var(--accent); }
+.sc-instruction {
+  font-size: var(--text-small);
+  color: var(--text-muted);
+  line-height: 1.6;
+  margin: 0;
+}
+.sc-instruction strong { color: var(--accent); }
+.sc-done-btn { width: 100%; }
+
+/* ─── Session Complete Card (Zone A) ────────────────────────── */
+.mission-landing-card.session-complete {
+  border-color: var(--accent);
+  background: linear-gradient(135deg, rgba(16,185,129,0.06) 0%, var(--surface) 60%);
+  position: relative;
+  overflow: hidden;
+  animation: pulse-card-border 2.5s ease-in-out infinite;
+}
+
+@keyframes pulse-card-border {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(16,185,129,0); }
+  50%       { box-shadow: 0 0 0 4px rgba(16,185,129,0.18); }
+}
+
+/* Top ribbon banner */
+.mission-landing-card.session-complete::before {
+  content: '✦  Session Complete — Ready to Review';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  padding: 5px 12px;
+  background: var(--accent);
+  color: var(--bg);
+  font-size: var(--text-micro);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-align: center;
+}
+
+/* Push card content down to clear the ribbon */
+.mission-landing-card.session-complete .mlc-inner {
+  padding-top: 28px;
+}
+
+/* mlc-inner wrapper for consistent layout */
+.mlc-inner { display: flex; flex-direction: column; gap: 6px; }
+
+/* Session meta rows */
+.mlc-session-meta {
+  font-size: var(--text-micro);
+  color: var(--text-muted);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 4px;
+}
+.mlc-session-meta span { display: flex; align-items: center; gap: 4px; }
+
+/* Override CTA button style for session-complete */
+.mission-landing-card.session-complete .mlc-cta {
+  background: var(--accent);
+  color: var(--bg);
+  border-color: var(--accent);
+  font-weight: 600;
+  width: 100%;
+  margin-top: 8px;
+  justify-content: center;
+}
+.mission-landing-card.session-complete .mlc-cta:hover {
+  background: var(--accent-light);
+  border-color: var(--accent-light);
+}
+</style>
+</head>
+<body>
+
+<!-- ─── Top Nav ─────────────────────────────────────────────── -->
+<nav class="nav">
+  <div class="nav-logo">
+    <span class="nav-logo-dot"></span>
+    Tacit
+  </div>
+  <div class="nav-mission-name" id="navMissionName">TacitAI Studio</div>
+  <div class="nav-right">
+    <div class="nav-avatar">JH</div>
+  </div>
+</nav>
+
+<!-- ─── App Shell ────────────────────────────────────────────── -->
+<div class="app-shell">
+
+  <!-- ─── Left Panel ──────────────────────────────────────────── -->
+  <div class="left-panel" id="leftPanel">
+
+    <!-- Agent section -->
+    <div class="lp-agent" id="lpAgent">
+      <div class="lp-agent-avatar" id="lpAgentAvatar">—</div>
+      <div class="lp-agent-name" id="lpAgentName">No agent selected</div>
+      <div class="lp-agent-domain" id="lpAgentDomain">Choose an agent to begin</div>
+    </div>
+
+    <div class="lp-divider"></div>
+
+    <!-- Studio label (shown on landing screen) -->
+    <div class="lp-studio-label" id="lpStudioLabel">
+      <div class="lp-studio-label-text">TacitAI Studio</div>
+    </div>
+
+    <!-- Vertical step list (shown on wizard screens) -->
+    <div class="lp-steps" id="lpSteps">
+      <div class="lp-step active" data-step="1">
+        <div class="lp-step-num"><span>1</span></div>
+        <div class="lp-step-label">Choose Agent</div>
+      </div>
+      <div class="lp-step" data-step="2">
+        <div class="lp-step-num"><span>2</span></div>
+        <div class="lp-step-label">Select Mode</div>
+      </div>
+      <div class="lp-step" data-step="3">
+        <div class="lp-step-num"><span>3</span></div>
+        <div class="lp-step-label">Mission</div>
+      </div>
+      <div class="lp-step" data-step="4">
+        <div class="lp-step-num"><span>4</span></div>
+        <div class="lp-step-label">Input</div>
+      </div>
+      <div class="lp-step" data-step="5">
+        <div class="lp-step-num"><span>5</span></div>
+        <div class="lp-step-label">Output</div>
+      </div>
+      <div class="lp-step" data-step="6">
+        <div class="lp-step-num"><span>6</span></div>
+        <div class="lp-step-label">Review</div>
+      </div>
+    </div>
+
+    <div class="lp-divider"></div>
+
+    <!-- Context summary -->
+    <div class="lp-context">
+      <div class="lp-context-title">Mission Context</div>
+      <div class="lp-ctx-row">
+        <div class="lp-ctx-label">Agent</div>
+        <div class="lp-ctx-value" id="ctxAgent">—</div>
+      </div>
+      <div class="lp-ctx-row">
+        <div class="lp-ctx-label">Mode</div>
+        <div class="lp-ctx-value" id="ctxMode">—</div>
+      </div>
+      <div class="lp-ctx-row">
+        <div class="lp-ctx-label">Mission</div>
+        <div class="lp-ctx-value" id="ctxMission">—</div>
+      </div>
+      <div class="lp-ctx-row">
+        <div class="lp-ctx-label">Input</div>
+        <div class="lp-ctx-value" id="ctxInput">—</div>
+      </div>
+      <div class="lp-ctx-row">
+        <div class="lp-ctx-label">Output</div>
+        <div class="lp-ctx-value" id="ctxOutput">—</div>
+      </div>
+    </div>
+
+  </div><!-- /left-panel -->
+
+  <!-- ─── Right Panel ─────────────────────────────────────────── -->
+  <div class="right-panel" id="rightPanel">
+
+    <!-- Step content -->
+    <div class="step-content" id="stepContent">
+
+      <!-- ════════════════════════════════════════════════════════
+           SCREEN 1 — Landing (Redesigned v5)
+      ════════════════════════════════════════════════════════════ -->
+      <div class="screen active" id="screen-1">
+
+        <!-- Zone A: Recent Missions -->
+        <div class="landing-zone">
+          <h2 class="landing-zone-heading">Pick up where you left off</h2>
+          <div class="mission-cards-row" id="recentMissionCardsRow">
+            <!-- Populated by renderRecentMissions() -->
+          </div>
+        </div>
+
+        <div class="landing-divider"></div>
+
+        <!-- Zone B: Launch New Mission -->
+        <div class="landing-zone">
+          <h2 class="landing-zone-heading">Launch a new mission</h2>
+          <p class="landing-zone-sub">Choose an agent to get started</p>
+          <div class="agent-grid" id="agentList"></div>
+        </div>
+
+      </div>
+
+      <!-- ════════════════════════════════════════════════════════
+           SCREEN 2 — Select Mode (Hybrid removed)
+      ════════════════════════════════════════════════════════════ -->
+      <div class="screen" id="screen-2">
+        <div class="screen-header">
+          <h1>How will input be provided?</h1>
+          <p>Select the operating mode for this mission run.</p>
+        </div>
+        <div class="mode-grid" id="modeGrid"></div>
+        <div class="mode-context-note" id="modeContextNote">Select a mode above to continue.</div>
+      </div>
+
+      <!-- ════════════════════════════════════════════════════════
+           SCREEN 3 — Name the Mission
+      ════════════════════════════════════════════════════════════ -->
+      <div class="screen" id="screen-3">
+        <div class="screen-header">
+          <h1>What is the mission?</h1>
+          <p>Choose from this agent's mission repertoire.</p>
+        </div>
+        <div class="mission-select-wrap">
+          <label class="field-label" for="missionSelect">Mission</label>
+          <select class="styled-select" id="missionSelect" onchange="onMissionChange(this.value)">
+            <option value="">— Select a mission —</option>
+          </select>
+        </div>
+        <div class="mission-preview" id="missionPreview" style="display:none;">
+          <div class="mission-preview-title">Default outputs for this mission</div>
+          <div class="mission-preview-outputs" id="missionPreviewOutputs"></div>
+        </div>
+        <div class="context-field">
+          <label class="field-label" for="missionContext">Additional context <span style="color:var(--text-muted);font-weight:400;text-transform:none">(optional)</span></label>
+          <textarea class="styled-textarea" id="missionContext" placeholder="Any specific instructions or parameters for this run…" rows="3"></textarea>
+        </div>
+      </div>
+
+      <!-- ════════════════════════════════════════════════════════
+           SCREEN 4 — Provide Input (no hybrid tabs)
+      ════════════════════════════════════════════════════════════ -->
+      <div class="screen" id="screen-4">
+        <div class="screen-header">
+          <h1 id="step4Heading">Provide Input</h1>
+          <p id="step4Subheading">Fill in the required information for this mission run.</p>
+        </div>
+        <div id="inputFormContainer"></div>
+      </div>
+
+      <!-- ════════════════════════════════════════════════════════
+           SCREEN 5 — Configure Output
+      ════════════════════════════════════════════════════════════ -->
+      <div class="screen" id="screen-5">
+        <div class="screen-header">
+          <h1>What should the agent produce?</h1>
+          <p>Choose the automations to run after this mission. Recommended ones are pre-selected.</p>
+        </div>
+        <div id="automationsContainer"></div>
+      </div>
+
+      <!-- ════════════════════════════════════════════════════════
+           SCREEN 6 — Review & Launch
+      ════════════════════════════════════════════════════════════ -->
+      <div class="screen" id="screen-6">
+        <div class="screen-header">
+          <h1>Ready to launch?</h1>
+          <p>Review your configuration before dispatching the agent.</p>
+        </div>
+        <div class="review-card" id="reviewCard"></div>
+      </div>
+
+      <!-- ════════════════════════════════════════════════════════
+           SCREEN 7 — Execution
+      ════════════════════════════════════════════════════════════ -->
+      <div class="screen" id="screen-exec">
+        <div class="exec-agent-avatar" id="execAvatar"></div>
+        <div class="exec-title" id="execTitle"></div>
+        <div class="exec-subtitle" id="execSubtitle"></div>
+        <div class="exec-progress-wrap">
+          <div class="exec-progress-steps" id="execSteps"></div>
+          <div class="exec-progress-bar-wrap">
+            <div class="exec-progress-bar" id="execBar"></div>
+          </div>
+          <div class="exec-status-text" id="execStatusText">Initializing…</div>
+        </div>
+      </div>
+
+      <!-- ════════════════════════════════════════════════════════
+           SCREEN 8 — Output Review
+      ════════════════════════════════════════════════════════════ -->
+      <div class="screen" id="screen-output">
+        <div class="output-header">
+          <button class="output-back" onclick="backToMissions()">← Back to Missions</button>
+          <div class="output-agent-badge" id="outputAgentBadge"></div>
+        </div>
+        <div style="margin-bottom:28px;">
+          <div class="output-title" id="outputTitle"></div>
+          <div class="output-meta" id="outputMeta"></div>
+        </div>
+        <div id="outputContent"></div>
+        <div class="output-actions">
+          <button class="btn btn-secondary" onclick="backToMissions()">+ New Mission</button>
+          <button class="btn btn-secondary">⬇ Download</button>
+          <button class="btn btn-secondary">↗ Push to CRM</button>
+        </div>
+      </div>
+
+      <!-- ════════════════════════════════════════════════════════
+           SCREEN 8B — Session Confirm (Facilitator mode)
+      ════════════════════════════════════════════════════════════ -->
+      <div class="screen" id="screen-session-confirm">
+        <div class="session-confirm-wrap">
+
+          <div class="sc-check">✓</div>
+          <h1 class="sc-heading">Session Scheduled</h1>
+          <p class="sc-subhead">Your mission session has been set. The agent will join and facilitate when the call begins.</p>
+
+          <div class="sc-details-card" id="scDetailsCard">
+            <!-- populated by renderSessionConfirm() -->
+          </div>
+
+          <div class="sc-notify-section">
+            <p class="sc-notify-label">Notify me when the session is complete via:</p>
+            <div class="sc-notify-options">
+              <label class="sc-notify-opt">
+                <input type="radio" name="notifyMethod" value="sms" checked onchange="toggleNotifyInput(this.value)">
+                <span>SMS</span>
+              </label>
+              <label class="sc-notify-opt">
+                <input type="radio" name="notifyMethod" value="email" onchange="toggleNotifyInput(this.value)">
+                <span>Email</span>
+              </label>
+            </div>
+            <input class="sc-notify-input" id="scNotifyInput" type="tel"
+                   placeholder="Your mobile number" autocomplete="tel">
+          </div>
+
+          <p class="sc-instruction">
+            Once your session ends, you'll receive a notification with a link to return and finish your work in the Output-Workspace. Your mission will appear in <strong>Zone A</strong> on the landing page when you log back in.
+          </p>
+
+          <button class="btn btn-primary sc-done-btn" onclick="backToMissions()">
+            Done — Back to Missions
+          </button>
+
+        </div>
+      </div>
+
+      <!-- ════════════════════════════════════════════════════════
+           SCREEN 9 — Document Workspace (Executor mode)
+      ════════════════════════════════════════════════════════════ -->
+      <div class="screen" id="screen-workspace-doc">
+        <div class="workspace-topbar">
+          <button class="workspace-back-link" onclick="backToMissions()">← Back to Missions</button>
+        </div>
+        <div class="workspace-doc-split">
+          <!-- Left panel: Source Documents (~45%) -->
+          <div class="ws-doc-left">
+            <div class="ws-panel-breadcrumb">TacitAI Studio — Workspace</div>
+            <h2 class="ws-panel-title">Source Documents</h2>
+            <div class="ws-panel-sub" id="wsDocMissionName">—</div>
+            <div class="ws-panel-sub" id="wsDocAgentMeta" style="font-size:var(--text-micro);color:var(--text-muted)">—</div>
+
+            <div class="ws-doc-list">
+              <div class="ws-doc-item">
+                <span class="ws-doc-icon">📄</span>
+                <div class="ws-doc-info">
+                  <span class="ws-doc-name">contract-draft-v2.pdf</span>
+                  <span class="ws-doc-size">142 KB</span>
+                </div>
+                <button class="ws-doc-view" onclick="viewDocument('contract-draft-v2.pdf')">View</button>
+              </div>
+              <div class="ws-doc-item">
+                <span class="ws-doc-icon">📄</span>
+                <div class="ws-doc-info">
+                  <span class="ws-doc-name">amendment-schedule-a.docx</span>
+                  <span class="ws-doc-size">38 KB</span>
+                </div>
+                <button class="ws-doc-view" onclick="viewDocument('amendment-schedule-a.docx')">View</button>
+              </div>
+            </div>
+
+            <div class="ws-doc-divider"></div>
+
+            <div class="ws-doc-preview" id="wsDocPreview">
+              <div class="ws-doc-preview-placeholder">Select a document to preview</div>
+            </div>
+
+            <button class="btn btn-secondary ws-add-doc-btn">+ Add Document</button>
+          </div>
+
+          <!-- Right panel: Mission Output (~55%) -->
+          <div class="ws-doc-right">
+            <div>
+              <h2 class="ws-panel-title">Mission Output</h2>
+              <div class="ws-panel-sub" id="wsDocOutputSub">—</div>
+            </div>
+
+            <div class="ws-output-card">
+              <pre class="ws-output-monospace">Extracted Contract Data
+─────────────────────────
+Client:         Acme Financial Group
+Contract Type:  Master Service Agreement
+Effective Date: 2026-02-01
+Value:          $2,400,000
+Term:           24 months
+Auto-Renew:     Yes (60-day notice)
+
+Key Clauses Flagged:
+• Section 4.2 — Indemnification (review required)
+• Section 7.1 — IP Ownership (non-standard)
+• Section 9.3 — Termination for Convenience
+
+CRM Push Status: Pending</pre>
+            </div>
+
+            <div class="ws-output-actions">
+              <button class="btn btn-secondary">Export as PDF</button>
+              <button class="btn btn-primary">Push to CRM</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ════════════════════════════════════════════════════════
+           SCREEN 10 — Conversation Workspace (Facilitator mode)
+      ════════════════════════════════════════════════════════════ -->
+      <div class="screen" id="screen-workspace-conv">
+        <div class="workspace-topbar">
+          <button class="workspace-back-link" onclick="backToMissions()">← Back to Missions</button>
+        </div>
+
+        <!-- Zone A: Conversation Recording (~40%) -->
+        <div class="ws-conv-zone-a">
+          <h2 class="ws-zone-heading">Conversation Recording</h2>
+          <div class="ws-conv-sub" id="wsConvMissionName">—</div>
+          <div class="ws-conv-sub" id="wsConvAgentMeta" style="font-size:var(--text-micro);color:var(--text-muted)">—</div>
+
+          <!-- Mock audio player -->
+          <div class="ws-audio-player">
+            <div class="ws-audio-title">Sales Discovery Call — March 20, 2026 — 32 min</div>
+            <div class="ws-audio-controls">
+              <button class="ws-play-btn" title="Play">▶</button>
+              <div class="ws-audio-progress-wrap">
+                <div class="ws-audio-progress-bar" style="width:35%"></div>
+              </div>
+              <span class="ws-audio-time">11:22 / 32:00</span>
+            </div>
+          </div>
+
+          <!-- Transcript preview -->
+          <div class="ws-transcript-box">
+            <div class="ws-transcript-inner">[00:00] Sarah Chen: "Thanks for joining. Can you walk me through your current onboarding process?"
+[00:42] Prospect:   "Sure. Right now it takes about 3 weeks and involves..."
+[01:18] Sarah Chen: "And what's the biggest bottleneck you're seeing?"
+[02:05] Prospect:   "Honestly, the compliance review step. It slows everything..."
+[03:12] Sarah Chen: "We've seen similar patterns. Tacit can automate that layer..."</div>
+            <button class="ws-transcript-btn">View Full Transcript</button>
+          </div>
+        </div>
+
+        <!-- Zone B: Automations (~60%) -->
+        <div class="ws-conv-zone-b">
+          <h2 class="ws-zone-heading">What would you like to do with this?</h2>
+          <p class="ws-zone-sub">Select an automation to run</p>
+
+          <div class="ws-automation-grid">
+            <!-- Card 1: Meeting Summary -->
+            <div class="ws-auto-card">
+              <div class="ws-auto-icon">📋</div>
+              <div class="ws-auto-title">Generate Meeting Summary</div>
+              <div class="ws-auto-desc">Summarise key discussion points, decisions, and next steps</div>
+              <div class="ws-auto-dest">→ Salesforce</div>
+              <button class="btn btn-primary ws-auto-run-btn" onclick="runAutomation('Generate Meeting Summary', 'Salesforce')">Run Automation</button>
+            </div>
+
+            <!-- Card 2: User Story -->
+            <div class="ws-auto-card">
+              <div class="ws-auto-icon">📝</div>
+              <div class="ws-auto-title">Generate User Story</div>
+              <div class="ws-auto-desc">Extract a structured Agile user story from the conversation</div>
+              <div class="ws-auto-dest">→ Jira Backlog</div>
+              <button class="btn btn-primary ws-auto-run-btn" onclick="runAutomation('Generate User Story', 'Jira Backlog')">Run Automation</button>
+            </div>
+
+            <!-- Card 3: Sales Brief -->
+            <div class="ws-auto-card">
+              <div class="ws-auto-icon">📊</div>
+              <div class="ws-auto-title">Generate Sales Brief</div>
+              <div class="ws-auto-desc">Draft a post-call sales brief with opportunity notes</div>
+              <div class="ws-auto-dest">→ Salesforce</div>
+              <button class="btn btn-primary ws-auto-run-btn" onclick="runAutomation('Generate Sales Brief', 'Salesforce')">Run Automation</button>
+            </div>
+
+            <!-- Card 4: Follow-Up Email -->
+            <div class="ws-auto-card">
+              <div class="ws-auto-icon">🔔</div>
+              <div class="ws-auto-title">Generate Follow-Up Email</div>
+              <div class="ws-auto-desc">Compose a personalised follow-up email draft</div>
+              <div class="ws-auto-dest">→ Email Draft</div>
+              <button class="btn btn-primary ws-auto-run-btn" onclick="runAutomation('Generate Follow-Up Email', 'Email Draft')">Run Automation</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /step-content -->
+
+    <!-- Sticky nav footer -->
+    <div class="step-nav-bar" id="stepNavBar">
+      <button class="btn btn-secondary" id="navBack" onclick="navBack()">← Back</button>
+      <button class="btn btn-primary" id="navContinue" onclick="navContinue()" disabled>Continue →</button>
+    </div>
+
+  </div><!-- /right-panel -->
+
+</div><!-- /app-shell -->
+
+<!-- ─── Toast Container ──────────────────────────────────────── -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// DATA LAYER — v5.1: inputTypes and outputTypes added to all agents
+// ═══════════════════════════════════════════════════════════════
+
+const AGENTS = {
+  SAGE: {
+    id: 'SAGE', name: 'SAGE', role: 'Compliance Intelligence Agent',
+    domain: 'SOC 2 / Risk Compliance', color: '#6495ed',
+    inputTypes:  ['Meeting Link', 'Session Recording', 'Stakeholder Notes'],
+    outputTypes: ['Evidence Map', 'Gap Analysis', 'Audit Artifacts'],
+    supportedModes: ['facilitator'], primaryMode: 'facilitator',
+    missions: [
+      { id: 'soc2-control-evidence', name: 'SOC 2 Control Evidence Interview', description: 'Structured stakeholder interview to gather control evidence for SOC 2 Type II audit.', defaultOutputs: ['Control Evidence Map', 'Gap Analysis Report', 'Follow-up Action List'] },
+      { id: 'vendor-risk-assessment', name: 'Vendor Risk Assessment', description: 'Facilitated session to assess third-party vendor security posture and compliance gaps.', defaultOutputs: ['Risk Register Update', 'Vendor Risk Score', 'Remediation Recommendations'] },
+      { id: 'security-posture-review', name: 'Security Posture Review', description: 'Comprehensive security posture interview with IT leadership across all control domains.', defaultOutputs: ['Posture Score Report', 'Control Gap Matrix', 'Audit Artifact Pack'] },
+      { id: 'audit-prep-interview', name: 'Audit Prep Stakeholder Interview', description: 'Pre-audit stakeholder briefing and readiness assessment across control owners.', defaultOutputs: ['Readiness Summary', 'Evidence Checklist', 'Stakeholder Briefing Doc'] }
+    ],
+    inputFields: {
+      facilitator: [
+        { type: 'text', id: 'meetingLink', label: 'Meeting Link', placeholder: 'https://meet.google.com/abc-defg-hij', hint: 'Zoom, Google Meet, or Teams link' },
+        { type: 'row', fields: [ { type: 'date', id: 'sessionDate', label: 'Session Date', placeholder: 'Select date' }, { type: 'time', id: 'sessionTime', label: 'Session Time', placeholder: '2:00 PM EST' } ] },
+        { type: 'text', id: 'inviteeName', label: 'Invitee Name', placeholder: 'e.g. Sarah Chen, VP Engineering' },
+        { type: 'select', id: 'controlDomain', label: 'Control Domain', options: ['Access Control', 'Change Management', 'Incident Response', 'Availability', 'Confidentiality', 'Processing Integrity'] },
+        { type: 'textarea', id: 'agendaNotes', label: 'Agenda Notes', placeholder: 'Key control areas, specific questions, or context for this session…' }
+      ]
+    },
+    automations: [
+      { id: 'control-evidence-map', name: 'Control Evidence Map', icon: '🗺️', description: 'Maps gathered evidence to SOC 2 control IDs with confidence scores.', recommended: true, category: 'Core Outputs' },
+      { id: 'risk-register-update', name: 'Risk Register Update', icon: '📋', description: 'Appends identified risks to the live risk register with severity ratings.', recommended: true, category: 'Core Outputs' },
+      { id: 'gap-analysis-report', name: 'Gap Analysis Report', icon: '📊', description: 'Generates a formatted gap analysis against SOC 2 Type II requirements.', recommended: true, category: 'Core Outputs' },
+      { id: 'audit-artifact-pack', name: 'Audit Artifact Pack', icon: '📦', description: 'Bundles all evidence into an auditor-ready ZIP package.', recommended: false, category: 'Delivery' },
+      { id: 'followup-actions', name: 'Follow-up Action List', icon: '✅', description: 'Extracts open items and assigns owners from session transcript.', recommended: false, category: 'Delivery' }
+    ],
+    executionStages: ['Transcribing session', 'Extracting evidence', 'Mapping to controls', 'Generating reports'],
+    sampleOutput: {
+      title: 'Control Evidence Map — SOC 2 Type II',
+      summary: 'Access Control domain interview with Sarah Chen, VP Engineering. 12 controls assessed.',
+      tableHeaders: ['Control ID', 'Evidence Collected', 'Gaps Identified', 'Confidence'],
+      tableRows: [
+        ['CC6.1', 'MFA enforced via Okta, enrollment policy documented', 'No exception handling documented', '92%'],
+        ['CC6.2', 'Role-based access matrix reviewed, HR integration confirmed', '—', '96%'],
+        ['CC6.3', 'Quarterly access reviews evidenced (Q3, Q4 2025)', 'Terminated user provisioning lag noted', '78%'],
+        ['CC6.6', 'Network segmentation diagram provided', 'No formal penetration test since 2024', '65%'],
+        ['CC7.1', 'SIEM alerts reviewed, Splunk dashboard shared', '—', '88%'],
+        ['CC8.1', 'Change management policy v2.3 confirmed', 'Emergency change process undocumented', '71%']
+      ]
+    }
+  },
+
+  MASON: {
+    id: 'MASON', name: 'MASON', role: 'Contract Intelligence Agent',
+    domain: 'Contract-to-Cash / CLM', color: '#ffa726',
+    inputTypes:  ['PDF Contracts', 'DOCX Amendments', 'Meeting Link'],
+    outputTypes: ['CRM Push', 'Contract Summary', 'Redline Delta'],
+    supportedModes: ['executor', 'facilitator'], primaryMode: 'executor',
+    missions: [
+      { id: 'contract-extraction', name: 'Contract Extraction & CRM Push', description: 'Extract key contract clauses, terms, and obligations then push structured data to CRM.', defaultOutputs: ['CRM Data Push', 'Contract Summary', 'Audit Trail Export'] },
+      { id: 'invoice-terms', name: 'Invoice Terms Extraction', description: 'Extract payment terms, due dates, and billing schedules from invoice documents.', defaultOutputs: ['Invoice Data (CSV)', 'GL Code Assignment', 'Payment Schedule'] },
+      { id: 'redline-review', name: 'Redline Review Session', description: 'Facilitated session reviewing contract redlines with counterparty legal team.', defaultOutputs: ['Redline Delta Report', 'Negotiation Summary', 'Risk Flags'] },
+      { id: 'vendor-onboarding', name: 'Vendor Onboarding Interview', description: 'Structured vendor intake interview covering compliance, payment, and contract terms.', defaultOutputs: ['Vendor Profile', 'Contract Draft', 'CRM Data Push'] },
+      { id: 'payment-terms', name: 'Payment Terms Analysis', description: 'Batch analysis of payment terms across a contract portfolio for optimization.', defaultOutputs: ['Terms Summary Report', 'Cash Flow Impact Model', 'Renegotiation Targets'] }
+    ],
+    inputFields: {
+      executor: [
+        { type: 'upload', id: 'contractDocs', label: 'Contract Documents', hint: 'PDF, DOCX — up to 20 files, 50MB each' },
+        { type: 'select', id: 'targetSystem', label: 'Target System', options: ['Salesforce CRM', 'DriveTrain', 'NetSuite ERP', 'HubSpot', 'Custom API'] },
+        { type: 'select', id: 'extractionTemplate', label: 'Extraction Template', options: ['Standard MSA', 'SaaS Subscription', 'Professional Services', 'Vendor Agreement', 'NDA'] },
+        { type: 'tags', id: 'priorityClauses', label: 'Priority Clauses', placeholder: 'Add clause tag, press Enter…', hint: 'e.g. Termination, Indemnification, Payment Terms' }
+      ],
+      facilitator: [
+        { type: 'text', id: 'meetingLink', label: 'Meeting Link', placeholder: 'https://zoom.us/j/123456789' },
+        { type: 'row', fields: [ { type: 'date', id: 'sessionDate', label: 'Session Date', placeholder: 'Select date' }, { type: 'time', id: 'sessionTime', label: 'Session Time', placeholder: '10:00 AM EST' } ] },
+        { type: 'text', id: 'counterpartyName', label: 'Counterparty Name', placeholder: 'e.g. Acme Corp Legal Team' },
+        { type: 'select', id: 'contractType', label: 'Contract Type', options: ['MSA', 'SOW', 'NDA', 'Vendor Agreement', 'License Agreement'] },
+        { type: 'textarea', id: 'agenda', label: 'Session Agenda', placeholder: 'Key redlines to discuss, open items, negotiation priorities…' }
+      ]
+    },
+    automations: [
+      { id: 'crm-push', name: 'CRM Data Push', icon: '🔗', description: 'Pushes extracted contract data to the selected CRM system with field mapping.', recommended: true, category: 'Integrations' },
+      { id: 'contract-summary', name: 'Contract Summary', icon: '📄', description: 'Generates a structured 1-page contract summary with key terms highlighted.', recommended: true, category: 'Core Outputs' },
+      { id: 'redline-delta', name: 'Redline Delta Report', icon: '🔴', description: 'Tracks changes between contract versions with risk flag scoring.', recommended: true, category: 'Core Outputs' },
+      { id: 'invoice-creation', name: 'Invoice Creation', icon: '💰', description: 'Auto-generates invoice draft from extracted payment terms.', recommended: false, category: 'Downstream' },
+      { id: 'gl-codes', name: 'GL Code Assignment', icon: '🏷️', description: 'Assigns general ledger codes to contract line items for ERP integration.', recommended: false, category: 'Downstream' },
+      { id: 'audit-trail', name: 'Audit Trail Export', icon: '📜', description: 'Exports full extraction audit trail with timestamps and confidence scores.', recommended: false, category: 'Compliance' }
+    ],
+    executionStages: ['Parsing documents', 'Extracting clauses', 'Mapping to schema', 'Pushing to CRM'],
+    sampleOutput: {
+      title: 'Contract Extraction — Acme Corp MSA',
+      summary: '3 documents processed. 14 clauses extracted. CRM push: Salesforce.',
+      tableHeaders: ['Clause', 'Extracted Value', 'Confidence', 'CRM Field'],
+      tableRows: [
+        ['Payment Terms', 'Net 30 from invoice date', '98%', 'Payment_Terms__c'],
+        ['Contract Term', '24 months, effective 2025-03-01', '96%', 'Contract_End_Date__c'],
+        ['Auto-Renewal', 'Yes — 60-day written notice to cancel', '94%', 'Auto_Renewal__c'],
+        ['Termination for Cause', '30-day cure period', '91%', 'Termination_Notice__c'],
+        ['Liability Cap', '2x annual contract value', '88%', 'Liability_Cap__c'],
+        ['Governing Law', 'Delaware, United States', '99%', 'Governing_Law__c'],
+        ['Indemnification', 'Mutual indemnification, third-party claims only', '85%', 'Indemnification__c']
+      ]
+    }
+  },
+
+  ARIA: {
+    id: 'ARIA', name: 'ARIA', role: 'Onboarding Intelligence Agent',
+    domain: 'Broker-Dealer Onboarding', color: '#f48fb1',
+    inputTypes:  ['Meeting Link', 'Advisor Profile Data', 'Form U4'],
+    outputTypes: ['Practice Profile', 'CRM Setup', 'Compliance Checklist'],
+    supportedModes: ['facilitator'], primaryMode: 'facilitator',
+    missions: [
+      { id: 'practice-intake', name: 'Practice Intake Interview', description: 'Structured intake interview to capture full practice profile for new advisor onboarding.', defaultOutputs: ['Practice Profile', 'CRM Setup Push', 'Compliance Checklist'] },
+      { id: 'advisor-registration', name: 'Advisor Registration Collection', description: 'Collect all registration data required for FINRA/state licensing submissions.', defaultOutputs: ['Registration Data Package', 'Form U4 Pre-fill', 'Compliance Checklist'] },
+      { id: 'compliance-discovery', name: 'Compliance Discovery Session', description: 'In-depth compliance posture review for RIA or BD onboarding compliance team.', defaultOutputs: ['Compliance Flag Report', 'Regulatory Checklist', 'Disclosure Summary'] },
+      { id: 'book-review', name: 'Book of Business Review', description: "Review advisor's existing client book for migration, AUM classification, and account mapping.", defaultOutputs: ['Book of Business Summary', 'AUM Breakdown', 'Account Migration Plan'] }
+    ],
+    inputFields: {
+      facilitator: [
+        { type: 'text', id: 'meetingLink', label: 'Meeting Link', placeholder: 'https://zoom.us/j/987654321' },
+        { type: 'row', fields: [ { type: 'date', id: 'sessionDate', label: 'Session Date', placeholder: 'Select date' }, { type: 'time', id: 'sessionTime', label: 'Session Time', placeholder: '1:00 PM EST' } ] },
+        { type: 'text', id: 'advisorName', label: 'Advisor Name', placeholder: 'e.g. Michael Torres, CFP' },
+        { type: 'text', id: 'practiceName', label: 'Practice Name', placeholder: 'e.g. Torres Wealth Partners' },
+        { type: 'select', id: 'advisorType', label: 'Advisor Type', options: ['RIA', 'Broker-Dealer', 'Hybrid RIA/BD', 'IAR', 'Insurance Only'] },
+        { type: 'text', id: 'complianceContact', label: 'Compliance Officer Contact', placeholder: 'Name + email or phone' }
+      ]
+    },
+    automations: [
+      { id: 'practice-profile', name: 'Practice Profile', icon: '🏢', description: 'Generates a structured practice profile card with all captured advisor details.', recommended: true, category: 'Core Outputs' },
+      { id: 'crm-setup', name: 'CRM Setup Push', icon: '🔗', description: 'Creates advisor and practice records in the onboarding CRM with full field population.', recommended: true, category: 'Integrations' },
+      { id: 'compliance-checklist', name: 'Compliance Checklist', icon: '☑️', description: 'Generates a tailored compliance checklist based on advisor type and jurisdiction.', recommended: true, category: 'Compliance' },
+      { id: 'registration-package', name: 'Registration Data Package', icon: '📦', description: 'Compiles all registration data into a formatted submission-ready package.', recommended: false, category: 'Delivery' },
+      { id: 'welcome-packet', name: 'Welcome Packet Draft', icon: '✉️', description: 'Drafts a personalized welcome packet for the incoming advisor.', recommended: false, category: 'Delivery' }
+    ],
+    executionStages: ['Transcribing session', 'Building practice profile', 'Running compliance check', 'Pushing to CRM'],
+    sampleOutput: {
+      title: 'Practice Profile — Torres Wealth Partners',
+      summary: 'RIA advisor onboarding complete. Practice profile and CRM records created.',
+      tableHeaders: ['Field', 'Value', 'Source', 'Status'],
+      tableRows: [
+        ['Advisor Name', 'Michael Torres, CFP', 'Session transcript', 'Verified'],
+        ['Practice Name', 'Torres Wealth Partners LLC', 'Session transcript', 'Verified'],
+        ['Advisor Type', 'Hybrid RIA/BD', 'Form U4', 'Verified'],
+        ['AUM (est.)', '$48M', 'Advisor disclosure', 'Pending audit'],
+        ['Support Staff', '3 (1 licensed)', 'Session transcript', 'Verified'],
+        ['Compliance Officer', 'Jennifer Mills, CCO', 'Session transcript', 'Verified'],
+        ['CRM Record', 'Created — ID #ADV-2026-0341', 'Salesforce', 'Pushed ✓']
+      ]
+    }
+  },
+
+  RACHEL: {
+    id: 'RACHEL', name: 'RACHEL', role: 'Research Intelligence Agent',
+    domain: 'Research & Competitive Intelligence', color: '#80cbc4',
+    inputTypes:  ['Topic Query', 'Target Company List', 'Date Range'],
+    outputTypes: ['Research Report', 'Competitor Matrix', 'Executive Brief'],
+    supportedModes: ['executor'], primaryMode: 'executor',
+    missions: [
+      { id: 'competitive-landscape', name: 'Competitive Landscape Analysis', description: 'Deep-dive competitive analysis mapping competitors, positioning, and differentiation.', defaultOutputs: ['Research Report (MD)', 'Competitor Matrix', 'Executive Summary'] },
+      { id: 'market-signal', name: 'Market Signal Report', description: 'Real-time signal aggregation across news, filings, job posts, and social for a target market.', defaultOutputs: ['Market Signal Report', 'Signal Alert Config', 'Slack Brief Push'] },
+      { id: 'prospect-research', name: 'Prospect Research Brief', description: 'Comprehensive research brief on a target company for sales or partnership outreach.', defaultOutputs: ['Prospect Brief', 'CRM Opportunity Notes', 'Outreach Talking Points'] },
+      { id: 'industry-trends', name: 'Industry Trend Summary', description: 'Summarize emerging trends and market shifts across a target industry vertical.', defaultOutputs: ['Trend Summary Report', 'Executive Summary', 'Supporting Citations'] }
+    ],
+    inputFields: {
+      executor: [
+        { type: 'text', id: 'researchTopic', label: 'Research Topic', placeholder: 'e.g. AI-powered contract lifecycle management platforms' },
+        { type: 'tags', id: 'targetCompanies', label: 'Target Companies', placeholder: 'Add company, press Enter…', hint: 'Name specific companies to include in the analysis' },
+        { type: 'select', id: 'timeRange', label: 'Time Range', options: ['Last 30 days', 'Last 90 days', 'Last 6 months', 'Last 12 months', 'All time'] },
+        { type: 'select', id: 'outputFormat', label: 'Output Format', options: ['Executive Brief (2 pages)', 'Full Report (10+ pages)', 'Slide-ready bullets', 'Raw data CSV'] },
+        { type: 'range', id: 'depthSelector', label: 'Research Depth', hint: 'Quick Brief → Full Report' }
+      ]
+    },
+    automations: [
+      { id: 'research-report', name: 'Research Report (MD)', icon: '📝', description: 'Full formatted research report in Markdown, ready for publishing or editing.', recommended: true, category: 'Core Outputs' },
+      { id: 'exec-summary', name: 'Executive Summary', icon: '⚡', description: '1-page executive summary with top-3 insights and recommended actions.', recommended: true, category: 'Core Outputs' },
+      { id: 'competitor-matrix', name: 'Competitor Matrix', icon: '🏆', description: 'Side-by-side comparison matrix across key dimensions (pricing, features, positioning).', recommended: true, category: 'Core Outputs' },
+      { id: 'slack-brief', name: 'Slack Brief Push', icon: '💬', description: 'Pushes a concise 3-bullet brief to the configured Slack channel.', recommended: false, category: 'Distribution' },
+      { id: 'crm-notes', name: 'CRM Opportunity Notes', icon: '🔗', description: 'Formats insights as CRM opportunity notes and pushes to specified records.', recommended: false, category: 'Distribution' }
+    ],
+    executionStages: ['Scoping research', 'Gathering sources', 'Synthesizing insights', 'Formatting outputs'],
+    sampleOutput: {
+      title: 'Competitive Landscape — AI-Powered CLM Platforms',
+      summary: '6 competitors analyzed across 5 dimensions. Analysis period: last 90 days.',
+      tableHeaders: ['Company', 'Positioning', 'Key Differentiator', 'Threat Level'],
+      tableRows: [
+        ['Ironclad', 'Enterprise CLM platform, workflow-first', 'Deep Salesforce integration, no-code workflows', 'High'],
+        ['Docusign CLM', 'Agreement cloud, eSign-native', 'Largest existing eSign base, known brand', 'High'],
+        ['LinkSquares', 'AI extraction, post-signature focus', 'Fast clause extraction, private company analytics', 'Medium'],
+        ['Lexion', 'SMB-focused, AI-assisted', 'Ease of setup, Gmail/Outlook inbox integration', 'Medium'],
+        ['SpotDraft', 'Collaborative redlining, legal team focus', 'Strong template library, fast negotiation UI', 'Medium'],
+        ['Juro', 'Browser-native contracts, self-serve', 'Embedded contract creation in product workflows', 'Low']
+      ]
+    }
+  },
+
+  CLARA: {
+    id: 'CLARA', name: 'CLARA', role: 'Document Intelligence Agent',
+    domain: 'Document Extraction & Classification', color: '#ce93d8',
+    inputTypes:  ['PDF', 'DOCX', 'XLSX', 'TIFF / Scanned Images'],
+    outputTypes: ['Classified Document Set', 'Extraction CSV', 'Index Manifest'],
+    supportedModes: ['executor'], primaryMode: 'executor',
+    missions: [
+      { id: 'doc-classification', name: 'Document Classification & Routing', description: 'Classify and route a batch of documents to defined destinations based on content type.', defaultOutputs: ['Classified Document Set', 'Index Manifest', 'Exception Report'] },
+      { id: 'multi-doc-extraction', name: 'Multi-Document Extraction', description: 'Extract structured fields from a document batch using a defined extraction schema.', defaultOutputs: ['Extraction Results (CSV)', 'Confidence Report', 'Exception Report'] },
+      { id: 'policy-compliance', name: 'Policy Compliance Check', description: 'Check a document set against a defined policy schema and flag non-compliant items.', defaultOutputs: ['Compliance Flag Report', 'Pass/Fail Summary', 'Remediation Notes'] },
+      { id: 'data-room-index', name: 'Data Room Indexing', description: 'Ingest and index a full data room for M&A, fundraising, or audit purposes.', defaultOutputs: ['Index Manifest', 'Classification Report', 'Linked TOC'] }
+    ],
+    inputFields: {
+      executor: [
+        { type: 'upload', id: 'documentBatch', label: 'Document Batch', hint: 'PDF, DOCX, XLSX, PNG, TIFF — up to 500 files' },
+        { type: 'select', id: 'classificationSchema', label: 'Classification Schema', options: ['Financial Documents', 'Legal Contracts', 'HR Records', 'Medical Records', 'Custom Schema…'] },
+        { type: 'select', id: 'outputDestination', label: 'Output Destination', options: ['SharePoint', 'Google Drive', 'S3 Bucket', 'Local Download', 'DriveTrain'] },
+        { type: 'range', id: 'confidenceThreshold', label: 'Confidence Threshold', hint: 'Low (60%) → High (95%)' }
+      ]
+    },
+    automations: [
+      { id: 'classified-set', name: 'Classified Document Set', icon: '📂', description: 'Organized document set with classification labels applied to filename and metadata.', recommended: true, category: 'Core Outputs' },
+      { id: 'extraction-csv', name: 'Extraction Results (CSV)', icon: '📊', description: 'Structured CSV of all extracted fields across the document batch.', recommended: true, category: 'Core Outputs' },
+      { id: 'compliance-flags', name: 'Compliance Flag Report', icon: '🚩', description: 'Flags documents with policy violations, missing fields, or low confidence extractions.', recommended: true, category: 'Quality' },
+      { id: 'index-manifest', name: 'Index Manifest', icon: '📋', description: 'Full document index with filename, type, confidence, and routing destination.', recommended: false, category: 'Delivery' },
+      { id: 'exception-report', name: 'Exception Report', icon: '⚠️', description: 'Lists all documents that fell below the confidence threshold for human review.', recommended: false, category: 'Quality' }
+    ],
+    executionStages: ['Ingesting documents', 'Running classification', 'Extracting fields', 'Generating reports'],
+    sampleOutput: {
+      title: 'Document Index — Data Room Batch 01',
+      summary: '48 documents processed. 44 classified (92%). 4 exceptions flagged.',
+      tableHeaders: ['Filename', 'Classification', 'Confidence', 'Routing'],
+      tableRows: [
+        ['MSA_Acme_2025.pdf', 'Legal Contract — MSA', '97%', 'Contracts/Active'],
+        ['Invoice_March_2026.pdf', 'Financial — Invoice', '99%', 'Finance/AP'],
+        ['Board_Minutes_Q1.docx', 'Corporate — Board Minutes', '94%', 'Legal/Governance'],
+        ['NDA_SignedParty_v2.pdf', 'Legal Contract — NDA', '96%', 'Contracts/NDAs'],
+        ['Employee_Review_T.Torres.pdf', 'HR — Performance Review', '88%', 'HR/Reviews'],
+        ['Unknown_Document_14.pdf', 'Unclassified', '41%', '⚠ Exception Queue']
+      ]
+    }
+  }
+};
+
+// v5.2: Extended with sessionComplete state for facilitator missions
+const recentMissions = [
+  {
+    id: 'rm-sage-1',
+    agentId: 'SAGE',
+    missionId: 'soc2-control-evidence',
+    missionName: 'SOC 2 Control Evidence Interview',
+    mode: 'facilitator',
+    status: 'Session Complete',
+    timestamp: '15 Mar · 2:00 PM',
+    sessionComplete: true,
+    participant: 'Sarah Chen, VP Engineering',
+    sessionDateTime: 'Mar 15, 2026 · 2:00 PM EST',
+    sessionType: 'Google Meet',
+    prefilledState: { selectedAgent: 'SAGE', selectedMode: 'facilitator', selectedMission: 'soc2-control-evidence' }
+  },
+  {
+    id: 'rm-sage-2',
+    agentId: 'SAGE',
+    missionId: 'vendor-risk-assessment',
+    missionName: 'Vendor Risk Assessment',
+    mode: 'facilitator',
+    status: 'Session Complete',
+    timestamp: '28 Mar · 10:30 AM',
+    sessionComplete: true,
+    participant: 'Tom Bradley, IT Director',
+    sessionDateTime: 'Mar 28, 2026 · 10:30 AM EST',
+    sessionType: 'Zoom',
+    prefilledState: { selectedAgent: 'SAGE', selectedMode: 'facilitator', selectedMission: 'vendor-risk-assessment' }
+  },
+  {
+    id: 'rm-mason-1',
+    agentId: 'MASON',
+    missionId: 'contract-extraction',
+    missionName: 'Contract Extraction & CRM Push',
+    mode: 'executor',
+    status: 'Output Ready',
+    timestamp: '2 days ago',
+    sessionComplete: false,
+    prefilledState: { selectedAgent: 'MASON', selectedMode: 'executor', selectedMission: 'contract-extraction' }
+  },
+  {
+    id: 'rm-clara-1',
+    agentId: 'CLARA',
+    missionId: 'doc-classification',
+    missionName: 'Document Classification & Routing',
+    mode: 'executor',
+    status: 'Output Ready',
+    timestamp: '10 days ago',
+    sessionComplete: false,
+    prefilledState: { selectedAgent: 'CLARA', selectedMode: 'executor', selectedMission: 'doc-classification' }
+  }
+];
+
+// ═══════════════════════════════════════════════════════════════
+// STATE — v5: added activeWorkspace
+// ═══════════════════════════════════════════════════════════════
+
+let state = {
+  selectedAgent: null,
+  selectedMode: null,
+  selectedMission: null,
+  currentStep: 1,
+  selectedAutomations: new Set(),
+  prevAgentId: null,
+  activeWorkspace: null
+};
+
+// ═══════════════════════════════════════════════════════════════
+// UTILITIES
+// ═══════════════════════════════════════════════════════════════
+
+function getAgent() { return state.selectedAgent ? AGENTS[state.selectedAgent] : null; }
+function getMission() {
+  const agent = getAgent();
+  if (!agent || !state.selectedMission) return null;
+  return agent.missions.find(m => m.id === state.selectedMission);
+}
+function modeLabel(mode) {
+  return { executor: 'Execute', facilitator: 'Facilitate' }[mode] || mode;
+}
+function showToast(message, type = 'default', icon = '💬') {
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  toast.innerHTML = `<span class="toast-icon">${icon}</span>${message}`;
+  container.appendChild(toast);
+  setTimeout(() => {
+    toast.style.animation = 'slideOut 200ms ease forwards';
+    setTimeout(() => toast.remove(), 200);
+  }, 3000);
+}
+function confidenceClass(val) {
+  const n = parseInt(val);
+  if (n >= 90) return 'confidence-high';
+  if (n >= 75) return 'confidence-med';
+  return 'confidence-low';
+}
+function statusClass(val) {
+  const v = val.toLowerCase();
+  if (v.includes('verified') || v.includes('pass') || v.includes('pushed') || v.includes('✓')) return 'status-pass';
+  if (v.includes('pending') || v.includes('warn')) return 'status-warn';
+  if (v.includes('fail') || v.includes('error') || v.includes('exception')) return 'status-fail';
+  return '';
+}
+
+// ═══════════════════════════════════════════════════════════════
+// CONTEXT PANEL — updates after every state mutation
+// ═══════════════════════════════════════════════════════════════
+
+function updateContextPanel() {
+  const agent = getAgent();
+  const mission = getMission();
+
+  const lpAgent = document.getElementById('lpAgent');
+  const lpAvatar = document.getElementById('lpAgentAvatar');
+  const lpName = document.getElementById('lpAgentName');
+  const lpDomain = document.getElementById('lpAgentDomain');
+
+  if (agent) {
+    lpAgent.classList.add('has-agent');
+    lpAvatar.textContent = agent.id;
+    lpAvatar.style.background = agent.color + '22';
+    lpAvatar.style.color = agent.color;
+    lpName.textContent = agent.name;
+    lpName.style.color = agent.color;
+    lpDomain.textContent = agent.domain;
+  } else {
+    lpAgent.classList.remove('has-agent');
+    lpAvatar.textContent = '—';
+    lpAvatar.style.background = '';
+    lpAvatar.style.color = '';
+    lpName.textContent = 'No agent selected';
+    lpName.style.color = '';
+    lpDomain.textContent = 'Choose an agent to begin';
+  }
+
+  function setCtx(id, value) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (value && value !== '—') {
+      el.textContent = value;
+      el.classList.add('filled');
+    } else {
+      el.textContent = '—';
+      el.classList.remove('filled');
+    }
+  }
+
+  setCtx('ctxAgent', agent ? agent.name : null);
+  setCtx('ctxMode', state.selectedMode ? modeLabel(state.selectedMode) : null);
+  setCtx('ctxMission', mission ? mission.name : null);
+
+  let inputSummary = null;
+  if (state.selectedMode === 'executor') inputSummary = 'Documents & config';
+  else if (state.selectedMode === 'facilitator') inputSummary = 'Session setup';
+  if (state.currentStep < 4) inputSummary = null;
+  setCtx('ctxInput', inputSummary);
+
+  let outputSummary = null;
+  if (state.selectedAutomations.size > 0) {
+    outputSummary = `${state.selectedAutomations.size} automation${state.selectedAutomations.size !== 1 ? 's' : ''} selected`;
+  }
+  setCtx('ctxOutput', outputSummary);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// LEFT PANEL STEP INDICATOR
+// ═══════════════════════════════════════════════════════════════
+
+function updateStepIndicator(stepNum) {
+  document.querySelectorAll('.lp-step').forEach(item => {
+    const n = parseInt(item.dataset.step);
+    item.classList.remove('active', 'completed');
+    if (n < stepNum) item.classList.add('completed');
+    if (n === stepNum) item.classList.add('active');
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// NAV FOOTER MANAGEMENT
+// ═══════════════════════════════════════════════════════════════
+
+function updateNavBar() {
+  const navBar = document.getElementById('stepNavBar');
+  const backBtn = document.getElementById('navBack');
+  const contBtn = document.getElementById('navContinue');
+  const step = state.currentStep;
+  const screenId = document.querySelector('.screen.active')?.id;
+
+  // Hide nav on non-wizard screens
+  const hideScreens = ['screen-exec', 'screen-output', 'screen-workspace-doc', 'screen-workspace-conv', 'screen-session-confirm', 'screen-1'];
+  if (hideScreens.includes(screenId)) {
+    navBar.classList.add('hidden');
+    return;
+  }
+  navBar.classList.remove('hidden');
+
+  backBtn.style.visibility = (step <= 1) ? 'hidden' : 'visible';
+
+  if (step === 6) {
+    const isExecutor = state.selectedMode === 'executor';
+    contBtn.textContent = isExecutor ? '⚡ Launch Mission' : '📅 Schedule Session';
+    contBtn.disabled = false;
+  } else {
+    contBtn.textContent = 'Continue →';
+    if (step === 2) contBtn.disabled = !state.selectedMode;
+    else if (step === 3) contBtn.disabled = !state.selectedMission;
+    else contBtn.disabled = false;
+  }
+}
+
+function navBack() {
+  const step = state.currentStep;
+  if (step > 1) goToStep(step - 1);
+}
+
+function navContinue() {
+  const step = state.currentStep;
+  if (step === 6) { launchMission(); return; }
+  if (step < 6) goToStep(step + 1);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SCREEN NAVIGATION — v5: handles workspace and landing screens
+// ═══════════════════════════════════════════════════════════════
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const target = document.getElementById(id);
+  if (target) target.classList.add('active');
+
+  const lpPanel = document.getElementById('leftPanel');
+  const lpSteps = document.getElementById('lpSteps');
+  const lpStudioLabel = document.getElementById('lpStudioLabel');
+
+  const hideLeftScreens = ['screen-exec', 'screen-output', 'screen-workspace-doc', 'screen-workspace-conv', 'screen-session-confirm'];
+
+  if (hideLeftScreens.includes(id)) {
+    lpPanel.style.display = 'none';
+  } else {
+    lpPanel.style.display = '';
+  }
+
+  // Landing screen: show studio label, hide step list
+  if (id === 'screen-1') {
+    if (lpSteps) lpSteps.style.display = 'none';
+    if (lpStudioLabel) lpStudioLabel.style.display = '';
+  } else {
+    if (lpSteps) lpSteps.style.display = '';
+    if (lpStudioLabel) lpStudioLabel.style.display = 'none';
+  }
+
+  const isWizardStep = id.startsWith('screen-') && !isNaN(id.replace('screen-', ''));
+  const stepNum = isWizardStep ? parseInt(id.replace('screen-', '')) : null;
+  if (stepNum && stepNum > 1) updateStepIndicator(stepNum);
+
+  updateNavBar();
+  document.getElementById('stepContent').scrollTop = 0;
+}
+
+function goToStep(n) {
+  state.currentStep = n;
+  if (n === 1) { showScreen('screen-1'); updateNavMissionName(); updateContextPanel(); return; }
+  if (n === 2) renderModeCards();
+  if (n === 3) renderMissionSelect();
+  if (n === 4) renderInputForm();
+  if (n === 5) renderAutomations();
+  if (n === 6) renderReview();
+  showScreen('screen-' + n);
+  updateNavMissionName();
+  updateContextPanel();
+}
+
+function updateNavMissionName() {
+  const mission = getMission();
+  const agent = getAgent();
+  let label = 'TacitAI Studio';
+  if (agent && mission) label = `${agent.name} — ${mission.name}`;
+  else if (agent) label = `${agent.name} — New Mission`;
+  document.getElementById('navMissionName').textContent = label;
+}
+
+function backToMissions() {
+  state.activeWorkspace = null;
+  state.currentStep = 1;
+  showScreen('screen-1');
+  updateNavMissionName();
+  updateContextPanel();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// STEP 1 — Agent Selection + Landing Screen
+// ═══════════════════════════════════════════════════════════════
+
+function renderAgentList() {
+  const list = document.getElementById('agentList');
+  list.innerHTML = Object.values(AGENTS).map(agent => {
+    const isSelected = state.selectedAgent === agent.id;
+    const missionItems = agent.missions.slice(0, 3).map(m => {
+      const name = m.name.length > 36 ? m.name.slice(0, 36) + '…' : m.name;
+      return `<div class="anc-mission-item">· ${name}</div>`;
+    }).join('');
+    const modeBadges = agent.supportedModes.map(m => {
+      const code = m === 'facilitator' ? 'F' : 'E';
+      return `<span class="mode-badge ${code}" title="${modeLabel(m)}">${modeLabel(m)}</span>`;
+    }).join('');
+    const inTypes = agent.inputTypes.slice(0, 3).join(' · ');
+    const outTypes = agent.outputTypes.slice(0, 3).join(' · ');
+    return `
+    <div class="agent-netflix-card ${isSelected ? 'selected' : ''}" id="agent-card-${agent.id}"
+         onclick="selectAgent('${agent.id}')">
+      <div class="anc-hero" style="background:radial-gradient(ellipse at 50% 30%, ${agent.color}33 0%, var(--surface2) 70%)">
+        <div class="anc-avatar" style="background:${agent.color}">${agent.id}</div>
+        <div class="anc-name">${agent.name}</div>
+        <div class="anc-role">${agent.role}</div>
+      </div>
+      <div class="anc-hero-divider"></div>
+      <div class="anc-detail">
+        <div class="anc-modes">${modeBadges}</div>
+        <div>
+          <div class="anc-section-label">Missions</div>
+          ${missionItems}
+        </div>
+        <div class="anc-row">
+          <div class="anc-row-label">Domain</div>
+          <div class="anc-row-value">${agent.domain}</div>
+        </div>
+        <div class="anc-row">
+          <div class="anc-row-label">In</div>
+          <div class="anc-row-value">${inTypes}</div>
+        </div>
+        <div class="anc-row">
+          <div class="anc-row-label">Out</div>
+          <div class="anc-row-value">${outTypes}</div>
+        </div>
+        <button class="btn btn-primary anc-launch-btn" onclick="event.stopPropagation(); selectAgent('${agent.id}')">▶&nbsp;&nbsp;Launch Mission</button>
+      </div>
+    </div>
+  `}).join('');
+}
+
+function renderRecentMissions() {
+  const row = document.getElementById('recentMissionCardsRow');
+  if (!row) return;
+
+  if (recentMissions.length === 0) {
+    row.innerHTML = '<p class="landing-empty">No recent missions. Launch one below.</p>';
+    return;
+  }
+
+  row.innerHTML = recentMissions.map(rm => {
+    const agent = AGENTS[rm.agentId];
+    if (rm.sessionComplete) {
+      return `
+        <div class="mission-landing-card session-complete" onclick="openWorkspace('${rm.id}')">
+          <div class="mlc-inner">
+            <div class="mlc-avatar" style="background:${agent.color}22;color:${agent.color}">${agent.id}</div>
+            <div class="mlc-name">${rm.missionName}</div>
+            <div class="mlc-meta">${agent.name} · ${modeLabel(rm.mode)}</div>
+            <div class="mlc-session-meta">
+              <span>📅 ${rm.sessionDateTime}</span>
+              <span>👤 ${rm.participant}</span>
+              <span>📞 ${rm.sessionType}</span>
+            </div>
+            <button class="btn mlc-cta" onclick="event.stopPropagation(); openWorkspace('${rm.id}')">
+              Finish in Output-Workspace →
+            </button>
+          </div>
+        </div>
+      `;
+    } else {
+      const chipClass = rm.status === 'Output Ready' ? 'status-chip-ready' : 'status-chip-progress';
+      return `
+        <div class="mission-landing-card" onclick="openWorkspace('${rm.id}')">
+          <div class="mlc-inner" style="padding-top:0">
+            <div class="mlc-avatar" style="background:${agent.color}22;color:${agent.color}">${agent.id}</div>
+            <div class="mlc-name">${rm.missionName}</div>
+            <div class="mlc-meta">${agent.name} · ${modeLabel(rm.mode)}</div>
+            <div class="mlc-timestamp">${rm.timestamp}</div>
+            <div class="mlc-status-chip ${chipClass}">${rm.status}</div>
+            <button class="btn btn-secondary mlc-cta" onclick="event.stopPropagation(); openWorkspace('${rm.id}')">→ Open Workspace</button>
+          </div>
+        </div>
+      `;
+    }
+  }).join('');
+}
+
+function selectAgent(id) {
+  const wasStep2Plus = state.currentStep >= 2 && state.selectedAgent !== null;
+  const isChange = state.selectedAgent !== null && state.selectedAgent !== id;
+
+  state.prevAgentId = state.selectedAgent;
+  state.selectedAgent = id;
+
+  document.querySelectorAll('.agent-netflix-card').forEach(c => c.classList.remove('selected'));
+  const card = document.getElementById('agent-card-' + id);
+  if (card) card.classList.add('selected');
+
+  updateContextPanel();
+
+  if (wasStep2Plus && isChange) {
+    state.selectedMode = null;
+    state.selectedMission = null;
+    state.selectedAutomations = new Set();
+    showToast('Agent changed — please confirm mode.', 'warning', '⚠️');
+    goToStep(2);
+  } else {
+    // From landing: proceed to mode selection
+    goToStep(2);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// WORKSPACE NAVIGATION — v5 new
+// ═══════════════════════════════════════════════════════════════
+
+function openWorkspace(missionId) {
+  const rm = recentMissions.find(r => r.id === missionId);
+  if (!rm) return;
+
+  const agent = AGENTS[rm.agentId];
+  state.activeWorkspace = {
+    agentId: rm.agentId,
+    missionName: rm.missionName,
+    mode: rm.mode,
+    timestamp: rm.timestamp,
+    agent: agent
+  };
+
+  if (rm.mode === 'executor') {
+    renderWorkspaceDoc();
+    showScreen('screen-workspace-doc');
+  } else {
+    renderWorkspaceConv();
+    showScreen('screen-workspace-conv');
+  }
+
+  document.getElementById('navMissionName').textContent = `${agent.name} — ${rm.missionName}`;
+}
+
+function routeToPostLaunchWorkspace() {
+  const agent = getAgent();
+  const mission = getMission();
+  if (!agent || !mission) return;
+
+  state.activeWorkspace = {
+    agentId:      agent.id,
+    missionId:    mission.id,
+    missionName:  mission.name,
+    mode:         state.selectedMode,
+    timestamp:    'Just now',
+    status:       'Output Ready',
+    agent:        agent
+  };
+
+  if (state.selectedMode === 'executor') {
+    renderWorkspaceDoc();
+    showScreen('screen-workspace-doc');
+  } else {
+    renderWorkspaceConv();
+    showScreen('screen-workspace-conv');
+  }
+}
+
+function renderWorkspaceDoc() {
+  const ws = state.activeWorkspace;
+  if (!ws) return;
+  const agent = ws.agent || AGENTS[ws.agentId];
+
+  const missionNameEl = document.getElementById('wsDocMissionName');
+  if (missionNameEl) missionNameEl.textContent = ws.missionName;
+
+  const agentMetaEl = document.getElementById('wsDocAgentMeta');
+  if (agentMetaEl) agentMetaEl.textContent = `${agent?.name || ws.agentId} · ${modeLabel(ws.mode)} · ${ws.timestamp}`;
+
+  const outputSubEl = document.getElementById('wsDocOutputSub');
+  if (outputSubEl) outputSubEl.textContent = `${agent?.name || ws.agentId} · ${modeLabel(ws.mode)} · ${ws.timestamp}`;
+
+  // Reset preview
+  const preview = document.getElementById('wsDocPreview');
+  if (preview) {
+    preview.innerHTML = '<div class="ws-doc-preview-placeholder">Select a document to preview</div>';
+  }
+}
+
+function renderWorkspaceConv() {
+  const ws = state.activeWorkspace;
+  if (!ws) return;
+  const agent = ws.agent || AGENTS[ws.agentId];
+
+  const hdr = document.getElementById('wsConvMissionName');
+  if (hdr) hdr.textContent = ws.missionName;
+
+  const sub = document.getElementById('wsConvAgentMeta');
+  if (sub) sub.textContent = `${agent?.name || ws.agentId} · ${modeLabel(ws.mode)} · ${ws.timestamp}`;
+}
+
+function viewDocument(name) {
+  const preview = document.getElementById('wsDocPreview');
+  if (!preview) return;
+  preview.innerHTML = `
+    <div style="width:100%;text-align:center;">
+      <div style="font-size:var(--text-small);font-weight:600;color:var(--text);margin-bottom:12px;">📄 ${name}</div>
+      <div style="background:var(--surface3);border-radius:8px;padding:18px 16px;font-size:var(--text-micro);color:var(--text-muted);font-family:monospace;text-align:left;line-height:1.9;">
+        MASTER SERVICE AGREEMENT<br>
+        Effective Date: February 1, 2026<br>
+        Parties: Acme Financial Group / TacitAI Inc.<br><br>
+        1. Services. Provider agrees to deliver...<br>
+        2. Payment Terms. Client shall pay within 30 days...<br>
+        3. Term. This Agreement shall remain in effect for 24 months...<br>
+        [Preview — full document rendering simulation]
+      </div>
+    </div>
+  `;
+}
+
+function runAutomation(name, dest) {
+  showToast(`Running: ${name}…`, 'default', '⚡');
+  setTimeout(() => {
+    showToast(`${name} complete — sent to ${dest}`, 'success', '✅');
+  }, 1500);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// STEP 2 — Mode Selection (Hybrid removed)
+// ═══════════════════════════════════════════════════════════════
+
+const MODE_META = {
+  facilitator: { icon: '🎙️', name: 'Facilitate', desc: 'Agent joins a live session and facilitates structured data collection via conversation.' },
+  executor:    { icon: '⚡', name: 'Execute', desc: 'Agent processes documents and data autonomously without a live session.' }
+};
+
+function renderModeCards() {
+  const agent = getAgent();
+  if (!agent) return;
+  const allModes = ['facilitator', 'executor'];
+  const grid = document.getElementById('modeGrid');
+  grid.innerHTML = allModes.map(mode => {
+    const meta = MODE_META[mode];
+    const supported = agent.supportedModes.includes(mode);
+    const selected = state.selectedMode === mode;
+    return `
+      <div class="mode-card ${selected ? 'selected' : ''} ${!supported ? 'disabled' : ''}"
+           onclick="${supported ? `selectMode('${mode}')` : ''}">
+        <div class="mode-selected-indicator">✓</div>
+        <div class="mode-icon">${meta.icon}</div>
+        <div class="mode-name">${meta.name}</div>
+        <div class="mode-desc">${meta.desc}</div>
+        ${!supported ? `<div class="mode-unavail-label">Not available for ${agent.name}</div>` : ''}
+      </div>
+    `;
+  }).join('');
+}
+
+function selectMode(mode) {
+  state.selectedMode = mode;
+  document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('selected'));
+  const allModes = ['facilitator', 'executor'];
+  const cards = document.querySelectorAll('.mode-card');
+  const idx = allModes.indexOf(mode);
+  if (cards[idx]) cards[idx].classList.add('selected');
+
+  const notes = {
+    facilitator: '🎙️ Next: set up your session — meeting link, date, time, and invitees.',
+    executor: '⚡ Next: upload your documents and configure extraction settings.'
+  };
+  document.getElementById('modeContextNote').textContent = notes[mode] || '';
+  updateNavBar();
+  updateContextPanel();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// STEP 3 — Mission Selection
+// ═══════════════════════════════════════════════════════════════
+
+function renderMissionSelect() {
+  const agent = getAgent();
+  if (!agent) return;
+  const sel = document.getElementById('missionSelect');
+  sel.innerHTML = '<option value="">— Select a mission —</option>' +
+    agent.missions.map(m => `<option value="${m.id}" ${state.selectedMission === m.id ? 'selected' : ''}>${m.name}</option>`).join('');
+
+  if (state.selectedMission) {
+    updateMissionPreview(state.selectedMission);
+  } else {
+    document.getElementById('missionPreview').style.display = 'none';
+  }
+  updateNavBar();
+}
+
+function onMissionChange(id) {
+  state.selectedMission = id || null;
+  if (id) updateMissionPreview(id);
+  else document.getElementById('missionPreview').style.display = 'none';
+  updateNavBar();
+  updateContextPanel();
+}
+
+function updateMissionPreview(id) {
+  const mission = getAgent()?.missions.find(m => m.id === id);
+  if (!mission) return;
+  document.getElementById('missionPreview').style.display = 'block';
+  document.getElementById('missionPreviewOutputs').innerHTML =
+    mission.defaultOutputs.map(o => `<span class="output-chip">${o}</span>`).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// STEP 4 — Input Form (no hybrid tab logic)
+// ═══════════════════════════════════════════════════════════════
+
+function renderInputForm() {
+  const agent = getAgent();
+  if (!agent) return;
+  const mode = state.selectedMode;
+
+  const headings = {
+    executor:    { h: 'Provide the input',    sub: 'Upload documents and configure extraction settings.' },
+    facilitator: { h: 'Set up the session',   sub: 'Configure your meeting details and session parameters.' }
+  };
+  const hd = headings[mode] || headings.executor;
+  document.getElementById('step4Heading').textContent = hd.h;
+  document.getElementById('step4Subheading').textContent = hd.sub;
+
+  const fields = agent.inputFields[mode] || agent.inputFields[agent.primaryMode] || [];
+  const container = document.getElementById('inputFormContainer');
+  container.innerHTML = `<div class="input-form">${renderFields(fields)}</div>`;
+
+  container.querySelectorAll('.upload-zone').forEach(zone => {
+    zone.addEventListener('dragenter', e => { e.preventDefault(); zone.classList.add('drag-over'); });
+    zone.addEventListener('dragover', e => { e.preventDefault(); });
+    zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
+    zone.addEventListener('drop', e => {
+      e.preventDefault(); zone.classList.remove('drag-over');
+      showDroppedFiles(zone, Array.from(e.dataTransfer.files));
+    });
+    zone.addEventListener('click', () => zone.querySelector('.upload-file-input')?.click());
+  });
+  container.querySelectorAll('.upload-file-input').forEach(inp => {
+    inp.addEventListener('change', function() {
+      showDroppedFiles(this.closest('.upload-zone'), Array.from(this.files));
+    });
+  });
+  container.querySelectorAll('.tag-input-inner').forEach(inner => {
+    inner.addEventListener('keydown', e => {
+      if (e.key === 'Enter' && inner.value.trim()) {
+        e.preventDefault();
+        addTag(inner.closest('.tag-input-wrap'), inner.value.trim());
+        inner.value = '';
+      }
+    });
+  });
+
+  updateContextPanel();
+}
+
+function renderFields(fields) { return fields.map(f => renderField(f)).join(''); }
+
+function renderField(f) {
+  if (f.type === 'row') return `<div class="input-row">${f.fields.map(renderField).join('')}</div>`;
+  if (f.type === 'upload') return `
+    <div class="field-group">
+      <label class="field-label">${f.label}</label>
+      <div class="upload-zone" id="zone-${f.id}">
+        <input type="file" class="upload-file-input" multiple>
+        <div class="upload-icon">📁</div>
+        <div class="upload-primary">Drop files here or click to browse</div>
+        <div class="upload-secondary">${f.hint || 'PDF, DOCX, XLSX supported'}</div>
+      </div>
+    </div>`;
+  if (f.type === 'select') return `
+    <div class="field-group">
+      <label class="field-label" for="${f.id}">${f.label}</label>
+      <select class="styled-select" id="${f.id}">
+        ${f.options.map(o => `<option>${o}</option>`).join('')}
+      </select>
+      ${f.hint ? `<div class="field-hint">${f.hint}</div>` : ''}
+    </div>`;
+  if (f.type === 'tags') return `
+    <div class="field-group">
+      <label class="field-label">${f.label}</label>
+      <div class="tag-input-wrap" id="tags-${f.id}">
+        <input class="tag-input-inner" placeholder="${f.placeholder || 'Add item…'}" />
+      </div>
+      ${f.hint ? `<div class="field-hint">${f.hint}</div>` : ''}
+    </div>`;
+  if (f.type === 'range') return `
+    <div class="field-group">
+      <label class="field-label">${f.label}</label>
+      <div class="range-wrap">
+        <input type="range" class="styled-range" min="0" max="100" value="60" id="${f.id}">
+        <div class="range-labels">
+          <span class="range-label">Quick Brief</span>
+          <span class="range-label">Full Report</span>
+        </div>
+      </div>
+      ${f.hint ? `<div class="field-hint">${f.hint}</div>` : ''}
+    </div>`;
+  if (f.type === 'textarea') return `
+    <div class="field-group">
+      <label class="field-label" for="${f.id}">${f.label}</label>
+      <textarea class="styled-textarea" id="${f.id}" placeholder="${f.placeholder || ''}" rows="3"></textarea>
+      ${f.hint ? `<div class="field-hint">${f.hint}</div>` : ''}
+    </div>`;
+  return `
+    <div class="field-group">
+      <label class="field-label" for="${f.id}">${f.label}</label>
+      <input type="${f.type || 'text'}" class="styled-input" id="${f.id}" placeholder="${f.placeholder || ''}">
+      ${f.hint ? `<div class="field-hint">${f.hint}</div>` : ''}
+    </div>`;
+}
+
+function showDroppedFiles(zone, files) {
+  let existing = zone.querySelector('.uploaded-files');
+  if (!existing) { existing = document.createElement('div'); existing.className = 'uploaded-files'; zone.appendChild(existing); }
+  files.forEach(f => {
+    const div = document.createElement('div');
+    div.className = 'uploaded-file';
+    const kb = (f.size / 1024).toFixed(0);
+    div.innerHTML = `<span class="uploaded-file-icon">📄</span><span class="uploaded-file-name">${f.name}</span><span class="uploaded-file-size">${kb} KB</span>`;
+    existing.appendChild(div);
+  });
+  zone.querySelector('.upload-icon').textContent = '✅';
+  zone.querySelector('.upload-primary').textContent = `${files.length} file${files.length > 1 ? 's' : ''} added`;
+}
+
+function addTag(wrap, text) {
+  const chip = document.createElement('span');
+  chip.className = 'tag-chip';
+  chip.innerHTML = `${text}<span class="tag-chip-remove" onclick="this.parentElement.remove()">×</span>`;
+  const inner = wrap.querySelector('.tag-input-inner');
+  wrap.insertBefore(chip, inner);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// STEP 5 — Automations
+// ═══════════════════════════════════════════════════════════════
+
+function renderAutomations() {
+  const agent = getAgent();
+  if (!agent) return;
+
+  if (state.selectedAutomations.size === 0) {
+    agent.automations.filter(a => a.recommended).forEach(a => state.selectedAutomations.add(a.id));
+  }
+
+  const categories = {};
+  agent.automations.forEach(a => {
+    if (!categories[a.category]) categories[a.category] = [];
+    categories[a.category].push(a);
+  });
+
+  const container = document.getElementById('automationsContainer');
+  container.innerHTML = `<div class="automations-section">` +
+    Object.entries(categories).map(([cat, autos]) => `
+      <div class="automation-category">
+        <div class="automation-category-title">${cat}</div>
+        <div class="automation-grid">
+          ${autos.map(a => {
+            const checked = state.selectedAutomations.has(a.id);
+            return `
+              <div class="automation-tile ${checked ? 'checked' : ''}" onclick="toggleAutomation('${a.id}', this)">
+                <div class="auto-checkbox">${checked ? '✓' : ''}</div>
+                <div class="auto-info">
+                  <div class="auto-header">
+                    <span class="auto-icon">${a.icon}</span>
+                    <span class="auto-name">${a.name}</span>
+                    ${a.recommended ? '<span class="auto-badge-recommended">Recommended</span>' : ''}
+                  </div>
+                  <div class="auto-desc">${a.description}</div>
+                </div>
+              </div>`;
+          }).join('')}
+        </div>
+      </div>`).join('') +
+    `<div class="automation-count" id="autoCount">${state.selectedAutomations.size} automations selected</div>
+    </div>`;
+
+  updateContextPanel();
+}
+
+function toggleAutomation(id, tile) {
+  if (state.selectedAutomations.has(id)) {
+    state.selectedAutomations.delete(id);
+    tile.classList.remove('checked');
+    tile.querySelector('.auto-checkbox').textContent = '';
+  } else {
+    state.selectedAutomations.add(id);
+    tile.classList.add('checked');
+    tile.querySelector('.auto-checkbox').textContent = '✓';
+  }
+  const countEl = document.getElementById('autoCount');
+  if (countEl) countEl.textContent = `${state.selectedAutomations.size} automations selected`;
+  updateContextPanel();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// STEP 6 — Review
+// ═══════════════════════════════════════════════════════════════
+
+function renderReview() {
+  const agent = getAgent();
+  const mission = getMission();
+  if (!agent) return;
+
+  const selectedAutos = agent.automations.filter(a => state.selectedAutomations.has(a.id));
+  const card = document.getElementById('reviewCard');
+  card.innerHTML = `
+    <div class="review-section">
+      <div class="review-section-label">Agent</div>
+      <div class="review-agent-row">
+        <div class="review-agent-avatar" style="background:${agent.color}22;color:${agent.color}">${agent.id}</div>
+        <div>
+          <div class="review-section-value">${agent.name} — ${agent.role}</div>
+          <div class="review-meta">${agent.domain}</div>
+        </div>
+      </div>
+    </div>
+    <div class="review-section">
+      <div class="review-section-label">Mode</div>
+      <div class="review-section-value accent">${modeLabel(state.selectedMode)}</div>
+      <div class="review-meta">${
+        state.selectedMode === 'executor' ? 'Document processing — no live session required' :
+        'Live session — agent joins and facilitates'
+      }</div>
+    </div>
+    <div class="review-section">
+      <div class="review-section-label">Mission</div>
+      <div class="review-section-value">${mission ? mission.name : '—'}</div>
+      ${mission ? `<div class="review-meta">${mission.description}</div>` : ''}
+    </div>
+    <div class="review-section">
+      <div class="review-section-label">Output Automations</div>
+      ${selectedAutos.length > 0
+        ? `<div class="review-chips">${selectedAutos.map(a => `<span class="review-chip">${a.icon} ${a.name}</span>`).join('')}</div>`
+        : '<div class="review-section-value" style="color:var(--text-muted)">None selected</div>'
+      }
+    </div>
+    <div class="review-section">
+      <div class="review-section-label">Dispatched by</div>
+      <div class="review-section-value">Jordan Hayes</div>
+      <div class="review-meta">Today at ${new Date().toLocaleTimeString('en-US', {hour:'2-digit',minute:'2-digit'})}</div>
+    </div>
+  `;
+  updateNavBar();
+  updateContextPanel();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// EXECUTION SCREEN
+// ═══════════════════════════════════════════════════════════════
+
+function launchMission() {
+  if (state.selectedMode === 'facilitator') {
+    renderSessionConfirm();
+    showScreen('screen-session-confirm');
+  } else {
+    renderExecution();
+    showScreen('screen-exec');
+  }
+}
+
+function renderExecution() {
+  const agent = getAgent();
+  const mission = getMission();
+  if (!agent) return;
+
+  const avatar = document.getElementById('execAvatar');
+  avatar.textContent = agent.id;
+  avatar.style.background = agent.color + '22';
+  avatar.style.color = agent.color;
+  avatar.style.borderColor = agent.color + '55';
+  avatar.style.boxShadow = `0 0 40px ${agent.color}22`;
+
+  document.getElementById('execTitle').textContent = mission ? mission.name : 'Running Mission…';
+  document.getElementById('execSubtitle').textContent = `${agent.name} • ${modeLabel(state.selectedMode)} mode • Dispatched just now`;
+
+  const steps = agent.executionStages;
+  document.getElementById('execSteps').innerHTML = steps.map((s, i) => `
+    <div class="exec-step" id="exec-step-${i}">
+      <div class="exec-step-num">${i + 1}</div>
+      <div class="exec-step-label">${s}</div>
+    </div>`).join('');
+
+  const bar = document.getElementById('execBar');
+  const statusText = document.getElementById('execStatusText');
+  let currentStage = 0;
+  bar.style.width = '0%';
+
+  function advanceStage() {
+    if (currentStage > 0) {
+      document.getElementById(`exec-step-${currentStage - 1}`)?.classList.remove('active');
+      document.getElementById(`exec-step-${currentStage - 1}`)?.classList.add('done');
+    }
+    if (currentStage < steps.length) {
+      document.getElementById(`exec-step-${currentStage}`)?.classList.add('active');
+      statusText.textContent = steps[currentStage] + '…';
+      bar.style.width = `${((currentStage + 1) / (steps.length + 1)) * 100}%`;
+      currentStage++;
+      setTimeout(advanceStage, 2000);
+    } else {
+      bar.style.width = '100%';
+      statusText.textContent = 'Mission complete ✓';
+      setTimeout(() => { routeToPostLaunchWorkspace(); }, 800);
+    }
+  }
+  setTimeout(advanceStage, 400);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// OUTPUT REVIEW
+// ═══════════════════════════════════════════════════════════════
+
+function renderOutputReview() {
+  const agent = getAgent();
+  if (!agent) return;
+  const out = agent.sampleOutput;
+
+  document.getElementById('outputAgentBadge').innerHTML = `
+    <div class="output-agent-dot" style="background:${agent.color}"></div>
+    ${agent.name} — ${modeLabel(state.selectedMode)}`;
+
+  document.getElementById('outputTitle').textContent = out.title;
+  document.getElementById('outputMeta').textContent = out.summary;
+
+  const rows = out.tableRows.map(row => {
+    const cells = row.map((cell, i) => {
+      const header = out.tableHeaders[i]?.toLowerCase() || '';
+      if (header.includes('confidence') && cell.includes('%')) return `<td class="${confidenceClass(cell)}">${cell}</td>`;
+      if (header.includes('status') || header.includes('routing')) {
+        const sc = statusClass(cell);
+        if (sc) return `<td><span class="output-status-badge ${sc}">${cell}</span></td>`;
+      }
+      if (header.includes('threat')) {
+        const t = cell.toLowerCase();
+        const tc = t.includes('high') ? 'status-fail' : t.includes('medium') ? 'status-warn' : 'status-pass';
+        return `<td><span class="output-status-badge ${tc}">${cell}</span></td>`;
+      }
+      return `<td>${cell}</td>`;
+    });
+    return `<tr>${cells.join('')}</tr>`;
+  }).join('');
+
+  document.getElementById('outputContent').innerHTML = `
+    <div class="output-table-wrap">
+      <table class="output-table">
+        <thead><tr>${out.tableHeaders.map(h => `<th>${h}</th>`).join('')}</tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SESSION CONFIRM — v5.2 Facilitator Lifecycle
+// ═══════════════════════════════════════════════════════════════
+
+function renderSessionConfirm() {
+  const agent = getAgent();
+  const mission = getMission();
+  if (!agent) return;
+
+  // Read session inputs from state — fall back to placeholder values for demo
+  const sessionDate = document.getElementById('sessionDate')?.value || 'TBD';
+  const sessionTime = document.getElementById('sessionTime')?.value || 'TBD';
+  const meetingLink = document.getElementById('meetingLink')?.value || '—';
+
+  document.getElementById('scDetailsCard').innerHTML = `
+    <div class="sc-detail-row">
+      <span class="sc-detail-label">Agent</span>
+      <span class="sc-detail-value">${agent.name} — ${agent.role}</span>
+    </div>
+    <div class="sc-detail-row">
+      <span class="sc-detail-label">Mission</span>
+      <span class="sc-detail-value">${mission?.name || '—'}</span>
+    </div>
+    <div class="sc-detail-row">
+      <span class="sc-detail-label">Session Date</span>
+      <span class="sc-detail-value">${sessionDate}</span>
+    </div>
+    <div class="sc-detail-row">
+      <span class="sc-detail-label">Session Time</span>
+      <span class="sc-detail-value">${sessionTime}</span>
+    </div>
+    <div class="sc-detail-row">
+      <span class="sc-detail-label">Meeting Link</span>
+      <span class="sc-detail-value" style="word-break:break-all;font-size:var(--text-micro)">${meetingLink}</span>
+    </div>
+  `;
+}
+
+function toggleNotifyInput(value) {
+  const input = document.getElementById('scNotifyInput');
+  if (!input) return;
+  if (value === 'sms') {
+    input.type = 'tel';
+    input.placeholder = 'Your mobile number';
+  } else {
+    input.type = 'email';
+    input.placeholder = 'Your email address';
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════
+
+function init() {
+  renderAgentList();
+  renderRecentMissions();
+  showScreen('screen-1');
+  updateContextPanel();
+}
+
+init();
+</script>
+</body>
+</html>

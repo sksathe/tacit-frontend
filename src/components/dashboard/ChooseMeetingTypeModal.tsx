@@ -3,20 +3,21 @@ import { X, Phone, Video } from "lucide-react";
 
 type MeetingFlow = "start" | "schedule" | null;
 
+export type MeetingChannel = "phone" | "virtual";
+
 interface ChooseMeetingTypeModalProps {
   open: boolean;
   flow: MeetingFlow;
   onClose: () => void;
-  onContinueVirtual: () => void;
-  onContinuePhone: () => void;
+  /** Phone → phone session; virtual → web meeting (Zoom/Meet link) in Start/Schedule modal. */
+  onContinue: (channel: MeetingChannel) => void;
 }
 
 export function ChooseMeetingTypeModal({
   open,
   flow,
   onClose,
-  onContinueVirtual,
-  onContinuePhone,
+  onContinue,
 }: ChooseMeetingTypeModalProps) {
   const [selectedType, setSelectedType] = useState<"virtual" | "phone" | null>(null);
 
@@ -29,11 +30,7 @@ export function ChooseMeetingTypeModal({
 
   const handleContinue = () => {
     if (!selectedType) return;
-    if (selectedType === "virtual") {
-      onContinueVirtual();
-    } else {
-      onContinuePhone();
-    }
+    onContinue(selectedType === "virtual" ? "virtual" : "phone");
     setSelectedType(null);
   };
 
@@ -50,17 +47,17 @@ export function ChooseMeetingTypeModal({
       onClick={handleClose}
     >
       <div
-        className="bg-card border-2 border-primary rounded-2xl p-10 max-w-[720px] w-[90%] max-h-[90vh] overflow-y-auto relative"
+        className="relative w-[90%] max-h-[90vh] max-w-[720px] overflow-y-auto rounded-2xl border border-border bg-card/95 p-10 shadow-[0_24px_70px_-26px_hsl(var(--foreground)/0.45)]"
         onClick={(e) => e.stopPropagation()}
       >
         <button
           onClick={handleClose}
-          className="absolute top-5 right-5 bg-transparent border-none text-muted-foreground text-2xl cursor-pointer transition-colors leading-none hover:text-primary"
+          className="absolute top-5 right-5 cursor-pointer border-none bg-transparent text-2xl leading-none text-muted-foreground transition-colors hover:text-foreground"
         >
           <X className="w-5 h-5" />
         </button>
 
-        <h2 className="text-2xl md:text-3xl font-extrabold text-primary mb-3 text-center">
+        <h2 className="mb-3 text-center text-2xl font-bold text-foreground md:text-3xl">
           Choose meeting type
         </h2>
         <p className="text-muted-foreground mb-8 text-center text-sm md:text-base">
@@ -73,14 +70,14 @@ export function ChooseMeetingTypeModal({
           <button
             type="button"
             onClick={() => setSelectedType("phone")}
-            className={`flex flex-col items-start text-left gap-3 p-5 rounded-xl border transition-all cursor-pointer bg-background/60 hover:bg-primary/5 ${
+            className={`flex cursor-pointer flex-col items-start gap-3 rounded-xl border bg-background/60 p-5 text-left transition-all hover:-translate-y-[1px] hover:bg-muted/35 ${
               selectedType === "phone"
-                ? "border-primary ring-2 ring-primary/40 shadow-elegant"
-                : "border-border hover:border-primary/40"
+                ? "border-ring ring-2 ring-ring/25 shadow-[0_12px_36px_-26px_hsl(var(--ring)/0.7)]"
+                : "border-border hover:border-ring/35"
             }`}
           >
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full border border-border bg-muted/50 text-foreground">
                 <Phone className="w-5 h-5" />
               </div>
               <div className="font-semibold text-foreground text-base md:text-lg">
@@ -91,7 +88,7 @@ export function ChooseMeetingTypeModal({
               Use the existing Tacit phone workflow. The SME dials a number and speaks with your
               AI agent.
             </p>
-            <div className="mt-1 inline-flex items-center gap-1 rounded-full border border-primary/30 bg-primary/5 px-2 py-0.5 text-[0.7rem] font-medium text-primary">
+            <div className="mt-1 inline-flex items-center gap-1 rounded-full border border-border bg-muted/40 px-2 py-0.5 text-[0.7rem] font-medium text-muted-foreground">
               Available now
             </div>
           </button>
@@ -100,14 +97,14 @@ export function ChooseMeetingTypeModal({
           <button
             type="button"
             onClick={() => setSelectedType("virtual")}
-            className={`flex flex-col items-start text-left gap-3 p-5 rounded-xl border transition-all cursor-pointer bg-background/60 hover:bg-primary/5 ${
+            className={`flex cursor-pointer flex-col items-start gap-3 rounded-xl border bg-background/60 p-5 text-left transition-all hover:-translate-y-[1px] hover:bg-muted/35 ${
               selectedType === "virtual"
-                ? "border-primary ring-2 ring-primary/40 shadow-elegant"
-                : "border-border hover:border-primary/40"
+                ? "border-ring ring-2 ring-ring/25 shadow-[0_12px_36px_-26px_hsl(var(--ring)/0.7)]"
+                : "border-border hover:border-ring/35"
             }`}
           >
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full border border-border bg-muted/50 text-foreground">
                 <Video className="w-5 h-5" />
               </div>
               <div className="font-semibold text-foreground text-base md:text-lg">
@@ -118,8 +115,8 @@ export function ChooseMeetingTypeModal({
               Run this session over Meet, Zoom, or Teams. We&apos;ll handle invites and agenda
               prep for you.
             </p>
-            <div className="mt-1 inline-flex items-center gap-1 rounded-full border border-primary/30 bg-primary/5 px-2 py-0.5 text-[0.7rem] font-medium text-primary">
-              Coming soon
+            <div className="mt-1 inline-flex items-center gap-1 rounded-full border border-border bg-muted/40 px-2 py-0.5 text-[0.7rem] font-medium text-muted-foreground">
+              Available now
             </div>
           </button>
         </div>
@@ -136,7 +133,7 @@ export function ChooseMeetingTypeModal({
             type="button"
             onClick={handleContinue}
             disabled={!selectedType}
-            className="px-5 py-2.5 rounded-lg text-sm font-semibold bg-primary text-primary-foreground shadow-elegant hover:bg-primary-glow hover:shadow-glow transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            className="rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground transition-all hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
           >
             Continue
           </button>

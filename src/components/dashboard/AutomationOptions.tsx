@@ -10,12 +10,22 @@ interface AutomationItem {
   recommended?: boolean;
 }
 
+export interface EagleAutomationHandlers {
+  onExportJson: () => void;
+  onExportExcel: () => void;
+  onValidationNotes: () => void;
+  canExportExcel: boolean;
+  disabled?: boolean;
+}
+
 interface AutomationOptionsProps {
   onOpenConfigDrawer: (type: string, title: string, icon: string) => void;
   /** Optional: open a richer summary panel instead of config drawer for Generate Summary */
   onOpenSummaryPanel?: () => void;
   /** Agent name so we can customize automations per agent (e.g. Rachel = finance-focused) */
   agentName?: string;
+  /** Eagle: export / validation actions (no transcript automations) */
+  eagleHandlers?: EagleAutomationHandlers;
   /** Layout mode for where this appears in the page */
   layout?: "grid" | "stack";
   className?: string;
@@ -26,6 +36,7 @@ export function AutomationOptions({
   onOpenConfigDrawer,
   onOpenSummaryPanel,
   agentName,
+  eagleHandlers,
   layout = "grid",
   className,
   title = "Available Automations",
@@ -36,7 +47,32 @@ export function AutomationOptions({
   const [category, setCategory] = useState<"all" | "core" | "finance" | "analysis" | "insights" | "documentation" | "training">("all");
 
   const automations: AutomationItem[] =
-    agentName === "Rachel"
+    agentName === "Eagle"
+      ? [
+          {
+            id: "eagle-export-json",
+            icon: "📥",
+            title: "Export JSON",
+            description: "Download the full logistics API response as JSON.",
+            category: "core",
+            recommended: true,
+          },
+          {
+            id: "eagle-export-excel",
+            icon: "📊",
+            title: "Export Excel",
+            description: "Download the spreadsheet when the server included an XLSX payload.",
+            category: "core",
+          },
+          {
+            id: "eagle-validation",
+            icon: "📋",
+            title: "Validation notes",
+            description: "Review parser warnings and validation messages in one place.",
+            category: "analysis",
+          },
+        ]
+      : agentName === "Rachel"
       ? [
           {
             id: "summary",
@@ -205,7 +241,13 @@ export function AutomationOptions({
   }, [automations, category, query]);
 
   const categoryPills: Array<{ key: "all" | "core" | "finance" | "analysis" | "insights" | "documentation" | "training"; label: string }> =
-    agentName === "Rachel"
+    agentName === "Eagle"
+      ? [
+          { key: "all", label: "All" },
+          { key: "core", label: "Core" },
+          { key: "analysis", label: "Analysis" },
+        ]
+      : agentName === "Rachel"
       ? [
           { key: "all", label: "All" },
           { key: "core", label: "Core" },
@@ -275,8 +317,21 @@ export function AutomationOptions({
         >
           {filteredAutomations.map((automation) => {
             const isProcessing = processingAutomations.has(automation.id);
+            const eagleCardDisabled =
+              agentName === "Eagle" &&
+              (!eagleHandlers ||
+                eagleHandlers.disabled ||
+                (automation.id === "eagle-export-excel" && !eagleHandlers.canExportExcel));
             const handleOpen = () => {
               if (isProcessing) return;
+              if (agentName === "Eagle") {
+                if (!eagleHandlers || eagleHandlers.disabled) return;
+                if (automation.id === "eagle-export-excel" && !eagleHandlers.canExportExcel) return;
+                if (automation.id === "eagle-export-json") eagleHandlers.onExportJson();
+                else if (automation.id === "eagle-export-excel") eagleHandlers.onExportExcel();
+                else if (automation.id === "eagle-validation") eagleHandlers.onValidationNotes();
+                return;
+              }
               if (automation.id === "summary" && onOpenSummaryPanel) {
                 onOpenSummaryPanel();
               } else {
@@ -289,13 +344,13 @@ export function AutomationOptions({
                 key={automation.id}
                 type="button"
                 onClick={handleOpen}
-                disabled={isProcessing}
+                disabled={isProcessing || eagleCardDisabled}
                 className={cn(
                   "flex h-full cursor-pointer flex-col rounded-2xl border text-left transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2",
                   "shadow-sm hover:shadow-md hover:-translate-y-0.5",
                   isStack ? "p-4" : "min-h-[130px] justify-start p-4",
                   cardStyle,
-                  isProcessing && "pointer-events-none opacity-60"
+                  (isProcessing || eagleCardDisabled) && "pointer-events-none opacity-60"
                 )}
               >
                 <div

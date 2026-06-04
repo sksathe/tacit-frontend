@@ -1,8 +1,10 @@
+import { useState } from "react";
 import { Navigate, useLocation, useNavigate, useParams } from "react-router-dom";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { SessionDetailView } from "@/components/dashboard/SessionDetailView";
 import { AutomationConfigPanel } from "@/components/dashboard/AutomationConfigPanel";
 import type { SessionItem } from "@/components/dashboard/AutomateSessionsList";
+import type { EagleWorkspaceSnapshot } from "@/types/logisticsExtraction";
 
 type AutomationParams = {
   agentId?: string;
@@ -24,6 +26,10 @@ export default function RachelAutomation() {
   const location = useLocation();
   const navigate = useNavigate();
   const state = location.state as AutomationRouteState | undefined;
+  const [eagleWorkspaceSnapshot, setEagleWorkspaceSnapshot] = useState<EagleWorkspaceSnapshot>({
+    processing: false,
+    processResponse: null,
+  });
 
   if (!agentId || !automationId || !sessionId) {
     return <Navigate to="/dashboard" replace />;
@@ -37,6 +43,7 @@ export default function RachelAutomation() {
   }
 
   const sessionsForAgent = state.sessionsForAgent ?? [];
+  const isEagleRoute = sessionFromState.agentName === "Eagle";
 
   const handleBack = () => {
     // Always go to dashboard home so we never send user back to login.
@@ -75,7 +82,7 @@ export default function RachelAutomation() {
 
       <DashboardHeader />
 
-      <main className="mx-auto max-w-[1700px] px-5 pb-20 pt-10 sm:px-8 sm:pt-14 lg:px-10">
+      <main className="w-full max-w-none px-3 pb-20 pt-10 sm:px-5 sm:pt-14 lg:px-6">
         <div className="mb-5 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
           <button
             type="button"
@@ -133,7 +140,7 @@ export default function RachelAutomation() {
             {sessionFromState.agentName}
           </span>
           <span className="rounded-full border border-primary/35 bg-primary/10 px-2 py-0.5 text-[0.58rem] font-bold uppercase tracking-[0.1em] text-primary">
-            Transcript ready
+            {isEagleRoute ? "Logistics extraction" : "Transcript ready"}
           </span>
         </section>
 
@@ -141,6 +148,7 @@ export default function RachelAutomation() {
           <AutomationConfigPanel
             automation={automationMeta}
             agentName={sessionFromState.agentName}
+            eagleWorkspaceSnapshot={isEagleRoute ? eagleWorkspaceSnapshot : null}
             onSelectAutomation={(type) => {
               navigate(`/dashboard/${agentId}/${type}/${sessionFromState.sessionId}`, {
                 replace: true,
@@ -177,6 +185,7 @@ export default function RachelAutomation() {
           compactLayout
           hideSessionStrip
           hideCompactAutomationOptions
+          onEagleWorkspaceStateChange={isEagleRoute ? setEagleWorkspaceSnapshot : undefined}
         />
       </main>
     </div>

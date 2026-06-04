@@ -6,13 +6,15 @@ import { TACIT_AGENTS } from "@/data/agents";
 import { SelectedAgentDescription } from "./SelectedAgentDescription";
 import { AgentAvatar } from "./AgentAvatar";
 import { apiClient } from "@/lib/apiClient";
+import type { SessionModalPrefill } from "./sessionModalPrefill";
 
 interface StartSessionModalProps {
   open: boolean;
   onClose: () => void;
+  prefill?: SessionModalPrefill | null;
 }
 
-export function StartSessionModal({ open, onClose }: StartSessionModalProps) {
+export function StartSessionModal({ open, onClose, prefill = null }: StartSessionModalProps) {
   const [selectedAgent, setSelectedAgent] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchFocused, setIsSearchFocused] = useState(false);
@@ -173,9 +175,32 @@ export function StartSessionModal({ open, onClose }: StartSessionModalProps) {
       setSearchQuery("");
       setIsSearchFocused(false);
       setMeetingMode("phone");
-      setFormData((prev) => ({ ...prev, meetingUrl: "" }));
+      setSelectedAgent(null);
+      setFormData({
+        sessionTitle: "",
+        inviteeEmail: "",
+        sessionNotes: "",
+        meetingUrl: "",
+      });
     }
   }, [open]);
+
+  // Apply Mission Brief / meeting-chooser prefill when opening
+  useEffect(() => {
+    if (!open || !prefill) return;
+    if (prefill.initialMeetingMode) setMeetingMode(prefill.initialMeetingMode);
+    if (prefill.initialSessionTitle?.trim()) {
+      setFormData((prev) => ({ ...prev, sessionTitle: prefill.initialSessionTitle!.trim() }));
+    }
+    if (prefill.initialSessionNotes?.trim()) {
+      setFormData((prev) => ({ ...prev, sessionNotes: prefill.initialSessionNotes!.trim() }));
+    }
+    if (prefill.initialAgentId) {
+      setSelectedAgent(prefill.initialAgentId);
+      const ag = agents.find((a) => a.id === prefill.initialAgentId);
+      if (ag) setSearchQuery(ag.name);
+    }
+  }, [open, prefill, agents]);
 
   if (!open) return null;
 
