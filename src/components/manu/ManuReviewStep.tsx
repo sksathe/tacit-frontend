@@ -11,11 +11,12 @@ interface ManuReviewStepProps {
   missionId: string;
   documents: ManuUploadedDocument[];
   manualConfig: ManuManualConfig;
-  onLaunch: () => void;
+  onLaunch: () => void | Promise<void>;
   onBack: () => void;
+  isLaunching?: boolean;
 }
 
-export function ManuReviewStep({ missionId, documents, manualConfig, onLaunch, onBack }: ManuReviewStepProps) {
+export function ManuReviewStep({ missionId, documents, manualConfig, onLaunch, onBack, isLaunching }: ManuReviewStepProps) {
   const mission = MANU_MISSIONS.find((m) => m.id === missionId);
   const sectionTitles = MANU_ALL_SECTIONS.filter((s) => manualConfig.selectedSectionIds.includes(s.id)).map((s) => s.title);
 
@@ -62,10 +63,10 @@ export function ManuReviewStep({ missionId, documents, manualConfig, onLaunch, o
       </Card>
 
       <div className="flex justify-between">
-        <Button variant="outline" onClick={onBack}>Back</Button>
-        <Button className="gap-2 bg-gradient-primary" onClick={onLaunch}>
+        <Button type="button" variant="outline" onClick={onBack}>Back</Button>
+        <Button className="gap-2 bg-gradient-primary" onClick={onLaunch} disabled={isLaunching}>
           <Rocket className="h-4 w-4" />
-          Launch MANU
+          {isLaunching ? "Launching…" : "Launch MANU"}
         </Button>
       </div>
     </div>

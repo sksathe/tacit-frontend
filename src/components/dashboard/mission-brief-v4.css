@@ -565,14 +565,14 @@ html:not(.dark) .mission-brief-v4__sidebar-minify:hover {
 .mission-brief-v4__screen,
 .mission-brief-v4__wizard-pane,
 .mission-brief-v4__progress-strip {
-  padding-left: 1.15rem;
+  padding-left: 1.75rem;
 }
 
 @media (max-width: 640px) {
   .mission-brief-v4__screen,
   .mission-brief-v4__wizard-pane,
   .mission-brief-v4__progress-strip {
-    padding-left: 0.85rem;
+    padding-left: 1rem;
   }
 }
 
@@ -2069,11 +2069,18 @@ html:not(.dark) .mission-brief-v4__sidebar-minify:hover {
 .mission-brief-v4__manu-workspace {
   width: 100%;
   max-width: none;
+  padding-left: 1.75rem;
 }
 
 .mission-brief-v4__manu-mission-picker {
   width: 100%;
   max-width: none;
+}
+
+@media (max-width: 640px) {
+  .mission-brief-v4__manu-workspace {
+    padding-left: 1rem;
+  }
 }
 
 .mission-brief-v4__manu-mission-grid {
@@ -4940,4 +4947,3 @@ html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__layou
   line-height: 1.45;
   color: hsl(var(--muted-foreground));
 }
-

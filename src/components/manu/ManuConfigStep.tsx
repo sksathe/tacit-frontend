@@ -144,7 +144,7 @@ export function ManuConfigStep({
       </Card>
 
       <div className="flex justify-between">
-        <Button variant="outline" onClick={onBack}>Back</Button>
+        <Button type="button" variant="outline" onClick={onBack}>Back</Button>
         <Button className="bg-gradient-primary" disabled={!metadata.productName || selectedSectionIds.length === 0} onClick={onContinue}>
           Continue to review
         </Button>

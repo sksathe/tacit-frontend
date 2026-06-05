@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { downloadApprovedManualPdf } from "@/lib/manuPdfExport";
+import { downloadManuExportPdf } from "@/lib/manuPdfExport";
 import type { ManuExportKind, ManuRun } from "@/types/manu";
 import { useToast } from "@/components/ui/use-toast";
 import { Download, FileText, Package } from "lucide-react";
@@ -23,60 +23,12 @@ interface ManuExportStepProps {
 export function ManuExportStep({ run, onRunChange, onRestart }: ManuExportStepProps) {
   const { toast } = useToast();
 
-  const downloadJson = (kind: ManuExportKind, filename: string, payload: unknown) => {
-    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = filename;
-    a.click();
-    URL.revokeObjectURL(url);
+  const markExported = (kind: ManuExportKind) => {
     onRunChange({
       ...run,
       exportStatus: { ...run.exportStatus, [kind]: "exported" },
       updatedAt: new Date().toISOString(),
     });
-    toast({ title: "Export ready", description: `${filename} downloaded (simulated POC export).` });
-  };
-
-  const buildPayload = (kind: ManuExportKind) => {
-    switch (kind) {
-      case "approved_manual":
-        return {
-          product: run.manualConfig.metadata,
-          sections: run.generatedSections.filter((s) => s.status === "approved"),
-        };
-      case "traceability_matrix":
-        return run.traceabilityMatrix;
-      case "risk_coverage":
-        return run.riskCoverage;
-      case "regulatory_checklist":
-        return run.regulatoryChecklist;
-      case "translation_qa":
-        return run.translationQA;
-      case "audit_package":
-        return {
-          runId: run.runId,
-          missionId: run.missionId,
-          missionFocus: run.missionFocus,
-          client: run.client,
-          metadata: run.manualConfig.metadata,
-          documents: run.uploadedDocuments.map((d) => ({ name: d.fileName, category: d.category })),
-          sections: run.generatedSections,
-          traceability: run.traceabilityMatrix,
-          risks: run.riskCoverage,
-          regulatory: run.regulatoryChecklist,
-          translationQA: run.translationQA,
-          gaps: run.gaps,
-          changeLog:
-            run.missionId === "manual-update"
-              ? run.gaps.filter((g) => g.includes("existing manual") || g.includes("revision"))
-              : [],
-          exportedAt: new Date().toISOString(),
-        };
-      default:
-        return {};
-    }
   };
 
   const exportApprovedManualPdf = () => {
@@ -89,12 +41,8 @@ export function ManuExportStep({ run, onRunChange, onRestart }: ManuExportStepPr
       });
       return;
     }
-    downloadApprovedManualPdf(run.manualConfig.metadata, sections, run.runId);
-    onRunChange({
-      ...run,
-      exportStatus: { ...run.exportStatus, approved_manual: "exported" },
-      updatedAt: new Date().toISOString(),
-    });
+    downloadManuExportPdf("approved_manual", run);
+    markExported("approved_manual");
     toast({
       title: "PDF ready",
       description: `Approved manual downloaded (${sections.length} sections).`,
@@ -106,7 +54,9 @@ export function ManuExportStep({ run, onRunChange, onRestart }: ManuExportStepPr
       exportApprovedManualPdf();
       return;
     }
-    downloadJson(kind, `manu-${run.runId.slice(0, 8)}-${kind}.json`, buildPayload(kind));
+    downloadManuExportPdf(kind, run);
+    markExported(kind);
+    toast({ title: "PDF ready", description: `${kind.replaceAll("_", " ")} downloaded as PDF.` });
   };
 
   const exportAll = () => {
@@ -118,7 +68,7 @@ export function ManuExportStep({ run, onRunChange, onRestart }: ManuExportStepPr
       <div>
         <h2 className="text-2xl font-bold">Export documentation package</h2>
         <p className="mt-2 text-muted-foreground">
-          Download auditable artifacts for LabCorp quality and regulatory records. The approved manual exports as PDF; supporting reports remain JSON.
+          Download auditable artifacts for LabCorp quality and regulatory records. All exports are generated as formatted PDF reports.
         </p>
       </div>
 
@@ -136,7 +86,7 @@ export function ManuExportStep({ run, onRunChange, onRestart }: ManuExportStepPr
                 ) : (
                   <Download className="h-4 w-4" />
                 )}
-                {opt.kind === "approved_manual" ? "Download PDF" : "Export"}
+                Download PDF
                 {run.exportStatus[opt.kind] === "exported" && (
                   <span className="text-xs text-emerald-500">✓</span>
                 )}

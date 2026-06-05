@@ -1,6 +1,7 @@
 import { MANU_DEMO_BUNDLES, type ManuDemoBundleKey } from "@/data/manuLabcorp";
 import { MANU_DOCUMENT_CATEGORY_OPTIONS } from "@/data/manuSections";
 import { getCategoryLabel } from "@/lib/manuSimulator";
+import { postManuDocumentExtract } from "@/lib/manuApi";
 import { buildUploadedDocumentFromFile, loadLabCorpDemoBundle } from "@/lib/manuSampleLoader";
 import { getDefaultMetadataForBundle } from "@/data/manuLabcorp";
 import { Button } from "@/components/ui/button";
@@ -37,7 +38,15 @@ export function ManuDocumentBundleStep({
     if (!fileList?.length) return;
     setIsAdding(true);
     try {
-      const built = await Promise.all(Array.from(fileList).map((f) => buildUploadedDocumentFromFile(f)));
+      const built = await Promise.all(
+        Array.from(fileList).map(async (f) => {
+          try {
+            return await postManuDocumentExtract(f);
+          } catch {
+            return buildUploadedDocumentFromFile(f);
+          }
+        }),
+      );
       onDocumentsChange([...documents, ...built]);
     } finally {
       setIsAdding(false);
@@ -142,34 +151,56 @@ export function ManuDocumentBundleStep({
         <div className="space-y-3">
           <h3 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">Uploaded documents ({documents.length})</h3>
           {documents.map((doc) => (
-            <Card key={doc.id} className="border-border/60">
-              <CardHeader className="pb-2">
-                <div className="flex flex-wrap items-start justify-between gap-2">
-                  <CardTitle className="flex items-center gap-2 text-base">
-                    <FileText className="h-4 w-4 text-primary" />
-                    {doc.fileName}
-                  </CardTitle>
-                  <div className="flex items-center gap-2">
-                    <Badge variant="outline" className="text-[0.65rem]">
+            <Card
+              key={doc.id}
+              className="overflow-hidden border-border/60 bg-card/75 shadow-sm transition-colors hover:border-primary/30"
+            >
+              <CardHeader className="gap-3 border-b border-border/50 bg-muted/10 px-4 py-4">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-primary/20 bg-primary/10 text-primary">
+                        <FileText className="h-4 w-4" />
+                      </div>
+                      <div className="min-w-0 space-y-1">
+                        <CardTitle className="truncate text-[0.95rem] font-semibold leading-5">
+                          {doc.fileName}
+                        </CardTitle>
+                        <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                          <Badge variant="outline" className="border-emerald-500/25 bg-emerald-500/10 text-[0.65rem] capitalize text-emerald-400">
+                            {doc.extractionStatus}
+                          </Badge>
+                          <span>{new Date(doc.uploadedAt).toLocaleString()}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 self-start lg:self-center">
+                    <Badge variant="outline" className="border-primary/20 bg-primary/5 text-[0.65rem]">
                       {Math.round(doc.parsingConfidence * 100)}% parse confidence
                     </Badge>
-                    <Button type="button" variant="ghost" size="icon" onClick={() => removeDoc(doc.id)}>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                      onClick={() => removeDoc(doc.id)}
+                    >
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
                 </div>
-                <CardDescription>
-                  <span className="capitalize">{doc.extractionStatus}</span> · {new Date(doc.uploadedAt).toLocaleString()}
-                </CardDescription>
               </CardHeader>
-              <CardContent className="grid gap-4 sm:grid-cols-2">
-                <div>
-                  <Label>Document category</Label>
+              <CardContent className="grid gap-3 px-4 py-4 lg:grid-cols-[minmax(240px,0.9fr)_minmax(0,1.1fr)]">
+                <div className="rounded-lg border border-border/50 bg-background/40 p-3">
+                  <Label className="text-[0.72rem] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+                    Document category
+                  </Label>
                   <Select
                     value={doc.category}
                     onValueChange={(v) => updateDoc(doc.id, { category: v as ManuDocumentCategory })}
                   >
-                    <SelectTrigger className="mt-1">
+                    <SelectTrigger className="mt-2 h-10 bg-background/70">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -180,15 +211,19 @@ export function ManuDocumentBundleStep({
                       ))}
                     </SelectContent>
                   </Select>
-                  <p className="mt-1 text-xs text-muted-foreground">{getCategoryLabel(doc.category)}</p>
+                  <CardDescription className="mt-2 text-xs leading-5">
+                    {getCategoryLabel(doc.category)}
+                  </CardDescription>
                 </div>
-                <div>
-                  <Label>Notes (optional)</Label>
+                <div className="rounded-lg border border-border/50 bg-background/40 p-3">
+                  <Label className="text-[0.72rem] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+                    Notes optional
+                  </Label>
                   <Textarea
-                    className="mt-1 min-h-[80px]"
+                    className="mt-2 min-h-[72px] resize-y border-border/60 bg-background/70 py-2"
                     value={doc.notes ?? ""}
                     onChange={(e) => updateDoc(doc.id, { notes: e.target.value })}
-                    placeholder="Version, market, or extraction hints…"
+                    placeholder="Version, market, or extraction hints..."
                   />
                 </div>
               </CardContent>
@@ -198,7 +233,7 @@ export function ManuDocumentBundleStep({
       )}
 
       <div className="flex justify-between">
-        <Button variant="outline" onClick={onBack}>
+        <Button type="button" variant="outline" onClick={onBack}>
           Back
         </Button>
         <Button

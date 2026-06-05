@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import type { ManuDemoBundleKey } from "@/data/manuLabcorp";
 import type { ManuManualConfig, ManuMode, ManuRun, ManuUploadedDocument } from "@/types/manu";
+import { getDefaultProjectId, postManuRun, pollManuRunUntilReady } from "@/lib/manuApi";
 import { simulateManuRun } from "@/lib/manuSimulator";
 import { loadLabCorpDemoBundle } from "@/lib/manuSampleLoader";
 import { getDefaultMetadataForBundle, getDefaultSectionsForMission } from "@/data/manuLabcorp";
@@ -86,7 +87,26 @@ export async function prepareWorkspaceRun(params: {
     metadata,
   };
   const mission = MANU_MISSIONS.find((m) => m.id === params.missionId)!;
-  let run = simulateManuRun({ mission, mode: "execute", documents, manualConfig });
+
+  let run: ManuRun | null = null;
+  try {
+    const projectId = await getDefaultProjectId();
+    const { runId } = await postManuRun({
+      projectId,
+      missionId: params.missionId,
+      mode: "execute",
+      manualConfig,
+      documents,
+    });
+    run = await pollManuRunUntilReady(runId, { intervalMs: 1500, maxAttempts: 90 });
+  } catch {
+    run = null;
+  }
+
+  if (!run) {
+    run = simulateManuRun({ mission, mode: "execute", documents, manualConfig });
+  }
+
   if (params.preApprove) {
     run = {
       ...run,

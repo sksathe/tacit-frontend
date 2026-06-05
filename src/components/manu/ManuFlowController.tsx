@@ -10,6 +10,8 @@ import { ManuStepNav } from "@/components/manu/ManuStepNav";
 import { ManuTranslationStep } from "@/components/manu/ManuTranslationStep";
 import type { ManuFlowApi } from "@/components/manu/useManuFlow";
 import type { ManuFlowStep } from "@/types/manu";
+import { useToast } from "@/components/ui/use-toast";
+import { useEffect, useRef } from "react";
 
 export type ManuFlowControllerProps = {
   flow: ManuFlowApi;
@@ -30,6 +32,9 @@ const NAV_STEPS: ManuFlowStep[] = [
 ];
 
 export function ManuFlowController({ flow, showStepNav = true }: ManuFlowControllerProps) {
+  const { toast } = useToast();
+  const warnedFallbackRef = useRef(false);
+
   const {
     entry,
     step,
@@ -43,14 +48,46 @@ export function ManuFlowController({ flow, showStepNav = true }: ManuFlowControl
     setManualConfig,
     run,
     setRun,
+    runId,
+    runStorage,
+    isLocalRun,
+    isLaunching,
+    usedSimulationFallback,
+    launchError,
     traceabilityOpen,
     setTraceabilityOpen,
     handleLaunch,
+    handleProcessingComplete,
+    completeWithSimulation,
     resetFlow,
     goBack,
     handleMissionSelect,
     handleBundleMetadata,
   } = flow;
+
+  useEffect(() => {
+    if (usedSimulationFallback && launchError && !warnedFallbackRef.current) {
+      warnedFallbackRef.current = true;
+      toast({
+        title: "Using offline simulation",
+        description: launchError,
+        variant: "destructive",
+      });
+      return;
+    }
+    if (runStorage === "local" && !warnedFallbackRef.current) {
+      warnedFallbackRef.current = true;
+      toast({
+        title: "Using localStorage for MANU runs",
+        description:
+          "Supabase manu_runs table is unavailable. Runs are stored transiently in your browser until migrations are applied.",
+      });
+      return;
+    }
+    if (!usedSimulationFallback && runStorage !== "local") {
+      warnedFallbackRef.current = false;
+    }
+  }, [usedSimulationFallback, runStorage, launchError, toast]);
 
   const showNav =
     showStepNav &&
@@ -107,10 +144,24 @@ export function ManuFlowController({ flow, showStepNav = true }: ManuFlowControl
           manualConfig={manualConfig}
           onLaunch={handleLaunch}
           onBack={goBack}
+          isLaunching={isLaunching}
         />
       )}
 
-      {step === "processing" && <ManuProcessingStep onComplete={() => setStep("workspace")} />}
+      {step === "processing" && missionId && (
+        <ManuProcessingStep
+          runId={runId}
+          isLocalRun={isLocalRun}
+          usedSimulationFallback={usedSimulationFallback}
+          simulationParams={
+            usedSimulationFallback
+              ? { missionId, mode, documents, manualConfig }
+              : undefined
+          }
+          onComplete={handleProcessingComplete}
+          onUseSimulationFallback={runId ? completeWithSimulation : undefined}
+        />
+      )}
 
       {step === "workspace" && run && (
         <ManuApprovalWorkspace
@@ -123,7 +174,12 @@ export function ManuFlowController({ flow, showStepNav = true }: ManuFlowControl
       )}
 
       {step === "translation" && run && (
-        <ManuTranslationStep run={run} onContinue={() => setStep("export")} onBack={() => setStep("workspace")} />
+        <ManuTranslationStep
+          run={run}
+          onRunChange={setRun}
+          onContinue={() => setStep("export")}
+          onBack={() => setStep("workspace")}
+        />
       )}
 
       {step === "export" && run && (

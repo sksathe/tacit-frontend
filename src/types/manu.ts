@@ -172,6 +172,17 @@ export interface ManuRun {
   updatedAt: string;
 }
 
+export type ManuRunStatus = "queued" | "processing" | "ready" | "failed";
+
+export interface ManuRunJobStatus {
+  runId: string;
+  status: ManuRunStatus;
+  stageIndex: number;
+  stageLabel: string;
+  progress: number;
+  error?: string;
+}
+
 export type ManuFlowStep =
   | "landing"
   | "mode"

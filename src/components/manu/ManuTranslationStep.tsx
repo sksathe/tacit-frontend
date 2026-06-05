@@ -4,10 +4,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import type { ManuRun } from "@/types/manu";
 import { AlertTriangle } from "lucide-react";
-import { useMemo, useState } from "react";
+import { generateManuTranslationQA } from "@/lib/manuApi";
+import { useEffect, useMemo, useState } from "react";
 
 interface ManuTranslationStepProps {
   run: ManuRun;
+  onRunChange: (run: ManuRun) => void;
   onContinue: () => void;
   onBack: () => void;
 }
@@ -34,6 +36,13 @@ const FALLBACK_TRANSLATION_MAP: Record<string, Array<[RegExp, string]>> = {
     [/\bdevice\b/gi, "geraet"],
     [/\blaboratory\b/gi, "labor"],
   ],
+  hi: [
+    [/\bwarning\b/gi, "चेतावनी"],
+    [/\bcaution\b/gi, "सावधानी"],
+    [/\bsafety\b/gi, "सुरक्षा"],
+    [/\bdevice\b/gi, "उपकरण"],
+    [/\blaboratory\b/gi, "प्रयोगशाला"],
+  ],
 };
 
 function fallbackTranslate(source: string, langCode: string, langLabel: string): string {
@@ -43,7 +52,7 @@ function fallbackTranslate(source: string, langCode: string, langLabel: string):
   return `[${langLabel}] ${translated.slice(0, 220)}${translated.length > 220 ? "…" : ""}`;
 }
 
-export function ManuTranslationStep({ run, onContinue, onBack }: ManuTranslationStepProps) {
+export function ManuTranslationStep({ run, onRunChange, onContinue, onBack }: ManuTranslationStepProps) {
   const langCodes = useMemo(() => {
     const fromMeta = run.manualConfig.metadata.targetLanguages;
     if (fromMeta.length) return fromMeta;
@@ -52,6 +61,37 @@ export function ManuTranslationStep({ run, onContinue, onBack }: ManuTranslation
   }, [run]);
 
   const [activeLang, setActiveLang] = useState(langCodes[0] ?? "es");
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [genError, setGenError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const generate = async () => {
+      setIsGenerating(true);
+      setGenError(null);
+      try {
+        const translationQA = await generateManuTranslationQA(run);
+        if (cancelled) return;
+        onRunChange({
+          ...run,
+          translationQA,
+          updatedAt: new Date().toISOString(),
+        });
+      } catch (err) {
+        if (cancelled) return;
+        const message = err instanceof Error ? err.message : "Failed to generate translation QA";
+        setGenError(message);
+      } finally {
+        if (!cancelled) setIsGenerating(false);
+      }
+    };
+
+    generate();
+    return () => {
+      cancelled = true;
+    };
+  }, [run.generatedSections, run.manualConfig, run.missionId]);
 
   const activeLabel = MANU_LANGUAGES.find((l) => l.code === activeLang)?.label ?? activeLang;
   const activeScore = (MANU_TRANSLATION_SCORES[activeLang] ?? 90) / 100;
@@ -63,11 +103,15 @@ export function ManuTranslationStep({ run, onContinue, onBack }: ManuTranslation
   const displayRows =
     rowsForLang.length > 0
       ? rowsForLang
-      : run.translationQA.slice(0, 4).map((r) => ({
-          ...r,
+      : run.generatedSections.slice(0, 4).map((section) => ({
+          sectionId: section.id,
+          sectionTitle: section.title,
+          sourceText: section.content.slice(0, 220),
           language: activeLabel,
-          translatedText: `[${activeLabel} simulated] ${r.sourceText.slice(0, 200)}…`,
-          accuracyScore: activeScore,
+          translatedText: fallbackTranslate(section.content, activeLang, activeLabel),
+          accuracyScore: Math.max(0.75, activeScore - 0.08),
+          terminologyFlags: ["AI output missing for this language; showing placeholder translation"],
+          missingWarnings: [],
         }));
 
   const normalizedRows = displayRows.map((row) => {
@@ -89,9 +133,22 @@ export function ManuTranslationStep({ run, onContinue, onBack }: ManuTranslation
       <div>
         <h2 className="text-2xl font-bold">Translation accuracy QA</h2>
         <p className="mt-2 text-muted-foreground">
-          Compare translated sections against approved English source. Scores align with LabCorp HTML prototype (simulated per language).
+          Compare translated sections against approved English source. Translation QA is generated after section approval.
         </p>
       </div>
+
+      {isGenerating && (
+        <Card className="border-primary/30 bg-primary/5">
+          <CardContent className="py-3 text-sm text-muted-foreground">
+            Generating translation QA with OpenAI...
+          </CardContent>
+        </Card>
+      )}
+      {genError && (
+        <Card className="border-destructive/40 bg-destructive/10">
+          <CardContent className="py-3 text-sm text-destructive">{genError}</CardContent>
+        </Card>
+      )}
 
       <div className="flex flex-wrap gap-2">
         {langCodes.map((code) => {
@@ -158,7 +215,7 @@ export function ManuTranslationStep({ run, onContinue, onBack }: ManuTranslation
       </div>
 
       <div className="flex justify-between">
-        <Button variant="outline" onClick={onBack}>
+        <Button type="button" variant="outline" onClick={onBack}>
           Back to approval
         </Button>
         <Button className="bg-gradient-primary" onClick={onContinue}>
