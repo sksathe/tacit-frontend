@@ -41,8 +41,8 @@ const RECENT_CARDS: Array<{
     id: "rm-1",
     product: "CentraSpin Ultra 24R",
     missionId: MANU_MISSION_IDS.productManualGen,
-    meta: "MANU � Product Manual Generation",
-    time: "Today � 4 source files",
+    meta: "MANU · Product Manual Generation",
+    time: "Today · 4 source files",
     chip: "Awaiting Approval",
     chipClass: "border-amber-500/40 bg-amber-500/10 text-amber-600",
     bundleKey: "cs-ultra",
@@ -51,8 +51,8 @@ const RECENT_CARDS: Array<{
     id: "rm-2",
     product: "CentraSpin Ultra 24R",
     missionId: MANU_MISSION_IDS.translationQa,
-    meta: "MANU � Translation Accuracy QA",
-    time: "Yesterday � approved English source",
+    meta: "MANU · Translation Accuracy QA",
+    time: "Yesterday · approved English source",
     chip: "Translation QA Complete",
     chipClass: "border-emerald-500/40 bg-emerald-500/10 text-emerald-600",
     bundleKey: "cs-ultra",
@@ -63,9 +63,9 @@ const RECENT_CARDS: Array<{
     id: "rm-3",
     product: "HemaCount Pro 5000",
     missionId: MANU_MISSION_IDS.productManualGen,
-    meta: "MANU � Product Manual Generation",
+    meta: "MANU · Product Manual Generation",
     time: "6 source files",
-    chip: "Draft � Traceability review",
+    chip: "Draft — Traceability review",
     chipClass: "border-border text-muted-foreground",
     bundleKey: "hcp-5000",
   },
@@ -107,13 +107,13 @@ export function ManuLandingStep({ onStartFlow, onOpenWorkspace }: ManuLandingSte
     <div className="space-y-10">
       <div className="text-center">
         <div className="mb-3 inline-flex rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-primary">
-          LabCorp � MANU Agent
+          LabCorp · MANU Agent
         </div>
         <h1 className="text-3xl font-bold tracking-tight md:text-4xl">
           Equipment Manual <span className="text-primary">Intelligence Workflow</span>
         </h1>
         <p className="mx-auto mt-3 max-w-2xl text-muted-foreground">
-          MANU ingests mixed technical source documents�PRDs, FMEA, regulatory notes, and validation reports�generates
+          MANU ingests mixed technical source documents—PRDs, FMEA, regulatory notes, and validation reports—generates
           traceable product manuals, maps risks to warnings, and routes sections for approval before translation QA and audit export.
         </p>
         <div className="mx-auto mt-6 flex max-w-lg justify-center gap-8 text-center">
@@ -162,7 +162,7 @@ export function ManuLandingStep({ onStartFlow, onOpenWorkspace }: ManuLandingSte
                   {card.chip}
                 </Badge>
                 <Button variant="secondary" className="mt-4 w-full" size="sm">
-                  Open workspace ?
+                  Open workspace →
                 </Button>
               </CardContent>
             </Card>
@@ -175,13 +175,13 @@ export function ManuLandingStep({ onStartFlow, onOpenWorkspace }: ManuLandingSte
         <Card className="border-primary/30 bg-card/60">
           <CardContent className="flex flex-col items-center gap-4 py-10 sm:flex-row sm:justify-between">
             <div className="text-left">
-              <p className="font-semibold">MANU � Manual Intelligence Agent</p>
+              <p className="font-semibold">MANU · Manual Intelligence Agent</p>
               <p className="text-sm text-muted-foreground">
-                Client: LabCorp � Sample bundles: {Object.values(MANU_DEMO_BUNDLES).map((b) => b.modelCode).join(", ")}
+                Client: LabCorp · Sample bundles: {Object.values(MANU_DEMO_BUNDLES).map((b) => b.modelCode).join(", ")}
               </p>
             </div>
             <Button className="bg-gradient-primary" onClick={onStartFlow}>
-              Launch new mission ?
+              Launch new mission →
             </Button>
           </CardContent>
         </Card>

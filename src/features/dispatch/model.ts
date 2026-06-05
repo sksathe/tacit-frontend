@@ -8,7 +8,9 @@ export type DispatchStepId =
   | "execution"
   | "outputReview"
   /** Eagle: single-screen upload → extract (logistics API); skips mode/mission wizard */
-  | "eagleWorkspace";
+  | "eagleWorkspace"
+  /** MANU: inline LabCorp manual workflow; skips generic mission brief wizard */
+  | "manuWorkspace";
 
 /** Pre-launch wizard steps (hybrid mission brief). */
 export const STEP_ORDER: DispatchStepId[] = [
@@ -33,6 +35,9 @@ export const STEP_ORDER_FACILITATE: DispatchStepId[] = [
 /** Eagle: choose agent → upload & extract only (no mode / mission / launch wizard). */
 export const STEP_ORDER_EAGLE: DispatchStepId[] = ["agent", "eagleWorkspace"];
 
+/** MANU: choose agent → inline manual intelligence workspace. */
+export const STEP_ORDER_MANU: DispatchStepId[] = ["agent", "manuWorkspace"];
+
 /** Shown after the user launches from the review step. */
 export const POST_LAUNCH_STEP_ORDER: DispatchStepId[] = ["execution", "outputReview"];
 
@@ -46,6 +51,7 @@ export const STEP_LABELS: Record<DispatchStepId, string> = {
   execution: "Execution",
   outputReview: "Output review",
   eagleWorkspace: "Document",
+  manuWorkspace: "Manual",
 };
 
 export type MissionLaunchRecord = {
@@ -130,6 +136,9 @@ export function orderedSteps(state: DispatchState): DispatchStepId[] {
   if (state.agentId === "eagle") {
     return STEP_ORDER_EAGLE;
   }
+  if (state.agentId === "manu") {
+    return STEP_ORDER_MANU;
+  }
   if (state.modeId === "facilitate") {
     const pre = STEP_ORDER_FACILITATE;
     return state.launched ? [...pre, ...POST_LAUNCH_STEP_ORDER] : pre;
@@ -142,6 +151,7 @@ function clampStepToOrder(state: DispatchState): DispatchStepId {
   const ord = orderedSteps(state);
   if (ord.includes(state.currentStep)) return state.currentStep;
   if (state.agentId === "eagle") return "eagleWorkspace";
+  if (state.agentId === "manu") return "manuWorkspace";
   if (state.currentStep === "outputContract") return state.modeId === "facilitate" ? "mission" : "input";
   return ord[0] ?? "agent";
 }
@@ -162,12 +172,19 @@ export function dispatchReducer(state: DispatchState, action: DispatchAction): D
         modeId: null,
         missionTemplateId: null,
         linkedSessionId: null,
-        ...(action.agentId === "eagle" ? { outputContractId: null } : {}),
+        ...((action.agentId === "eagle" || action.agentId === "manu") ? { outputContractId: null } : {}),
+        ...(action.agentId === "manu" ? { modeId: "execute" } : {}),
       };
       if (action.agentId === "eagle") {
         return { ...next, currentStep: "eagleWorkspace" };
       }
-      if (state.agentId === "eagle" && action.agentId !== "eagle") {
+      if (action.agentId === "manu") {
+        return { ...next, currentStep: "manuWorkspace" };
+      }
+      if (
+        (state.agentId === "eagle" && action.agentId !== "eagle") ||
+        (state.agentId === "manu" && action.agentId !== "manu")
+      ) {
         return { ...next, currentStep: "agent" };
       }
       const step = clampStepToOrder({ ...next, currentStep: state.currentStep });
@@ -203,6 +220,16 @@ export function dispatchReducer(state: DispatchState, action: DispatchAction): D
           currentStep: "eagleWorkspace",
         };
       }
+      if (agentId === "manu") {
+        return {
+          ...initialDispatchState,
+          agentId: "manu",
+          modeId: modeId ?? "execute",
+          missionTitle,
+          linkedSessionId: null,
+          currentStep: "manuWorkspace",
+        };
+      }
       return {
         ...initialDispatchState,
         agentId,
@@ -229,6 +256,9 @@ export function dispatchReducer(state: DispatchState, action: DispatchAction): D
     }
     case "GO_BACK": {
       if (state.agentId === "eagle" && state.currentStep === "eagleWorkspace") {
+        return { ...state, currentStep: "agent", agentId: null, modeId: null };
+      }
+      if (state.agentId === "manu" && state.currentStep === "manuWorkspace") {
         return { ...state, currentStep: "agent", agentId: null, modeId: null };
       }
       const ord = orderedSteps(state);

@@ -2065,6 +2065,73 @@ html:not(.dark) .mission-brief-v4__sidebar-minify:hover {
   line-height: 1.45;
 }
 
+/* MANU mission picker (Mission Brief inline workspace) */
+.mission-brief-v4__manu-workspace {
+  width: 100%;
+  max-width: none;
+}
+
+.mission-brief-v4__manu-mission-picker {
+  width: 100%;
+  max-width: none;
+}
+
+.mission-brief-v4__manu-mission-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: 1fr;
+  margin-top: 1.25rem;
+}
+
+@media (min-width: 640px) {
+  .mission-brief-v4__manu-mission-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .mission-brief-v4__manu-mission-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.mission-brief-v4__manu-mission-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 1.1rem 1.15rem;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+  border-radius: var(--mb-v4-radius);
+  border: 1px solid hsl(var(--border) / 0.75);
+  background: hsl(var(--muted) / 0.12);
+  color: inherit;
+  transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+}
+
+.mission-brief-v4__manu-mission-tile:hover {
+  border-color: hsl(var(--primary) / 0.45);
+  background: hsl(var(--primary) / 0.06);
+  box-shadow: 0 1px 0 hsl(var(--primary) / 0.12);
+}
+
+.mission-brief-v4__manu-mission-tile:focus-visible {
+  outline: 2px solid hsl(var(--primary) / 0.45);
+  outline-offset: 2px;
+}
+
+.mission-brief-v4__manu-mission-tile-title {
+  font-size: 1rem;
+  letter-spacing: -0.02em;
+}
+
+.mission-brief-v4__manu-mission-tile-desc {
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
 .mission-brief-v4__eagle-mission-row {
   display: flex;
   flex-wrap: wrap;
@@ -3769,6 +3836,10 @@ html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__layou
 
 .mission-brief-v4__pickup-badge--eagle {
   background: linear-gradient(180deg, hsl(190 45% 34%) 0%, hsl(195 40% 22%) 100%);
+}
+
+.mission-brief-v4__pickup-badge--manu {
+  background: linear-gradient(180deg, hsl(142 45% 32%) 0%, hsl(142 40% 20%) 100%);
 }
 
 .mission-brief-v4__pickup-badge--ross,

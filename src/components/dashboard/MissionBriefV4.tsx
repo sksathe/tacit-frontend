@@ -33,6 +33,8 @@ import {
 } from "@/features/dispatch/model";
 import { AgentAvatar } from "@/components/dashboard/AgentAvatar";
 import { EagleLogisticsMissionPanel } from "@/components/dashboard/EagleLogisticsMissionPanel";
+import { ManuMissionBriefPanel } from "@/components/dashboard/ManuMissionBriefPanel";
+import { getAgentCardDisplay } from "@/lib/agentMissionDisplay";
 import { cn } from "@/lib/utils";
 
 function agentById(id: string | null): TacitAgent | undefined {
@@ -67,6 +69,7 @@ function pickupBadgeModifier(agentId: string): string {
     mason: "mission-brief-v4__pickup-badge--mason",
     lexa: "mission-brief-v4__pickup-badge--lexa",
     eagle: "mission-brief-v4__pickup-badge--eagle",
+    manu: "mission-brief-v4__pickup-badge--manu",
     ross: "mission-brief-v4__pickup-badge--ross",
     monica: "mission-brief-v4__pickup-badge--monica",
     chandler: "mission-brief-v4__pickup-badge--chandler",
@@ -244,6 +247,7 @@ export function MissionBriefV4({
   const [eagleFileLabel, setEagleFileLabel] = useState<string | null>(null);
   const [eagleHasExtraction, setEagleHasExtraction] = useState(false);
   const [eagleSidebarExpanded, setEagleSidebarExpanded] = useState(false);
+  const [manuMissionLabel, setManuMissionLabel] = useState<string | null>(null);
   const ord = useMemo(() => orderedSteps(dispatchState), [dispatchState]);
   const curIdx = stepIndex(dispatchState);
   const agent = agentById(dispatchState.agentId);
@@ -272,6 +276,7 @@ export function MissionBriefV4({
   const isLightWorkspace = isLightConfigureStep(dispatchState.currentStep);
   const phaseLabel = useMemo(() => {
     if (dispatchState.agentId === "eagle") return "Document";
+    if (dispatchState.agentId === "manu") return "Manual";
     if (dispatchState.modeId === "facilitate") return "Facilitation";
     return "Configuration";
   }, [dispatchState.agentId, dispatchState.modeId]);
@@ -300,6 +305,12 @@ export function MissionBriefV4({
       setEagleFileLabel(null);
       setEagleHasExtraction(false);
       setEagleSidebarExpanded(false);
+    }
+  }, [dispatchState.agentId, dispatchState.currentStep]);
+
+  useEffect(() => {
+    if (dispatchState.agentId !== "manu" || dispatchState.currentStep !== "manuWorkspace") {
+      setManuMissionLabel(null);
     }
   }, [dispatchState.agentId, dispatchState.currentStep]);
 
@@ -378,7 +389,7 @@ export function MissionBriefV4({
     const st = stepStatuses.get(stepId) ?? "future";
     const canJump = dispatchState.launched
       ? i >= preLaunchStepCount && i <= curIdx
-      : dispatchState.agentId === "eagle"
+      : dispatchState.agentId === "eagle" || dispatchState.agentId === "manu"
         ? false
         : i <= curIdx;
     return (
@@ -490,7 +501,17 @@ export function MissionBriefV4({
                 </div>
               </div>
             )}
-            {dispatchState.agentId !== "eagle" && (
+            {dispatchState.agentId === "manu" && dispatchState.currentStep === "manuWorkspace" && (
+              <div className="mission-brief-v4__ctx-row">
+                <div className="mission-brief-v4__ctx-label">Mission</div>
+                <div
+                  className={`mission-brief-v4__ctx-value${manuMissionLabel ? " mission-brief-v4__ctx-value--filled" : ""}`}
+                >
+                  {manuMissionLabel ?? "—"}
+                </div>
+              </div>
+            )}
+            {dispatchState.agentId !== "eagle" && dispatchState.agentId !== "manu" && (
               <div className="mission-brief-v4__ctx-row">
                 <div className="mission-brief-v4__ctx-label">Output</div>
                 <div
@@ -671,22 +692,13 @@ export function MissionBriefV4({
 
                 <div className="mission-brief-v4__agent-grid">
                   {TACIT_AGENTS.map((a) => {
-                    const p = getDispatchProfile(a.id);
                     const selected = dispatchState.agentId === a.id;
-                    const modeChips =
-                      a.id === "eagle"
-                        ? ["Execute", "Facilitate"]
-                        : p?.modes?.slice(0, 2).map((m) => m.label) ?? [];
-                    const missionLines =
-                      p?.outputContracts?.slice(0, 2).map((o) => o.label) ?? a.specialties.slice(0, 2);
+                    const card = getAgentCardDisplay(a);
+                    const modeChips = card.modeChips;
+                    const missionLines = card.missionLines;
                     const domainLines = a.specialties.slice(0, 2);
-                    const inLines =
-                      a.id === "eagle"
-                        ? ["PDF contracts", "DOCX amendments", "Meeting link"]
-                        : ["Meeting link", "Session recording", "Stakeholder notes"];
-                    const outLines =
-                      p?.outputContracts?.slice(0, 3).map((o) => o.label) ??
-                      ["Mission brief", "Action items", "Audit artifacts"];
+                    const inLines = card.inLines;
+                    const outLines = card.outLines;
                     return (
                       <button
                         key={a.id}
@@ -724,7 +736,7 @@ export function MissionBriefV4({
 
                           <div className="mission-brief-v4__agent-section">
                             <span className="mission-brief-v4__agent-section-label">MISSIONS</span>
-                            <p className="mission-brief-v4__agent-section-value">{missionLines.join(" · ")}</p>
+                            <p className="mission-brief-v4__agent-section-value">{missionLines}</p>
                           </div>
                           <div className="mission-brief-v4__agent-section">
                             <span className="mission-brief-v4__agent-section-label">DOMAIN</span>
@@ -732,11 +744,11 @@ export function MissionBriefV4({
                           </div>
                           <div className="mission-brief-v4__agent-section">
                             <span className="mission-brief-v4__agent-section-label">IN</span>
-                            <p className="mission-brief-v4__agent-section-value">{inLines.join(" · ")}</p>
+                            <p className="mission-brief-v4__agent-section-value">{inLines}</p>
                           </div>
                           <div className="mission-brief-v4__agent-section">
                             <span className="mission-brief-v4__agent-section-label">OUT</span>
-                            <p className="mission-brief-v4__agent-section-value">{outLines.join(" · ")}</p>
+                            <p className="mission-brief-v4__agent-section-value">{outLines}</p>
                           </div>
                         </div>
 
@@ -747,7 +759,9 @@ export function MissionBriefV4({
                             e.preventDefault();
                             e.stopPropagation();
                             dispatchAction({ type: "SELECT_AGENT", agentId: a.id });
-                            dispatchAction({ type: "SET_STEP", step: "mode" });
+                            if (a.id !== "eagle" && a.id !== "manu") {
+                              dispatchAction({ type: "SET_STEP", step: "mode" });
+                            }
                           }}
                         >
                           ▸ Launch Mission
@@ -766,6 +780,10 @@ export function MissionBriefV4({
                 onFileSelected={setEagleFileLabel}
                 onExtractionOutputChange={setEagleHasExtraction}
               />
+            )}
+
+            {dispatchState.currentStep === "manuWorkspace" && (
+              <ManuMissionBriefPanel onMissionTitleChange={setManuMissionLabel} />
             )}
 
             {dispatchState.currentStep === "mode" && (
@@ -1349,7 +1367,9 @@ export function MissionBriefV4({
             )}
           </div>
 
-          {dispatchState.currentStep !== "agent" && (
+          {dispatchState.currentStep !== "agent" &&
+            dispatchState.currentStep !== "eagleWorkspace" &&
+            dispatchState.currentStep !== "manuWorkspace" && (
             <footer className="mission-brief-v4__footer mission-brief-v4__footer--light">
               <div />
               <div className="mission-brief-v4__footer-right">

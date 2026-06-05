@@ -33,6 +33,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 });
             }
             setIsLoading(false);
+        }).catch((err) => {
+            console.error("Failed to restore Supabase session:", err);
+            setIsLoading(false);
         });
 
         // Listen for auth changes
