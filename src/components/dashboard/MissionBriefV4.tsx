@@ -32,6 +32,7 @@ import {
   type MissionLaunchRecord,
 } from "@/features/dispatch/model";
 import { AgentAvatar } from "@/components/dashboard/AgentAvatar";
+import { ClaraContractMissionPanel } from "@/components/dashboard/ClaraContractMissionPanel";
 import { EagleLogisticsMissionPanel } from "@/components/dashboard/EagleLogisticsMissionPanel";
 import { ManuMissionBriefPanel } from "@/components/dashboard/ManuMissionBriefPanel";
 import { getAgentCardDisplay } from "@/lib/agentMissionDisplay";
@@ -166,6 +167,23 @@ const MISSION_TEMPLATES_BY_AGENT: Partial<Record<string, MissionTemplate[]>> = {
       defaultOutputs: ["Book of Business Summary", "AUM Breakdown", "Account Migration Plan"],
     },
   ],
+  lexa: [
+    {
+      id: "parse-order",
+      name: "Order form parse",
+      defaultOutputs: ["Structured contract JSON", "Line items table", "Confidence scores"],
+    },
+    {
+      id: "revrec",
+      name: "RevRec mapping",
+      defaultOutputs: ["RevRec schedule", "Billing term mapping", "ASC 606 alignment notes"],
+    },
+    {
+      id: "batch",
+      name: "Multi-document batch",
+      defaultOutputs: ["Normalized contract pack", "Excel export", "Audit trail"],
+    },
+  ],
 };
 
 function missionTemplatesForAgent(agentId: string | null): MissionTemplate[] {
@@ -273,10 +291,13 @@ export function MissionBriefV4({
     [recentLaunches, dismissedRecentTabIds],
   );
 
-  const isLightWorkspace = isLightConfigureStep(dispatchState.currentStep);
+  const isLightWorkspace =
+    isLightConfigureStep(dispatchState.currentStep) ||
+    dispatchState.currentStep === "claraWorkspace";
   const phaseLabel = useMemo(() => {
     if (dispatchState.agentId === "eagle") return "Document";
     if (dispatchState.agentId === "manu") return "Manual";
+    if (dispatchState.agentId === "lexa") return "Contract";
     if (dispatchState.modeId === "facilitate") return "Facilitation";
     return "Configuration";
   }, [dispatchState.agentId, dispatchState.modeId]);
@@ -511,7 +532,29 @@ export function MissionBriefV4({
                 </div>
               </div>
             )}
-            {dispatchState.agentId !== "eagle" && dispatchState.agentId !== "manu" && (
+            {dispatchState.agentId === "lexa" && dispatchState.currentStep === "claraWorkspace" && (
+              <>
+                <div className="mission-brief-v4__ctx-row">
+                  <div className="mission-brief-v4__ctx-label">Mode</div>
+                  <div
+                    className={`mission-brief-v4__ctx-value${dispatchState.modeId ? " mission-brief-v4__ctx-value--filled" : ""}`}
+                  >
+                    {profile?.modes.find((m) => m.id === dispatchState.modeId)?.label ?? "—"}
+                  </div>
+                </div>
+                <div className="mission-brief-v4__ctx-row">
+                  <div className="mission-brief-v4__ctx-label">Output</div>
+                  <div
+                    className={`mission-brief-v4__ctx-value${dispatchState.outputContractId ? " mission-brief-v4__ctx-value--filled" : ""}`}
+                  >
+                    {profile?.outputContracts.find((o) => o.id === dispatchState.outputContractId)?.label ?? "—"}
+                  </div>
+                </div>
+              </>
+            )}
+            {dispatchState.agentId !== "eagle" &&
+              dispatchState.agentId !== "manu" &&
+              dispatchState.agentId !== "lexa" && (
               <div className="mission-brief-v4__ctx-row">
                 <div className="mission-brief-v4__ctx-label">Output</div>
                 <div
@@ -759,7 +802,7 @@ export function MissionBriefV4({
                             e.preventDefault();
                             e.stopPropagation();
                             dispatchAction({ type: "SELECT_AGENT", agentId: a.id });
-                            if (a.id !== "eagle" && a.id !== "manu") {
+                            if (a.id !== "eagle" && a.id !== "manu" && a.id !== "lexa") {
                               dispatchAction({ type: "SET_STEP", step: "mode" });
                             }
                           }}
@@ -784,6 +827,14 @@ export function MissionBriefV4({
 
             {dispatchState.currentStep === "manuWorkspace" && (
               <ManuMissionBriefPanel onMissionTitleChange={setManuMissionLabel} />
+            )}
+
+            {dispatchState.currentStep === "claraWorkspace" && (
+              <ClaraContractMissionPanel
+                modeId={dispatchState.modeId}
+                outputContractId={dispatchState.outputContractId}
+                dispatchAction={dispatchAction}
+              />
             )}
 
             {dispatchState.currentStep === "mode" && (
@@ -1369,7 +1420,8 @@ export function MissionBriefV4({
 
           {dispatchState.currentStep !== "agent" &&
             dispatchState.currentStep !== "eagleWorkspace" &&
-            dispatchState.currentStep !== "manuWorkspace" && (
+            dispatchState.currentStep !== "manuWorkspace" &&
+            dispatchState.currentStep !== "claraWorkspace" && (
             <footer className="mission-brief-v4__footer mission-brief-v4__footer--light">
               <div />
               <div className="mission-brief-v4__footer-right">

@@ -39,8 +39,8 @@ All colors MUST be HSL.
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 220 20% 87%;
-    --input: 220 22% 88%;
+    --border: 226 45% 76%;
+    --input: 226 40% 84%;
     --ring: 226 72% 46%;
 
     /* Flat “gradients” so bg-gradient-primary / marketing tokens stay solid royal blue */
@@ -74,6 +74,8 @@ All colors MUST be HSL.
     /* Top chrome: same navy as Mission Brief v4 sidebar rail (html:not(.dark) --mb-sidebar-bg) */
     --dashboard-header-background: 226 72% 28%;
     --dashboard-header-border: 226 65% 22%;
+    --dashboard-header-foreground: 0 0% 100%;
+    --dashboard-header-foreground-muted: 226 28% 82%;
 
     --dashboard-canvas: 38 28% 96%;
     --dashboard-surface: 36 40% 99%;
@@ -81,8 +83,8 @@ All colors MUST be HSL.
     --dashboard-rail-bg: 226 72% 28%;
     --dashboard-rail-border: 226 65% 22%;
     --dashboard-rail-active: 217 92% 60%;
-    --dashboard-metric-highlight-from: 216 91% 61%;
-    --dashboard-metric-highlight-to: 226 80% 57%;
+    --dashboard-metric-highlight-from: 226 72% 46%;
+    --dashboard-metric-highlight-to: 226 72% 46%;
     --dashboard-text-strong: 221 41% 14%;
     --dashboard-text-muted: 220 12% 38%;
 
@@ -105,7 +107,7 @@ All colors MUST be HSL.
 
     --sidebar-accent-foreground: 222 47% 11%;
 
-    --sidebar-border: 220 22% 88%;
+    --sidebar-border: 226 45% 76%;
 
     --sidebar-ring: 226 72% 46%;
   }
@@ -152,6 +154,8 @@ All colors MUST be HSL.
     --primary-dashboard-glow: 160 84% 55%;
     --dashboard-header-background: 222 27% 8%;
     --dashboard-header-border: 220 20% 16%;
+    --dashboard-header-foreground: 42 40% 96%;
+    --dashboard-header-foreground-muted: 220 12% 72%;
     --dashboard-canvas: 222 28% 5%;
     --dashboard-surface: 220 24% 8%;
     --dashboard-surface-muted: 220 20% 10%;
@@ -213,6 +217,19 @@ All colors MUST be HSL.
 
   .dark {
     color-scheme: dark;
+  }
+
+  /* Mission Studio in light mode: keep dashboard canvas aligned with light theme */
+  html:not(.dark) .dashboard--mission-studio {
+    --dashboard-canvas: 38 28% 96%;
+    --dashboard-surface: 36 40% 99%;
+    --dashboard-surface-muted: 34 24% 95%;
+    --dashboard-header-background: 226 72% 28%;
+    --dashboard-header-border: 226 65% 22%;
+    --dashboard-rail-bg: 226 72% 28%;
+    --dashboard-rail-border: 226 65% 22%;
+    --dashboard-text-strong: 221 41% 14%;
+    --dashboard-text-muted: 220 12% 38%;
   }
 
   /* Mission Studio active: canvas + header align with MissionBrief charcoal / metallic frame */

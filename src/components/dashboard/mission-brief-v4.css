@@ -2605,14 +2605,14 @@ html:not(.dark) .mission-brief-v4__sidebar-minify:hover {
 
 /* Tacit light-mode refresh: enterprise dashboard surfaces and stronger hierarchy */
 html:not(.dark) .mission-brief-v4 {
-  --mb-v4-border: hsl(var(--dashboard-rail-border) / 0.18);
+  --mb-v4-border: hsl(var(--primary) / 0.32);
   --mb-v4-surface: hsl(var(--dashboard-surface));
   --mb-v4-muted: hsl(var(--dashboard-text-muted));
   --mb-v4-fg: hsl(var(--dashboard-text-strong));
 }
 
 html:not(.dark) .mission-brief-v4__layout {
-  border: 1px solid hsl(var(--dashboard-rail-border) / 0.12);
+  border: 1px solid hsl(var(--primary) / 0.28);
   border-radius: 1rem;
   overflow: hidden;
   background: hsl(var(--dashboard-surface));
@@ -2648,7 +2648,7 @@ html:not(.dark) .mission-brief-v4__mode-option,
 html:not(.dark) .mission-brief-v4__recent-card,
 html:not(.dark) .mission-brief-v4__review-block,
 html:not(.dark) .mission-brief-v4__placeholder {
-  border-color: hsl(var(--dashboard-rail-border) / 0.2);
+  border-color: hsl(var(--primary) / 0.32);
   background: hsl(var(--dashboard-surface));
   box-shadow: 0 8px 24px -22px hsl(var(--dashboard-rail-border) / 0.45);
 }
@@ -2667,7 +2667,7 @@ html:not(.dark) .mission-brief-v4__mode-option--selected {
 }
 
 html:not(.dark) .mission-brief-v4__check {
-  background: linear-gradient(135deg, hsl(var(--dashboard-metric-highlight-from)), hsl(var(--dashboard-metric-highlight-to)));
+  background: hsl(var(--primary));
 }
 
 html:not(.dark) .mission-brief-v4__recent-title,
@@ -2800,11 +2800,11 @@ html:not(.dark) .mission-brief-v4__label {
 html:not(.dark) .mission-brief-v4__breadcrumb {
   margin-bottom: 0.85rem;
   padding: 0.35rem 0.5rem 0.6rem;
-  border-bottom-color: hsl(var(--dashboard-rail-border) / 0.2);
+  border-bottom-color: hsl(var(--primary) / 0.28);
 }
 
 html:not(.dark) .mission-brief-v4__chip {
-  border-color: hsl(var(--dashboard-rail-border) / 0.24);
+  border-color: hsl(var(--primary) / 0.32);
   background: hsl(var(--dashboard-surface));
 }
 
@@ -3074,7 +3074,7 @@ html:not(.dark) .mission-brief-v4__chip--active {
 }
 
 html:not(.dark) .mission-brief-v4__footer {
-  border-top-color: hsl(var(--dashboard-rail-border) / 0.25);
+  border-top-color: hsl(var(--primary) / 0.28);
 }
 
 .dark .mission-brief-v4__footer {
@@ -3288,38 +3288,38 @@ html:not(.dark) .mission-brief-v4__footer {
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 15.5rem), 1fr));
 }
 
-/* Light global theme: use Nova sidebar instead of royal blue rail */
+/* Light global theme: royal blue sidebar rail (matches Tacit light dashboard) */
 html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__sidebar {
-  --mb-sidebar-bg: 204 22% 10%;
-  --mb-sidebar-border: 210 17% 17%;
-  --mb-sidebar-text: 210 14% 94%;
-  --mb-sidebar-muted: 204 11% 47%;
-  --mb-sidebar-step-upcoming: 200 17% 6%;
-  --mb-sidebar-step-upcoming-border: 210 17% 17%;
-  --mb-sidebar-step-active: 160 84% 39%;
-  --mb-sidebar-step-done: 161 94% 30%;
+  --mb-sidebar-bg: 226 72% 28%;
+  --mb-sidebar-border: 226 65% 22%;
+  --mb-sidebar-text: 0 0% 100%;
+  --mb-sidebar-muted: 0 0% 100%;
+  --mb-sidebar-step-upcoming: 226 52% 50%;
+  --mb-sidebar-step-upcoming-border: 226 48% 42%;
+  --mb-sidebar-step-active: 226 76% 54%;
+  --mb-sidebar-step-done: 226 72% 46%;
 
   border-right-color: hsl(var(--mb-sidebar-border));
   background: hsl(var(--mb-sidebar-bg));
 }
 
 html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__sidebar .mission-brief-v4__step--current .mission-brief-v4__step-num {
-  color: hsl(0 0% 9%);
-  box-shadow: 0 0 0 3px var(--mb52-accent-ring);
+  color: hsl(0 0% 100%);
+  box-shadow: 0 0 0 3px hsl(226 72% 46% / 0.25);
 }
 
 html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__sidebar .mission-brief-v4__step--done .mission-brief-v4__step-num {
-  color: hsl(0 0% 9%);
+  color: hsl(0 0% 100%);
 }
 
 html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__sidebar .mission-brief-v4__agent-avatar-shell > div {
-  border-color: hsl(var(--mb-sidebar-muted) / 0.45);
-  background: hsl(210 20% 14%);
+  border-color: hsl(0 0% 100% / 0.35);
+  background: hsl(226 65% 22%);
   box-shadow: none;
 }
 
 html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__left-panel {
-  border-bottom-color: hsl(210 17% 17%);
+  border-bottom-color: hsl(var(--primary) / 0.32);
 }
 
 /* Dark site theme: metallic rail (subtle sheen + edge) */
@@ -4946,4 +4946,381 @@ html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__layou
   font-size: 0.8rem;
   line-height: 1.45;
   color: hsl(var(--muted-foreground));
+}
+
+/* ═══ Mission Brief v5.2 — site light mode (Clara / Eagle / MANU workspaces) ═══
+   v52 scopes dark tokens on .mission-brief-v4--v52; reset them when html is not .dark
+   so embedded shadcn/MANU/Eagle UI inherits the app light theme. */
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 {
+  --background: 220 32% 97%;
+  --foreground: 222 47% 11%;
+  --card: 220 38% 99%;
+  --card-foreground: 222 47% 11%;
+  --popover: 220 40% 99%;
+  --popover-foreground: 222 47% 11%;
+  --primary: 226 72% 46%;
+  --primary-foreground: 0 0% 100%;
+  --primary-glow: 226 74% 58%;
+  --secondary: 220 26% 94%;
+  --secondary-foreground: 222 47% 11%;
+  --muted: 220 24% 94%;
+  --muted-foreground: 220 12% 40%;
+  --accent: 226 72% 46%;
+  --accent-foreground: 0 0% 100%;
+  --border: 226 45% 76%;
+  --input: 226 40% 84%;
+  --ring: 226 72% 46%;
+
+  --mb-v4-border: hsl(var(--primary) / 0.32);
+  --mb-v4-surface: hsl(var(--dashboard-surface));
+  --mb-v4-muted: hsl(var(--dashboard-text-muted));
+  --mb-v4-fg: hsl(var(--dashboard-text-strong));
+  --mb-v4-accent: hsl(var(--primary));
+
+  color: hsl(var(--foreground));
+  background:
+    radial-gradient(ellipse 95% 55% at 50% -15%, hsl(226 72% 46% / 0.07) 0%, transparent 52%),
+    linear-gradient(180deg, hsl(var(--dashboard-surface-muted)) 0%, hsl(var(--dashboard-canvas)) 100%);
+}
+
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__main,
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__main--light {
+  background: hsl(var(--dashboard-surface-muted));
+}
+
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__tab-bar {
+  border-bottom-color: hsl(var(--primary) / 0.28);
+  background: hsl(var(--dashboard-surface));
+  box-shadow: 0 1px 0 hsl(var(--primary) / 0.1);
+}
+
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__content--configure-light {
+  background: hsl(var(--dashboard-surface));
+  color: hsl(var(--foreground));
+}
+
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__agent-card:not(.mission-brief-v4__agent-card--selected) {
+  border-color: hsl(var(--primary) / 0.32);
+  background: hsl(var(--dashboard-surface));
+  box-shadow: 0 8px 24px -22px hsl(var(--primary) / 0.12);
+}
+
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__pickup-card--featured,
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__pickup-card--active.mission-brief-v4__pickup-card--featured {
+  border: 1px solid hsl(var(--primary) / 0.42);
+  background: hsl(var(--dashboard-surface));
+  box-shadow:
+    0 1px 2px hsl(var(--primary) / 0.06),
+    0 10px 28px -16px hsl(var(--primary) / 0.18);
+}
+
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__progress-strip--light {
+  background: hsl(var(--dashboard-surface));
+  border-color: hsl(var(--primary) / 0.28);
+  box-shadow: 0 8px 24px -20px hsl(var(--dashboard-rail-border) / 0.35);
+}
+
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__footer--light {
+  background: hsl(var(--dashboard-surface));
+  border-top-color: hsl(var(--primary) / 0.24);
+  box-shadow: 0 -4px 24px -18px hsl(var(--dashboard-rail-border) / 0.25);
+}
+
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__content--configure-light .mission-brief-v4__mode-option--hero,
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__content--configure-light .mission-brief-v4__mode-option--hero:hover,
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__content--configure-light .mission-brief-v4__mode-option--hero.mission-brief-v4__mode-option--selected {
+  border-color: hsl(var(--primary) / 0.45);
+  background:
+    radial-gradient(120% 80% at 80% 12%, hsl(226 72% 46% / 0.12) 0%, transparent 50%),
+    linear-gradient(180deg, hsl(var(--dashboard-surface)) 0%, hsl(var(--dashboard-surface-muted)) 100%);
+  box-shadow:
+    inset 0 1px 0 hsl(0 0% 100% / 0.65),
+    0 8px 24px -18px hsl(var(--dashboard-rail-border) / 0.35);
+}
+
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__eagle-mission-tile,
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__manu-mission-tile {
+  border-color: hsl(var(--primary) / 0.32);
+  background: hsl(var(--dashboard-surface));
+  color: hsl(var(--foreground));
+  box-shadow: 0 6px 20px -18px hsl(var(--dashboard-rail-border) / 0.4);
+}
+
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__eagle-mission-tile:hover,
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__manu-mission-tile:hover {
+  border-color: hsl(var(--primary) / 0.45);
+  background: hsl(var(--primary) / 0.06);
+}
+
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__eagle-dropzone {
+  background: hsl(var(--muted) / 0.55);
+  border-color: hsl(var(--primary) / 0.35);
+}
+
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__eagle-summary-card,
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__eagle-field-row,
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__eagle-file-pick {
+  background: hsl(var(--dashboard-surface));
+  border-color: hsl(var(--primary) / 0.28);
+}
+
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__btn--ghost:not(.mission-brief-v4__btn--ghost-light) {
+  border-color: hsl(var(--primary) / 0.35);
+  background: hsl(var(--dashboard-surface));
+  color: hsl(var(--foreground));
+  box-shadow: none;
+}
+
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__btn--ghost:not(.mission-brief-v4__btn--ghost-light):hover:not(:disabled) {
+  border-color: hsl(var(--primary) / 0.35);
+  background: hsl(var(--primary) / 0.06);
+}
+
+/* Mission combobox — light mode (fixes black select mission dropdown) */
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__combo-trigger {
+  border-color: hsl(var(--primary) / 0.35);
+  background: hsl(var(--dashboard-surface));
+  color: hsl(var(--foreground));
+  box-shadow:
+    inset 0 1px 0 hsl(0 0% 100% / 0.8),
+    0 4px 16px -12px hsl(var(--dashboard-rail-border) / 0.35);
+}
+
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__combo-trigger--placeholder {
+  color: hsl(var(--muted-foreground));
+}
+
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__combo-pop {
+  border-color: hsl(var(--primary) / 0.35);
+  background: hsl(var(--dashboard-surface));
+  box-shadow:
+    0 12px 40px -20px hsl(var(--dashboard-rail-border) / 0.45),
+    0 0 0 1px hsl(var(--border) / 0.6);
+}
+
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__combo-search {
+  border-bottom-color: hsl(var(--primary) / 0.28);
+}
+
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__combo-search-input {
+  border-color: hsl(var(--primary) / 0.35);
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+}
+
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__combo-option:hover {
+  border-color: hsl(var(--primary) / 0.25);
+  background: hsl(var(--primary) / 0.06);
+}
+
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__combo-option--selected {
+  border-color: hsl(var(--primary) / 0.45);
+  background: hsl(var(--primary) / 0.1);
+}
+
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__mission-preview {
+  border-color: hsl(var(--primary) / 0.32);
+  background: hsl(var(--dashboard-surface-muted));
+  box-shadow: 0 8px 24px -18px hsl(var(--dashboard-rail-border) / 0.35);
+}
+
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__mission-output-chip {
+  border-color: hsl(var(--primary) / 0.32);
+  background: hsl(var(--dashboard-surface));
+  color: hsl(var(--foreground));
+}
+
+/* Clara contract workspace (aligned with Contract Rev Rec module) */
+.mission-brief-v4__clara-workspace {
+  max-width: 56rem;
+}
+
+.mission-brief-v4__clara-mission-tile {
+  border-radius: 14px;
+  border: 1px solid hsl(var(--border));
+  background: hsl(var(--card));
+  padding: 1rem 1.05rem;
+  transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+}
+
+.mission-brief-v4__clara-mission-tile:hover {
+  border-color: hsl(var(--primary) / 0.4);
+  background: hsl(var(--primary) / 0.04);
+}
+
+.mission-brief-v4__clara-mission-tile--selected {
+  border-color: hsl(var(--primary) / 0.55);
+  background: hsl(var(--primary) / 0.08);
+  box-shadow: 0 0 0 1px hsl(var(--primary) / 0.15);
+}
+
+.mission-brief-v4__clara-mission-tile-title {
+  display: block;
+  font-size: 0.98rem;
+  font-weight: 700;
+  color: hsl(var(--foreground));
+}
+
+.mission-brief-v4__clara-mission-tile-desc {
+  display: block;
+  margin-top: 0.35rem;
+  font-size: 0.86rem;
+  line-height: 1.4;
+  color: hsl(var(--muted-foreground));
+}
+
+.mission-brief-v4__clara-output-chip {
+  border-radius: 999px;
+  border: 1px solid hsl(var(--primary) / 0.3);
+  background: hsl(var(--background) / 0.8);
+  padding: 0.45rem 0.85rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: hsl(var(--foreground));
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.mission-brief-v4__clara-output-chip:hover {
+  border-color: hsl(var(--primary) / 0.5);
+  background: hsl(var(--primary) / 0.06);
+}
+
+.mission-brief-v4__clara-output-chip--selected {
+  border-color: hsl(var(--primary) / 0.65);
+  background: hsl(var(--primary) / 0.12);
+  color: hsl(var(--primary));
+}
+
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__clara-mission-tile {
+  border-color: hsl(var(--primary) / 0.32);
+  background: hsl(var(--dashboard-surface));
+  box-shadow: 0 6px 20px -18px hsl(var(--dashboard-rail-border) / 0.4);
+}
+
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__clara-mission-tile--selected {
+  border-color: hsl(var(--primary) / 0.45);
+  background: hsl(var(--primary) / 0.08);
+}
+
+/* Light mode: solid royal blue CTAs — no teal/emerald gradients */
+html:not(.dark) .mission-brief-v4__agent-launch {
+  border-color: hsl(var(--primary) / 0.7);
+  background: hsl(var(--primary));
+  box-shadow: 0 1px 0 hsl(0 0% 100% / 0.16) inset;
+}
+
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__btn--primary {
+  border-color: hsl(var(--primary) / 0.75);
+  background: hsl(var(--primary));
+  box-shadow:
+    0 8px 22px -12px hsl(var(--primary) / 0.45),
+    0 1px 0 hsl(0 0% 100% / 0.18) inset;
+}
+
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__btn--primary:hover:not(:disabled) {
+  border-color: hsl(var(--primary-glow) / 0.85);
+  background: hsl(var(--primary-glow));
+}
+
+html:not(.dark) .mission-brief-v4__footer--light .mission-brief-v4__btn--primary {
+  box-shadow: 0 8px 22px -12px hsl(var(--primary) / 0.45);
+}
+
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__sidebar .mission-brief-v4__step--current .mission-brief-v4__step-num {
+  background: hsl(var(--primary));
+  border-color: hsl(var(--primary));
+  box-shadow: 0 0 0 3px hsl(var(--primary) / 0.22);
+}
+
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__sidebar .mission-brief-v4__step--done .mission-brief-v4__step-num {
+  background: hsl(var(--primary));
+  border-color: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+}
+
+/* Light mode: pickup / recent mission cards — clean blue enterprise styling */
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__pickup-card--secondary,
+html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__pickup-card--active.mission-brief-v4__pickup-card--secondary {
+  border: 1px solid hsl(var(--primary) / 0.28);
+  background: hsl(var(--dashboard-surface));
+  box-shadow: 0 4px 20px -14px hsl(var(--primary) / 0.14);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__pickup-card--featured:hover,
+  html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__pickup-card--secondary:hover {
+    transform: translateY(-2px);
+    border-color: hsl(var(--primary) / 0.55);
+    box-shadow: 0 12px 32px -14px hsl(var(--primary) / 0.26);
+  }
+}
+
+html:not(.dark) .mission-brief-v4__pickup-ribbon {
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  border-bottom: 1px solid hsl(var(--primary) / 0.25);
+  box-shadow: none;
+}
+
+html:not(.dark) .mission-brief-v4__pickup-badge,
+html:not(.dark) .mission-brief-v4__pickup-badge--sage,
+html:not(.dark) .mission-brief-v4__pickup-badge--aria,
+html:not(.dark) .mission-brief-v4__pickup-badge--mason,
+html:not(.dark) .mission-brief-v4__pickup-badge--lexa,
+html:not(.dark) .mission-brief-v4__pickup-badge--eagle,
+html:not(.dark) .mission-brief-v4__pickup-badge--manu,
+html:not(.dark) .mission-brief-v4__pickup-badge--ross,
+html:not(.dark) .mission-brief-v4__pickup-badge--monica,
+html:not(.dark) .mission-brief-v4__pickup-badge--chandler,
+html:not(.dark) .mission-brief-v4__pickup-badge--default {
+  background: hsl(var(--primary) / 0.1);
+  color: hsl(var(--primary));
+  border: 1px solid hsl(var(--primary) / 0.32);
+  box-shadow: none;
+}
+
+html:not(.dark) .mission-brief-v4__pickup-cta--primary {
+  background: hsl(var(--primary));
+  border: 1px solid hsl(var(--primary) / 0.75);
+  color: hsl(var(--primary-foreground));
+  box-shadow: 0 4px 14px -6px hsl(var(--primary) / 0.38);
+}
+
+html:not(.dark) .mission-brief-v4__pickup-card:hover .mission-brief-v4__pickup-cta--primary {
+  background: hsl(var(--primary-glow));
+  border-color: hsl(var(--primary-glow) / 0.85);
+}
+
+html:not(.dark) .mission-brief-v4__pickup-cta--ghost {
+  border: 1px solid hsl(var(--primary) / 0.38);
+  background: hsl(var(--dashboard-surface));
+  color: hsl(var(--primary));
+  box-shadow: none;
+}
+
+html:not(.dark) .mission-brief-v4__pickup-card:hover .mission-brief-v4__pickup-cta--ghost {
+  border-color: hsl(var(--primary) / 0.58);
+  background: hsl(var(--primary) / 0.06);
+  color: hsl(var(--primary));
+}
+
+html:not(.dark) .mission-brief-v4__pickup-status {
+  background: hsl(var(--primary) / 0.08);
+  border-color: hsl(var(--primary) / 0.4);
+  color: hsl(var(--primary));
+  box-shadow: none;
+}
+
+html:not(.dark) .mission-brief-v4__pickup-title {
+  color: hsl(var(--foreground));
+}
+
+html:not(.dark) .mission-brief-v4__pickup-sub,
+html:not(.dark) .mission-brief-v4__pickup-meta-row,
+html:not(.dark) .mission-brief-v4__pickup-ago {
+  color: hsl(var(--muted-foreground));
+}
+
+html:not(.dark) .mission-brief-v4__pickup-meta-icon {
+  color: hsl(var(--primary) / 0.65);
 }

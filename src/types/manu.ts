@@ -127,6 +127,9 @@ export interface ManuTranslationQARow {
   accuracyScore: number;
   terminologyFlags: string[];
   missingWarnings: string[];
+  status: ManuSectionStatus;
+  flagReason?: string;
+  approverNotes?: string;
 }
 
 export type ManuExportKind =
@@ -152,6 +155,12 @@ export interface ManuRun {
   riskCoverage: ManuRiskMapping[];
   regulatoryChecklist: ManuRegulatoryRow[];
   approvalStatus: {
+    allRequiredApproved: boolean;
+    approvedCount: number;
+    flaggedCount: number;
+    requiredCount: number;
+  };
+  translationApprovalStatus: {
     allRequiredApproved: boolean;
     approvedCount: number;
     flaggedCount: number;

@@ -6,6 +6,7 @@ import { TACIT_AGENTS } from "@/data/agents";
 import { SelectedAgentDescription } from "./SelectedAgentDescription";
 import { AgentAvatar } from "./AgentAvatar";
 import { apiClient } from "@/lib/apiClient";
+import { getDefaultProjectId } from "@/lib/defaultProject";
 import type { SessionModalPrefill } from "./sessionModalPrefill";
 
 interface ScheduleSessionModalProps {
@@ -91,16 +92,7 @@ export function ScheduleSessionModal({ open, onClose, prefill = null }: Schedule
         throw new Error("Not authenticated");
       }
 
-      // Get user's first project (or you can add project selection UI)
-      const projectsData = await apiClient.requestJson<any>("/api/projects", {
-        token: session.access_token,
-      });
-      const projects = projectsData?.projects ?? projectsData ?? [];
-      if (!projects || projects.length === 0) {
-        throw new Error("No projects found. Please create a project first.");
-      }
-
-      const projectId = projects[0].id;
+      const projectId = await getDefaultProjectId(session.access_token);
 
       // Calculate scheduled times
       const scheduledStartAt = new Date(`${formData.sessionDate}T${formData.sessionTime}`).toISOString();
@@ -135,7 +127,7 @@ export function ScheduleSessionModal({ open, onClose, prefill = null }: Schedule
         method: "POST",
         token: session.access_token,
         body: JSON.stringify({
-          project_id: projectId,
+          ...(projectId ? { project_id: projectId } : {}),
           title: formData.sessionTitle,
           agenda: formData.sessionNotes || undefined,
           scheduled_start_at: scheduledStartAt,

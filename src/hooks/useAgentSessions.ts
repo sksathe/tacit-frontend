@@ -50,22 +50,7 @@ export function useAgentSessions(agent: TacitAgent | null) {
           return;
         }
 
-        const projectsData = await apiClient.requestJson<any>("/api/projects", {
-          token: session.access_token,
-        });
-        const projects = projectsData?.projects ?? projectsData ?? [];
-        const projectId = Array.isArray(projects) && projects.length > 0 ? projects[0].id : null;
-
-        if (!projectId) {
-          const mock = getMockSessions(agent);
-          if (!cancelled) {
-            setSessions(mock);
-            setLoading(false);
-          }
-          return;
-        }
-
-        const data = await apiClient.requestJson<any>(`/api/sessions/project/${projectId}`, {
+        const data = await apiClient.requestJson<any>("/api/sessions", {
           token: session.access_token,
         });
         const list = data?.sessions ?? [];

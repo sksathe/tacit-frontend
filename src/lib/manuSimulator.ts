@@ -456,6 +456,7 @@ export function simulateManuRun(params: {
       terminologyFlags:
         section.id === "safety-warnings" ? [] : ["Verify localized warning symbols per market labeling checklist"],
       missingWarnings: [],
+      status: "draft" as const,
     }));
   });
 
@@ -482,6 +483,12 @@ export function simulateManuRun(params: {
       requiredCount: totalSections,
     },
     translationQA,
+    translationApprovalStatus: {
+      allRequiredApproved: false,
+      approvedCount: 0,
+      flaggedCount: 0,
+      requiredCount: translationQA.length,
+    },
     exportStatus: {
       approved_manual: "idle",
       traceability_matrix: "idle",

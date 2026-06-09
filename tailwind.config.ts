@@ -37,6 +37,8 @@ export default {
         "dashboard-header": {
           DEFAULT: "hsl(var(--dashboard-header-background))",
           border: "hsl(var(--dashboard-header-border))",
+          foreground: "hsl(var(--dashboard-header-foreground) / <alpha-value>)",
+          "foreground-muted": "hsl(var(--dashboard-header-foreground-muted) / <alpha-value>)",
         },
         "dashboard-canvas": "hsl(var(--dashboard-canvas))",
         "dashboard-surface": "hsl(var(--dashboard-surface))",

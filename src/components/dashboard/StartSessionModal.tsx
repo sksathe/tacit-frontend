@@ -6,6 +6,7 @@ import { TACIT_AGENTS } from "@/data/agents";
 import { SelectedAgentDescription } from "./SelectedAgentDescription";
 import { AgentAvatar } from "./AgentAvatar";
 import { apiClient } from "@/lib/apiClient";
+import { getDefaultProjectId } from "@/lib/defaultProject";
 import type { SessionModalPrefill } from "./sessionModalPrefill";
 
 interface StartSessionModalProps {
@@ -84,14 +85,7 @@ export function StartSessionModal({ open, onClose, prefill = null }: StartSessio
         throw new Error("Not authenticated");
       }
 
-      const projectsData = await apiClient.requestJson<any>("/api/projects", {
-        token: session.access_token,
-      });
-      const projects = projectsData?.projects ?? projectsData ?? [];
-      if (!Array.isArray(projects) || projects.length === 0) {
-        throw new Error("No projects found. Please create a project first.");
-      }
-      const projectId = projects[0].id;
+      const projectId = await getDefaultProjectId(session.access_token);
 
       const now = new Date();
       const scheduledStartAt = now.toISOString();
@@ -124,7 +118,7 @@ export function StartSessionModal({ open, onClose, prefill = null }: StartSessio
         method: "POST",
         token: session.access_token,
         body: JSON.stringify({
-          project_id: projectId,
+          ...(projectId ? { project_id: projectId } : {}),
           title: formData.sessionTitle,
           agenda: formData.sessionNotes || undefined,
           scheduled_start_at: scheduledStartAt,

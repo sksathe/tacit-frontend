@@ -41,8 +41,8 @@ export function DashboardHeader() {
   return (
     <header className="sticky top-0 z-[1000] shrink-0 border-b border-dashboard-header-border/70 bg-dashboard-header/95 px-3 py-3 backdrop-blur-md sm:px-5 lg:px-6 dark:border-dashboard-header-border dark:bg-dashboard-header/90">
       <nav className="flex w-full max-w-none items-center justify-between gap-4">
-        <div className="flex min-w-0 items-center gap-3 text-primary-foreground dark:text-dashboard-text-strong">
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-primary-foreground/20 bg-primary-foreground/8 text-primary-foreground dark:border-dashboard-rail-border dark:bg-dashboard-surface dark:text-primary">
+        <div className="flex min-w-0 items-center gap-3 text-dashboard-header-foreground">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-dashboard-header-foreground/20 bg-dashboard-header-foreground/8 text-dashboard-header-foreground dark:border-dashboard-rail-border dark:bg-dashboard-surface dark:text-primary">
             <svg
               viewBox="0 0 40 40"
               fill="none"
@@ -67,7 +67,7 @@ export function DashboardHeader() {
           </span>
           <div className="min-w-0 leading-none">
             <div className="truncate text-base font-semibold tracking-wide sm:text-lg">Tacit Studio</div>
-            <div className="mt-1 text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-primary-foreground/70 dark:text-dashboard-text-muted">
+            <div className="mt-1 text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-dashboard-header-foreground-muted">
               Knowledge Workspace
             </div>
           </div>
@@ -75,22 +75,22 @@ export function DashboardHeader() {
 
         <div className="flex items-center gap-2.5 sm:gap-4">
           <div className="hidden items-center gap-2 md:flex">
-            <button type="button" className="rounded-full border border-primary-foreground/24 bg-primary-foreground px-3 py-1 text-xs font-semibold text-dashboard-header shadow-sm dark:border-dashboard-rail-border dark:bg-dashboard-surface dark:text-dashboard-text-strong">
+            <button type="button" className="rounded-full border border-dashboard-header-foreground/24 bg-dashboard-header-foreground px-3 py-1 text-xs font-semibold text-dashboard-header shadow-sm dark:border-dashboard-rail-border dark:bg-dashboard-surface dark:text-dashboard-text-strong">
               This week
             </button>
-            <button type="button" className="rounded-full border border-primary-foreground/20 bg-primary-foreground/10 px-3 py-1 text-xs font-medium text-primary-foreground/90 dark:border-dashboard-rail-border dark:bg-transparent dark:text-dashboard-text-muted">
+            <button type="button" className="rounded-full border border-dashboard-header-foreground/20 bg-dashboard-header-foreground/10 px-3 py-1 text-xs font-medium text-dashboard-header-foreground dark:border-dashboard-rail-border dark:bg-transparent dark:text-dashboard-header-foreground-muted">
               This month
             </button>
           </div>
 
-          <span className="hidden text-sm text-primary-foreground/88 lg:inline dark:text-dashboard-text-muted">
+          <span className="hidden text-sm text-dashboard-header-foreground lg:inline">
             Welcome back{user?.name ? `, ${user.name}` : ""}
           </span>
 
           <button
             type="button"
             onClick={toggleTheme}
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-primary-foreground/25 bg-primary-foreground/10 text-primary-foreground transition-all hover:border-primary-foreground/40 hover:bg-primary-foreground/16 dark:border-dashboard-rail-border dark:bg-dashboard-surface dark:text-primary dark:hover:border-primary/45 dark:hover:bg-dashboard-surface-muted"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-dashboard-header-foreground/25 bg-dashboard-header-foreground/10 text-dashboard-header-foreground transition-all hover:border-dashboard-header-foreground/40 hover:bg-dashboard-header-foreground/16 dark:border-dashboard-rail-border dark:bg-dashboard-surface dark:text-primary dark:hover:border-primary/45 dark:hover:bg-dashboard-surface-muted"
             aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
           >
             {darkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
@@ -100,13 +100,13 @@ export function DashboardHeader() {
             <button
               type="button"
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              className="flex items-center gap-1.5 rounded-full border border-primary-foreground/30 bg-primary-foreground/10 p-0.5 pr-1.5 transition-all hover:border-primary-foreground/55 hover:bg-primary-foreground/16 dark:border-dashboard-rail-border dark:bg-dashboard-surface dark:hover:border-primary/60 dark:hover:bg-dashboard-surface-muted"
+              className="flex items-center gap-1.5 rounded-full border border-dashboard-header-foreground/30 bg-dashboard-header-foreground/10 p-0.5 pr-1.5 transition-all hover:border-dashboard-header-foreground/55 hover:bg-dashboard-header-foreground/16 dark:border-dashboard-rail-border dark:bg-dashboard-surface dark:hover:border-primary/60 dark:hover:bg-dashboard-surface-muted"
             >
-              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary-foreground text-sm font-bold text-dashboard-header dark:bg-primary/18 dark:text-primary">
+              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-dashboard-header-foreground text-sm font-bold text-dashboard-header dark:bg-primary/18 dark:text-primary">
                 {userInitial}
               </span>
               <ChevronDown
-                className={`h-3.5 w-3.5 text-primary-foreground transition-transform dark:text-primary ${isDropdownOpen ? "rotate-180" : ""}`}
+                className={`h-3.5 w-3.5 text-dashboard-header-foreground transition-transform dark:text-primary ${isDropdownOpen ? "rotate-180" : ""}`}
               />
             </button>
 

@@ -10,7 +10,9 @@ export type DispatchStepId =
   /** Eagle: single-screen upload → extract (logistics API); skips mode/mission wizard */
   | "eagleWorkspace"
   /** MANU: inline LabCorp manual workflow; skips generic mission brief wizard */
-  | "manuWorkspace";
+  | "manuWorkspace"
+  /** Clara: contract / rev-rec workspace aligned with /contract-revrec */
+  | "claraWorkspace";
 
 /** Pre-launch wizard steps (hybrid mission brief). */
 export const STEP_ORDER: DispatchStepId[] = [
@@ -38,6 +40,9 @@ export const STEP_ORDER_EAGLE: DispatchStepId[] = ["agent", "eagleWorkspace"];
 /** MANU: choose agent → inline manual intelligence workspace. */
 export const STEP_ORDER_MANU: DispatchStepId[] = ["agent", "manuWorkspace"];
 
+/** Clara: choose agent → contract intelligence workspace (matches Contract Rev Rec POC). */
+export const STEP_ORDER_CLARA: DispatchStepId[] = ["agent", "claraWorkspace"];
+
 /** Shown after the user launches from the review step. */
 export const POST_LAUNCH_STEP_ORDER: DispatchStepId[] = ["execution", "outputReview"];
 
@@ -52,6 +57,7 @@ export const STEP_LABELS: Record<DispatchStepId, string> = {
   outputReview: "Output review",
   eagleWorkspace: "Document",
   manuWorkspace: "Manual",
+  claraWorkspace: "Contract",
 };
 
 export type MissionLaunchRecord = {
@@ -139,6 +145,9 @@ export function orderedSteps(state: DispatchState): DispatchStepId[] {
   if (state.agentId === "manu") {
     return STEP_ORDER_MANU;
   }
+  if (state.agentId === "lexa") {
+    return STEP_ORDER_CLARA;
+  }
   if (state.modeId === "facilitate") {
     const pre = STEP_ORDER_FACILITATE;
     return state.launched ? [...pre, ...POST_LAUNCH_STEP_ORDER] : pre;
@@ -152,6 +161,7 @@ function clampStepToOrder(state: DispatchState): DispatchStepId {
   if (ord.includes(state.currentStep)) return state.currentStep;
   if (state.agentId === "eagle") return "eagleWorkspace";
   if (state.agentId === "manu") return "manuWorkspace";
+  if (state.agentId === "lexa") return "claraWorkspace";
   if (state.currentStep === "outputContract") return state.modeId === "facilitate" ? "mission" : "input";
   return ord[0] ?? "agent";
 }
@@ -172,8 +182,11 @@ export function dispatchReducer(state: DispatchState, action: DispatchAction): D
         modeId: null,
         missionTemplateId: null,
         linkedSessionId: null,
-        ...((action.agentId === "eagle" || action.agentId === "manu") ? { outputContractId: null } : {}),
+        ...((action.agentId === "eagle" || action.agentId === "manu" || action.agentId === "lexa")
+          ? { outputContractId: null }
+          : {}),
         ...(action.agentId === "manu" ? { modeId: "execute" } : {}),
+        ...(action.agentId === "lexa" ? { modeId: "parse-order" } : {}),
       };
       if (action.agentId === "eagle") {
         return { ...next, currentStep: "eagleWorkspace" };
@@ -181,9 +194,13 @@ export function dispatchReducer(state: DispatchState, action: DispatchAction): D
       if (action.agentId === "manu") {
         return { ...next, currentStep: "manuWorkspace" };
       }
+      if (action.agentId === "lexa") {
+        return { ...next, currentStep: "claraWorkspace" };
+      }
       if (
         (state.agentId === "eagle" && action.agentId !== "eagle") ||
-        (state.agentId === "manu" && action.agentId !== "manu")
+        (state.agentId === "manu" && action.agentId !== "manu") ||
+        (state.agentId === "lexa" && action.agentId !== "lexa")
       ) {
         return { ...next, currentStep: "agent" };
       }
@@ -230,6 +247,16 @@ export function dispatchReducer(state: DispatchState, action: DispatchAction): D
           currentStep: "manuWorkspace",
         };
       }
+      if (agentId === "lexa") {
+        return {
+          ...initialDispatchState,
+          agentId: "lexa",
+          modeId: modeId ?? "parse-order",
+          missionTitle,
+          linkedSessionId: null,
+          currentStep: "claraWorkspace",
+        };
+      }
       return {
         ...initialDispatchState,
         agentId,
@@ -259,6 +286,9 @@ export function dispatchReducer(state: DispatchState, action: DispatchAction): D
         return { ...state, currentStep: "agent", agentId: null, modeId: null };
       }
       if (state.agentId === "manu" && state.currentStep === "manuWorkspace") {
+        return { ...state, currentStep: "agent", agentId: null, modeId: null };
+      }
+      if (state.agentId === "lexa" && state.currentStep === "claraWorkspace") {
         return { ...state, currentStep: "agent", agentId: null, modeId: null };
       }
       const ord = orderedSteps(state);

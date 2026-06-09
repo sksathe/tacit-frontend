@@ -1,4 +1,5 @@
 import { apiClient } from "@/lib/apiClient";
+import { getDefaultProjectId as resolveDefaultProjectId } from "@/lib/defaultProject";
 import {
   createLocalManuRunWithGenerator,
   getLocalManuRun,
@@ -13,8 +14,10 @@ import type {
   ManuRun,
   ManuRunJobStatus,
   ManuRunStatus,
+  ManuTranslationQARow,
   ManuUploadedDocument,
 } from "@/types/manu";
+import { computeTranslationApprovalStatus, normalizeTranslationRow } from "@/lib/manuTranslationUtils";
 
 export { isLocalManuRunId } from "@/lib/manuLocalStore";
 
@@ -38,14 +41,7 @@ async function getAuthToken(): Promise<string | undefined> {
 export async function getDefaultProjectId(): Promise<string | null> {
   const token = await getAuthToken();
   if (!token) return null;
-
-  try {
-    const data = await apiClient.requestJson<{ projects?: Array<{ id: string }> }>("/api/projects", { token });
-    const projects = data?.projects ?? (Array.isArray(data) ? data : []);
-    return Array.isArray(projects) && projects.length > 0 ? projects[0].id : null;
-  } catch {
-    return null;
-  }
+  return resolveDefaultProjectId(token);
 }
 
 export function normalizeManuUploadedDocument(raw: unknown): ManuUploadedDocument | null {
@@ -95,7 +91,16 @@ export function normalizeManuRun(raw: unknown): ManuRun | null {
       flaggedCount: 0,
       requiredCount: 0,
     },
-    translationQA: Array.isArray(o.translationQA) ? (o.translationQA as ManuRun["translationQA"]) : [],
+    translationQA: Array.isArray(o.translationQA)
+      ? (o.translationQA as Partial<ManuTranslationQARow>[]).map(normalizeTranslationRow)
+      : [],
+    translationApprovalStatus:
+      (o.translationApprovalStatus as ManuRun["translationApprovalStatus"]) ||
+      computeTranslationApprovalStatus(
+        Array.isArray(o.translationQA)
+          ? (o.translationQA as Partial<ManuTranslationQARow>[]).map(normalizeTranslationRow)
+          : [],
+      ),
     exportStatus: (o.exportStatus as ManuRun["exportStatus"]) || {
       approved_manual: "idle",
       traceability_matrix: "idle",
@@ -313,7 +318,8 @@ export async function generateManuTranslationQA(run: ManuRun): Promise<ManuRun["
   }
 
   const rows = (body as { translationQA?: unknown })?.translationQA;
-  return Array.isArray(rows) ? (rows as ManuRun["translationQA"]) : [];
+  if (!Array.isArray(rows)) return [];
+  return rows.map((row) => normalizeTranslationRow(row as Partial<ManuTranslationQARow>));
 }
 
 export async function pollManuRunUntilReady(

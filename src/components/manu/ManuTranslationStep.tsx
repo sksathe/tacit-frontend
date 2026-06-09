@@ -1,227 +1,564 @@
 import { MANU_LANGUAGES, MANU_TRANSLATION_SCORES } from "@/data/manuLabcorp";
+
 import { Button } from "@/components/ui/button";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
 import { Badge } from "@/components/ui/badge";
-import type { ManuRun } from "@/types/manu";
-import { AlertTriangle } from "lucide-react";
+
+import { Textarea } from "@/components/ui/textarea";
+
+import { manuSectionCardPalette } from "@/components/manu/manuTheme";
+
 import { generateManuTranslationQA } from "@/lib/manuApi";
+
+import {
+
+  approveAllTranslations,
+
+  approveAllTranslationsForLanguage,
+
+  buildFallbackTranslationQA,
+
+  enrichTranslationQA,
+
+  getLangLabel,
+
+  getRunTargetLanguageCodes,
+
+  getTranslationRowsForLanguage,
+
+  patchTranslationRow,
+
+} from "@/lib/manuTranslationUtils";
+
+import type { ManuRun, ManuSectionStatus } from "@/types/manu";
+
+import { AlertTriangle, CheckCircle2, Flag } from "lucide-react";
+
 import { useEffect, useMemo, useState } from "react";
 
+
+
 interface ManuTranslationStepProps {
+
   run: ManuRun;
+
   onRunChange: (run: ManuRun) => void;
+
   onContinue: () => void;
+
   onBack: () => void;
+
 }
 
-const FALLBACK_TRANSLATION_MAP: Record<string, Array<[RegExp, string]>> = {
-  es: [
-    [/\bwarning\b/gi, "advertencia"],
-    [/\bcaution\b/gi, "precaucion"],
-    [/\bsafety\b/gi, "seguridad"],
-    [/\bdevice\b/gi, "dispositivo"],
-    [/\blaboratory\b/gi, "laboratorio"],
-  ],
-  fr: [
-    [/\bwarning\b/gi, "avertissement"],
-    [/\bcaution\b/gi, "attention"],
-    [/\bsafety\b/gi, "securite"],
-    [/\bdevice\b/gi, "dispositif"],
-    [/\blaboratory\b/gi, "laboratoire"],
-  ],
-  de: [
-    [/\bwarning\b/gi, "warnhinweis"],
-    [/\bcaution\b/gi, "vorsicht"],
-    [/\bsafety\b/gi, "sicherheit"],
-    [/\bdevice\b/gi, "geraet"],
-    [/\blaboratory\b/gi, "labor"],
-  ],
-  hi: [
-    [/\bwarning\b/gi, "चेतावनी"],
-    [/\bcaution\b/gi, "सावधानी"],
-    [/\bsafety\b/gi, "सुरक्षा"],
-    [/\bdevice\b/gi, "उपकरण"],
-    [/\blaboratory\b/gi, "प्रयोगशाला"],
-  ],
-};
 
-function fallbackTranslate(source: string, langCode: string, langLabel: string): string {
-  const dictionary = FALLBACK_TRANSLATION_MAP[langCode];
-  if (!dictionary) return `[${langLabel}] ${source.slice(0, 220)}${source.length > 220 ? "…" : ""}`;
-  const translated = dictionary.reduce((text, [pattern, replacement]) => text.replace(pattern, replacement), source);
-  return `[${langLabel}] ${translated.slice(0, 220)}${translated.length > 220 ? "…" : ""}`;
+
+function statusBadge(status: ManuSectionStatus, approvedClass?: string) {
+
+  if (status === "approved") return <Badge className={approvedClass ?? "bg-emerald-600/90"}>Approved</Badge>;
+
+  if (status === "flagged") return <Badge variant="destructive">Flagged</Badge>;
+
+  return <Badge variant="secondary">Draft</Badge>;
+
 }
+
+
+
+function translationCardClass(
+
+  status: ManuSectionStatus,
+
+  palette: (typeof manuSectionCardPalette)[number],
+
+) {
+
+  const base = `border-l-4 shadow-sm ${palette.card}`;
+
+  if (status === "flagged") return `${base} border-l-destructive ring-1 ring-destructive/25`;
+
+  if (status === "approved") return `${base} ring-1 ring-black/5 dark:ring-white/10`;
+
+  return `${base} opacity-95`;
+
+}
+
+
 
 export function ManuTranslationStep({ run, onRunChange, onContinue, onBack }: ManuTranslationStepProps) {
-  const langCodes = useMemo(() => {
-    const fromMeta = run.manualConfig.metadata.targetLanguages;
-    if (fromMeta.length) return fromMeta;
-    const fromQA = [...new Set(run.translationQA.map((r) => r.language))];
-    return fromQA.length ? fromQA : ["es", "fr", "de"];
-  }, [run]);
+
+  const langCodes = useMemo(() => getRunTargetLanguageCodes(run), [run]);
 
   const [activeLang, setActiveLang] = useState(langCodes[0] ?? "es");
+
   const [isGenerating, setIsGenerating] = useState(false);
+
   const [genError, setGenError] = useState<string | null>(null);
 
+
+
   useEffect(() => {
+
     let cancelled = false;
 
+
+
     const generate = async () => {
+
       setIsGenerating(true);
+
       setGenError(null);
+
       try {
-        const translationQA = await generateManuTranslationQA(run);
+
+        const fromApi = await generateManuTranslationQA(run);
+
         if (cancelled) return;
+
+        const translationQA = enrichTranslationQA(fromApi, run.translationQA, run, langCodes);
+
         onRunChange({
+
           ...run,
+
           translationQA,
+
           updatedAt: new Date().toISOString(),
+
+          translationApprovalStatus: {
+
+            allRequiredApproved: false,
+
+            approvedCount: translationQA.filter((r) => r.status === "approved").length,
+
+            flaggedCount: translationQA.filter((r) => r.status === "flagged").length,
+
+            requiredCount: translationQA.length,
+
+          },
+
         });
+
       } catch (err) {
+
         if (cancelled) return;
+
         const message = err instanceof Error ? err.message : "Failed to generate translation QA";
+
         setGenError(message);
+
+        const translationQA =
+
+          run.translationQA.length > 0
+
+            ? enrichTranslationQA(run.translationQA, run.translationQA, run, langCodes)
+
+            : buildFallbackTranslationQA(run, langCodes);
+
+        onRunChange({
+
+          ...run,
+
+          translationQA,
+
+          updatedAt: new Date().toISOString(),
+
+          translationApprovalStatus: {
+
+            allRequiredApproved: false,
+
+            approvedCount: translationQA.filter((r) => r.status === "approved").length,
+
+            flaggedCount: translationQA.filter((r) => r.status === "flagged").length,
+
+            requiredCount: translationQA.length,
+
+          },
+
+        });
+
       } finally {
+
         if (!cancelled) setIsGenerating(false);
+
       }
+
     };
+
+
 
     generate();
+
     return () => {
+
       cancelled = true;
+
     };
+
   }, [run.generatedSections, run.manualConfig, run.missionId]);
 
-  const activeLabel = MANU_LANGUAGES.find((l) => l.code === activeLang)?.label ?? activeLang;
+
+
+  const activeLabel = getLangLabel(activeLang);
+
   const activeScore = (MANU_TRANSLATION_SCORES[activeLang] ?? 90) / 100;
 
-  const rowsForLang = run.translationQA.filter(
-    (r) => r.language === activeLabel || r.language === activeLang,
-  );
+  const rowsForLang = getTranslationRowsForLanguage(run.translationQA, activeLang);
 
-  const displayRows =
-    rowsForLang.length > 0
-      ? rowsForLang
-      : run.generatedSections.slice(0, 4).map((section) => ({
-          sectionId: section.id,
-          sectionTitle: section.title,
-          sourceText: section.content.slice(0, 220),
-          language: activeLabel,
-          translatedText: fallbackTranslate(section.content, activeLang, activeLabel),
-          accuracyScore: Math.max(0.75, activeScore - 0.08),
-          terminologyFlags: ["AI output missing for this language; showing placeholder translation"],
-          missingWarnings: [],
-        }));
 
-  const normalizedRows = displayRows.map((row) => {
-    const looksUntranslated = row.translatedText.includes(row.sourceText.slice(0, 60));
-    if (!looksUntranslated) return row;
-    return {
-      ...row,
-      translatedText: fallbackTranslate(row.sourceText, activeLang, activeLabel),
-    };
-  });
 
   const avgScore =
-    normalizedRows.length > 0
-      ? normalizedRows.reduce((a, r) => a + r.accuracyScore, 0) / normalizedRows.length
+
+    rowsForLang.length > 0
+
+      ? rowsForLang.reduce((a, r) => a + r.accuracyScore, 0) / rowsForLang.length
+
       : activeScore;
 
+
+
+  const approval = run.translationApprovalStatus;
+
+  const langApprovedCount = rowsForLang.filter((r) => r.status === "approved").length;
+
+  const allTranslationsApproved = approval.allRequiredApproved && approval.requiredCount > 0;
+
+  const allActiveLangApproved = rowsForLang.length > 0 && rowsForLang.every((r) => r.status === "approved");
+
+
+
+  const updateRow = (sectionId: string, patch: Parameters<typeof patchTranslationRow>[3]) => {
+
+    onRunChange(patchTranslationRow(run, sectionId, activeLang, patch));
+
+  };
+
+
+
   return (
+
     <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold">Translation accuracy QA</h2>
-        <p className="mt-2 text-muted-foreground">
-          Compare translated sections against approved English source. Translation QA is generated after section approval.
-        </p>
+
+      <div className="flex flex-wrap items-start justify-between gap-4">
+
+        <div>
+
+          <h2 className="text-2xl font-bold">Translation accuracy QA</h2>
+
+          <p className="mt-2 text-muted-foreground">
+
+            Review each translated section, add approver comments, and approve before export. Every language requires
+
+            sign-off.
+
+          </p>
+
+        </div>
+
+        <div className="flex flex-wrap gap-2">
+
+          <Button variant="outline" onClick={() => onRunChange(approveAllTranslationsForLanguage(run, activeLang))}>
+
+            Approve all ({activeLabel})
+
+          </Button>
+
+          <Button variant="outline" onClick={() => onRunChange(approveAllTranslations(run))}>
+
+            Approve all languages
+
+          </Button>
+
+          <Button className="bg-gradient-primary" disabled={!allTranslationsApproved} onClick={onContinue}>
+
+            Continue to export
+
+          </Button>
+
+        </div>
+
       </div>
+
+
 
       {isGenerating && (
+
         <Card className="border-primary/30 bg-primary/5">
+
           <CardContent className="py-3 text-sm text-muted-foreground">
+
             Generating translation QA with OpenAI...
+
           </CardContent>
+
         </Card>
+
       )}
+
       {genError && (
-        <Card className="border-destructive/40 bg-destructive/10">
-          <CardContent className="py-3 text-sm text-destructive">{genError}</CardContent>
+
+        <Card className="border-amber-500/40 bg-amber-500/10">
+
+          <CardContent className="py-3 text-sm text-amber-700 dark:text-amber-400">
+
+            {genError} — showing placeholder translations until AI generation is available. You can still review and
+
+            approve.
+
+          </CardContent>
+
         </Card>
+
       )}
+
+
+
+      <p className="text-sm text-muted-foreground">
+
+        Translation approval: {approval.approvedCount} of {approval.requiredCount} rows approved
+
+        {langApprovedCount > 0 && ` · ${activeLabel}: ${langApprovedCount} of ${rowsForLang.length}`}
+
+        {!allTranslationsApproved && " — approve every translation row before export."}
+
+      </p>
+
+
 
       <div className="flex flex-wrap gap-2">
+
         {langCodes.map((code) => {
-          const label = MANU_LANGUAGES.find((l) => l.code === code)?.label ?? code;
+
+          const label = getLangLabel(code);
+
           const score = MANU_TRANSLATION_SCORES[code] ?? 90;
+
+          const langRows = getTranslationRowsForLanguage(run.translationQA, code);
+
+          const langDone = langRows.length > 0 && langRows.every((r) => r.status === "approved");
+
           return (
+
             <button
+
               key={code}
+
               type="button"
+
               onClick={() => setActiveLang(code)}
+
               className={`rounded-lg border px-4 py-2 text-sm font-medium transition-colors ${
+
                 activeLang === code ? "border-primary bg-primary/15 text-primary" : "border-border text-muted-foreground"
+
               }`}
+
             >
+
               {label}
+
               <span className="ml-2 text-xs opacity-80">{score}%</span>
+
+              {langDone && <span className="ml-2 text-xs text-emerald-500">✓</span>}
+
             </button>
+
           );
+
         })}
+
       </div>
+
+
 
       <Card className="border-primary/25">
+
         <CardContent className="flex flex-wrap items-center justify-between gap-4 py-4">
+
           <div>
+
             <p className="text-sm text-muted-foreground">Semantic accuracy ({activeLabel})</p>
+
             <p className="text-3xl font-bold text-primary">{Math.round(avgScore * 100)}%</p>
+
           </div>
+
           <Badge variant={avgScore >= 0.92 ? "default" : "secondary"}>
-            {avgScore >= 0.92 ? "Pass threshold" : "Review recommended"}
+
+            {allActiveLangApproved ? "Language approved" : avgScore >= 0.92 ? "Pass threshold" : "Review recommended"}
+
           </Badge>
+
         </CardContent>
+
       </Card>
 
+
+
       <div className="space-y-4">
-        {normalizedRows.map((row) => (
-          <Card key={`${row.sectionId}-${activeLang}`}>
-            <CardHeader className="pb-2">
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <CardTitle className="text-base">{row.sectionTitle}</CardTitle>
-                <Badge variant="outline">{Math.round(row.accuracyScore * 100)}% match</Badge>
-              </div>
-            </CardHeader>
-            <CardContent className="grid gap-4 md:grid-cols-2">
-              <div>
-                <p className="mb-1 text-xs font-semibold uppercase text-muted-foreground">English source</p>
-                <p className="text-sm leading-relaxed">{row.sourceText}</p>
-              </div>
-              <div>
-                <p className="mb-1 text-xs font-semibold uppercase text-muted-foreground">{activeLabel} (translated)</p>
-                <p className="text-sm leading-relaxed text-muted-foreground">{row.translatedText}</p>
-              </div>
-              {row.terminologyFlags.length > 0 && (
-                <p className="md:col-span-2 text-xs text-amber-500">{row.terminologyFlags.join(" · ")}</p>
-              )}
-              {row.missingWarnings.length > 0 && (
-                <p className="md:col-span-2 flex gap-2 text-xs text-destructive">
-                  <AlertTriangle className="h-3 w-3 shrink-0" />
-                  {row.missingWarnings.join(" · ")}
-                </p>
-              )}
-            </CardContent>
-          </Card>
-        ))}
+
+        {rowsForLang.map((row, index) => {
+
+          const palette = manuSectionCardPalette[index % manuSectionCardPalette.length];
+
+          return (
+
+            <Card key={`${row.sectionId}-${activeLang}`} className={translationCardClass(row.status, palette)}>
+
+              <CardHeader className="pb-2">
+
+                <div className="flex flex-wrap items-center justify-between gap-2">
+
+                  <CardTitle className={`text-base ${palette.header}`}>{row.sectionTitle}</CardTitle>
+
+                  <div className="flex items-center gap-2">
+
+                    {statusBadge(row.status, palette.approvedBadge)}
+
+                    <Badge variant="outline" className="border-border/80 bg-background/60">
+
+                      {Math.round(row.accuracyScore * 100)}% match
+
+                    </Badge>
+
+                  </div>
+
+                </div>
+
+              </CardHeader>
+
+              <CardContent className="space-y-3">
+
+                <div className="grid gap-4 md:grid-cols-2">
+
+                  <div>
+
+                    <p className="mb-1 text-xs font-semibold uppercase text-muted-foreground">English source</p>
+
+                    <p className="text-sm leading-relaxed">{row.sourceText}</p>
+
+                  </div>
+
+                  <div>
+
+                    <p className="mb-1 text-xs font-semibold uppercase text-muted-foreground">{activeLabel} (translated)</p>
+
+                    <p className="text-sm leading-relaxed text-muted-foreground">{row.translatedText}</p>
+
+                  </div>
+
+                </div>
+
+                {row.terminologyFlags.length > 0 && (
+
+                  <p className="text-xs text-amber-500">{row.terminologyFlags.join(" · ")}</p>
+
+                )}
+
+                {row.missingWarnings.length > 0 && (
+
+                  <p className="flex gap-2 text-xs text-destructive">
+
+                    <AlertTriangle className="h-3 w-3 shrink-0" />
+
+                    {row.missingWarnings.join(" · ")}
+
+                  </p>
+
+                )}
+
+                {row.flagReason && <p className="text-xs text-destructive">Flag reason: {row.flagReason}</p>}
+
+                <Textarea
+
+                  placeholder="Approver notes and translation comments…"
+
+                  value={row.approverNotes ?? ""}
+
+                  onChange={(e) => updateRow(row.sectionId, { approverNotes: e.target.value })}
+
+                  className="min-h-[60px] text-xs"
+
+                />
+
+                <div className="flex gap-2">
+
+                  <Button
+
+                    size="sm"
+
+                    variant="outline"
+
+                    className={`gap-1 border-current/20 ${palette.header}`}
+
+                    onClick={() => updateRow(row.sectionId, { status: "approved", flagReason: undefined })}
+
+                  >
+
+                    <CheckCircle2 className="h-3 w-3" /> Approve
+
+                  </Button>
+
+                  <Button
+
+                    size="sm"
+
+                    variant="outline"
+
+                    className="gap-1 text-destructive"
+
+                    onClick={() =>
+
+                      updateRow(row.sectionId, {
+
+                        status: "flagged",
+
+                        flagReason: row.approverNotes || "Requires revision — terminology or warning localization",
+
+                      })
+
+                    }
+
+                  >
+
+                    <Flag className="h-3 w-3" /> Flag
+
+                  </Button>
+
+                </div>
+
+              </CardContent>
+
+            </Card>
+
+          );
+
+        })}
+
       </div>
 
+
+
       <div className="flex justify-between">
+
         <Button type="button" variant="outline" onClick={onBack}>
+
           Back to approval
+
         </Button>
-        <Button className="bg-gradient-primary" onClick={onContinue}>
+
+        <Button className="bg-gradient-primary" disabled={!allTranslationsApproved} onClick={onContinue}>
+
           Continue to export
+
         </Button>
+
       </div>
+
     </div>
+
   );
+
 }
+
