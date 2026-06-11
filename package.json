@@ -8,7 +8,7 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "node scripts/ensure-build-env.mjs && vite build",
     "build:dev": "vite build --mode development",
     "start": "vite preview",
     "lint": "eslint .",

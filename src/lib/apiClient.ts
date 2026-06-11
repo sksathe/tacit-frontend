@@ -1,3 +1,11 @@
+import { BUILD_TIME_API_BASE_URL } from "@/generated/apiBase";
+
+declare global {
+  interface Window {
+    __TACIT_API_BASE__?: string;
+  }
+}
+
 type ApiClientOptions = {
   baseUrl?: string;
 };
@@ -13,15 +21,26 @@ function normalizeBaseUrl(raw: string): string {
   return trimmed.endsWith("/") ? trimmed.slice(0, -1) : trimmed;
 }
 
-export function getApiBaseUrl(): string {
+function readConfiguredApiBase(): string {
+  const fromWindow =
+    typeof window !== "undefined" ? String(window.__TACIT_API_BASE__ ?? "").trim() : "";
   const fromEnv =
-    (import.meta as any)?.env?.VITE_API_BASE_URL ??
-    (import.meta as any)?.env?.VITE_API_URL ??
-    "";
+    String(
+      (import.meta as any)?.env?.VITE_API_BASE_URL ??
+        (import.meta as any)?.env?.VITE_API_URL ??
+        "",
+    ).trim();
+  const fromBuild = String(BUILD_TIME_API_BASE_URL ?? "").trim();
 
-  // 1. Explicit env var wins (Render prod, custom setups, etc.)
-  if (String(fromEnv || "").trim()) {
-    return normalizeBaseUrl(String(fromEnv));
+  return fromWindow || fromEnv || fromBuild;
+}
+
+export function getApiBaseUrl(): string {
+  const configured = readConfiguredApiBase();
+
+  // 1. Explicit build/runtime config wins (Render prod, custom setups, etc.)
+  if (configured) {
+    return normalizeBaseUrl(configured);
   }
 
   // 2. Local dev convenience: if frontend is running on localhost, default to local backend
@@ -32,16 +51,14 @@ export function getApiBaseUrl(): string {
     }
   }
 
-  // 3. Production must set VITE_API_BASE_URL at build time (see .env.example).
-  // Do not fall back to a stale backend — that causes 404s for newer routes (e.g. MANU).
+  // 3. Same-origin /api/* — works when the static host rewrites /api to the backend (see render.yaml).
   if (typeof window !== "undefined") {
     console.warn(
-      "[apiClient] VITE_API_BASE_URL is not set. Set it to your deployed backend URL and rebuild the frontend.",
+      "[apiClient] No API base URL in this build. Using same-origin /api/* — configure VITE_API_BASE_URL at build time or add a host rewrite to your backend.",
     );
   }
   return "";
 }
-
 export function createApiClient(opts: ApiClientOptions = {}) {
   const baseUrl = normalizeBaseUrl(opts.baseUrl ?? getApiBaseUrl());
 
@@ -61,6 +78,36 @@ export function createApiClient(opts: ApiClientOptions = {}) {
     return res;
   }
 
+  function apiConfigHint(requestUrl: string): string {
+    if (!baseUrl) {
+      return " No API base URL in this build. Set VITE_API_BASE_URL on the frontend service, clear build cache, redeploy, OR add a /api/* rewrite to your backend on the static host (see tacit-frontend/render.yaml). Check /config.json on the deployed site to verify what was baked in.";
+    }
+    if (baseUrl.includes("localhost")) {
+      return ` This build points at ${baseUrl} (localhost). Set VITE_API_BASE_URL to your deployed backend URL and rebuild.`;
+    }
+    if (requestUrl.includes("onrender.com") && !requestUrl.includes("/api/")) {
+      return " Request may be hitting the frontend host instead of the backend API service.";
+    }
+    return ` Check that ${baseUrl} is your backend (not frontend) and that the latest backend is deployed with /api routes.`;
+  }
+
+  async function parseJsonBody<T>(res: Response): Promise<T> {
+    const contentType = res.headers.get("content-type") || "";
+    const raw = await res.text();
+
+    if (contentType.includes("text/html") || raw.trimStart().startsWith("<!")) {
+      throw new Error(
+        `API returned HTML instead of JSON (configured base: ${baseUrl || "(empty)"}).${apiConfigHint(res.url)} Full URL: ${res.url}`,
+      );
+    }
+
+    try {
+      return JSON.parse(raw) as T;
+    } catch {
+      throw new Error(`API returned invalid JSON.${apiConfigHint(res.url)}`);
+    }
+  }
+
   async function requestJson<T>(path: string, options: ApiRequestOptions = {}): Promise<T> {
     const res = await request(path, {
       ...options,
@@ -74,15 +121,17 @@ export function createApiClient(opts: ApiClientOptions = {}) {
     if (!res.ok) {
       let message = `Request failed (${res.status})`;
       try {
-        const body = (await res.json()) as any;
+        const body = await parseJsonBody<{ error?: string; message?: string }>(res);
         message = body?.error || body?.message || message;
-      } catch {
-        // ignore
+      } catch (err) {
+        if (err instanceof Error && err.message.includes("HTML")) {
+          throw err;
+        }
       }
       throw new Error(message);
     }
 
-    return (await res.json()) as T;
+    return parseJsonBody<T>(res);
   }
 
   return { request, requestJson };

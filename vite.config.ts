@@ -26,7 +26,18 @@ export default defineConfig(({ mode }) => {
       },
     },
   },
-  plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
+  plugins: [
+    react(),
+    mode === "development" && componentTagger(),
+    {
+      name: "inject-api-base",
+      transformIndexHtml(html) {
+        const apiBase = (env.VITE_API_BASE_URL || env.VITE_API_URL || "").trim();
+        const snippet = `<script>window.__TACIT_API_BASE__=${JSON.stringify(apiBase)}</script>`;
+        return html.replace("</head>", `${snippet}</head>`);
+      },
+    },
+  ].filter(Boolean),
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
