@@ -7,8 +7,6 @@ import {
   ChevronRight,
   Loader2,
   Mic,
-  PanelLeftClose,
-  PanelLeftOpen,
   Plus,
   Search,
   Zap,
@@ -236,6 +234,7 @@ export function MissionBriefV4({
   const [eagleFileLabel, setEagleFileLabel] = useState<string | null>(null);
   const [eagleHasExtraction, setEagleHasExtraction] = useState(false);
   const [eagleSidebarExpanded, setEagleSidebarExpanded] = useState(false);
+  const [navSidebarExpanded, setNavSidebarExpanded] = useState(false);
   const [manuMissionLabel, setManuMissionLabel] = useState<string | null>(null);
   const ord = useMemo(() => orderedSteps(dispatchState), [dispatchState]);
   const curIdx = stepIndex(dispatchState);
@@ -304,16 +303,37 @@ export function MissionBriefV4({
     }
   }, [eagleHasExtraction]);
 
+  useEffect(() => {
+    const onHomepage = dispatchState.currentStep === "agent" && !dispatchState.agentId;
+    if (onHomepage) {
+      setNavSidebarExpanded(false);
+    } else if (dispatchState.agentId) {
+      setNavSidebarExpanded(true);
+    }
+  }, [dispatchState.currentStep, dispatchState.agentId]);
+
   const eagleOutputFocus =
     dispatchState.agentId === "eagle" &&
     dispatchState.currentStep === "eagleWorkspace" &&
     eagleHasExtraction &&
     !eagleSidebarExpanded;
-  const eagleSidebarCanMinify =
-    dispatchState.agentId === "eagle" &&
-    dispatchState.currentStep === "eagleWorkspace" &&
-    eagleHasExtraction &&
-    eagleSidebarExpanded;
+  const sidebarCollapsed = eagleOutputFocus || !navSidebarExpanded;
+
+  const collapseSidebar = () => {
+    if (dispatchState.agentId === "eagle" && eagleHasExtraction) {
+      setEagleSidebarExpanded(false);
+      return;
+    }
+    setNavSidebarExpanded(false);
+  };
+
+  const expandSidebar = () => {
+    if (dispatchState.agentId === "eagle" && eagleHasExtraction) {
+      setEagleSidebarExpanded(true);
+      return;
+    }
+    setNavSidebarExpanded(true);
+  };
 
   useEffect(() => {
     if (!dispatchState.linkedSessionId) setLinkedSessionName(null);
@@ -370,7 +390,6 @@ export function MissionBriefV4({
   };
 
   const showConfigProgressStrip = isLightWorkspace;
-  const showSidebar = dispatchState.agentId !== null;
   const progressStepLabel = ord[curIdx] ? STEP_LABELS[ord[curIdx]] : "";
   const progressPct = ord.length > 0 ? Math.round(((curIdx + 1) / ord.length) * 100) : 0;
 
@@ -409,32 +428,31 @@ export function MissionBriefV4({
       <div
         className={cn(
           "mission-brief-v4__layout",
-          eagleOutputFocus && "mission-brief-v4__layout--eagle-output",
-          !showSidebar && "mission-brief-v4__layout--no-sidebar",
+          sidebarCollapsed && "mission-brief-v4__layout--sidebar-collapsed",
         )}
       >
-        {showSidebar && (
         <aside
-          className={[
+          className={cn(
             "mission-brief-v4__sidebar",
             "mission-brief-v4__left-panel",
-            eagleOutputFocus ? "mission-brief-v4__sidebar--collapsed" : "",
-            eagleSidebarCanMinify ? "mission-brief-v4__sidebar--can-minify" : "",
-          ]
-            .filter(Boolean)
-            .join(" ")}
+            sidebarCollapsed && "mission-brief-v4__sidebar--collapsed",
+          )}
         >
-          {eagleSidebarCanMinify && (
+          <div className="mission-brief-v4__sidebar-toggle">
             <button
               type="button"
-              className="mission-brief-v4__sidebar-minify"
-              aria-label="Collapse agent sidebar"
-              title="Collapse sidebar"
-              onClick={() => setEagleSidebarExpanded(false)}
+              className="mission-brief-v4__sidebar-toggle-btn"
+              aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+              title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+              onClick={sidebarCollapsed ? expandSidebar : collapseSidebar}
             >
-              <PanelLeftClose className="h-4 w-4" strokeWidth={2} />
+              {sidebarCollapsed ? (
+                <ChevronRight className="h-4 w-4" strokeWidth={2} />
+              ) : (
+                <ChevronLeft className="h-4 w-4" strokeWidth={2} />
+              )}
             </button>
-          )}
+          </div>
           <div className="mission-brief-v4__agent-block">
             <span className="mission-brief-v4__agent-label">Agent</span>
             {agent ? (
@@ -539,17 +557,7 @@ export function MissionBriefV4({
               </div>
             )}
           </div>
-          <button
-            type="button"
-            className="mission-brief-v4__sidebar-expand"
-            aria-label="Expand agent sidebar"
-            title="Expand sidebar"
-            onClick={() => setEagleSidebarExpanded(true)}
-          >
-            <PanelLeftOpen className="h-4 w-4" strokeWidth={2} />
-          </button>
         </aside>
-        )}
 
         <div
           className={cn(

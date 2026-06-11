@@ -102,20 +102,17 @@
   grid-template-columns: minmax(240px, 18rem) minmax(0, 1fr);
   gap: 0;
   flex: 1;
+  width: 100%;
   min-height: min(720px, calc(100dvh - 10.5rem));
   border: none;
   border-radius: 0;
-  overflow: visible;
+  overflow: hidden;
   background: transparent;
 }
 
-.mission-brief-v4__layout--no-sidebar {
-  grid-template-columns: minmax(0, 1fr);
-}
-
-/* Eagle extraction view: give main column more width */
+/* Collapsed sidebar rail — narrow first column, main stays in column 2 */
 @media (min-width: 961px) {
-  .mission-brief-v4__layout--eagle-output {
+  .mission-brief-v4__layout--sidebar-collapsed {
     grid-template-columns: 3.35rem minmax(0, 1fr);
   }
 }
@@ -125,7 +122,7 @@
     grid-template-columns: 1fr;
   }
 
-  .mission-brief-v4__layout--eagle-output {
+  .mission-brief-v4__layout--sidebar-collapsed {
     grid-template-columns: 1fr;
   }
 }
@@ -137,6 +134,9 @@
   background: transparent;
   min-height: 0;
   min-width: 0;
+  max-width: 100%;
+  width: 100%;
+  overflow-x: hidden;
   overflow-y: auto;
   position: relative;
 }
@@ -237,6 +237,7 @@ html:not(.dark) .mission-brief-v4__sidebar .mission-brief-v4__step:disabled {
 .mission-brief-v4__sidebar--collapsed {
   align-items: center;
   padding-bottom: 0.75rem;
+  overflow: hidden;
 }
 
 @media (min-width: 961px) {
@@ -255,15 +256,23 @@ html:not(.dark) .mission-brief-v4__sidebar .mission-brief-v4__step:disabled {
     width: 100%;
   }
 
-  .mission-brief-v4__sidebar--collapsed .mission-brief-v4__sidebar-expand {
-    display: flex;
-  }
 }
 
-.mission-brief-v4__sidebar-expand {
-  display: none;
-  margin-top: auto;
-  align-self: center;
+.mission-brief-v4__sidebar-toggle {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 0.65rem 0.5rem 0.35rem;
+}
+
+.mission-brief-v4__sidebar--collapsed .mission-brief-v4__sidebar-toggle {
+  padding: 0.65rem 0.35rem 0.35rem;
+}
+
+.mission-brief-v4__sidebar-toggle-btn {
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   width: 2.25rem;
@@ -274,73 +283,31 @@ html:not(.dark) .mission-brief-v4__sidebar .mission-brief-v4__step:disabled {
   transition: background 0.15s ease, border-color 0.15s ease;
 }
 
-html:not(.dark) .mission-brief-v4__sidebar-expand {
+.mission-brief-v4__sidebar:not(.mission-brief-v4__sidebar--collapsed) .mission-brief-v4__sidebar-toggle {
+  justify-content: flex-end;
+  padding-right: 0.65rem;
+}
+
+html:not(.dark) .mission-brief-v4__sidebar-toggle-btn {
   border: 1px solid hsl(var(--mb-sidebar-text) / 0.35);
   background: hsl(var(--mb-sidebar-text) / 0.12);
   color: hsl(var(--mb-sidebar-text));
 }
 
-html:not(.dark) .mission-brief-v4__sidebar-expand:hover {
+html:not(.dark) .mission-brief-v4__sidebar-toggle-btn:hover {
   background: hsl(var(--mb-sidebar-text) / 0.2);
   border-color: hsl(var(--mb-sidebar-text) / 0.5);
 }
 
-.dark .mission-brief-v4__sidebar-expand {
+.dark .mission-brief-v4__sidebar-toggle-btn {
   border: 1px solid hsl(var(--border) / 0.75);
   background: hsl(var(--muted) / 0.25);
   color: hsl(var(--primary));
 }
 
-.dark .mission-brief-v4__sidebar-expand:hover {
+.dark .mission-brief-v4__sidebar-toggle-btn:hover {
   background: hsl(var(--primary) / 0.12);
   border-color: hsl(var(--primary) / 0.45);
-}
-
-.mission-brief-v4__sidebar-minify {
-  position: absolute;
-  top: 0.65rem;
-  right: 0.5rem;
-  z-index: 2;
-  display: none;
-  align-items: center;
-  justify-content: center;
-  width: 2rem;
-  height: 2rem;
-  padding: 0;
-  border-radius: var(--mb-v4-radius);
-  cursor: pointer;
-}
-
-html:not(.dark) .mission-brief-v4__sidebar-minify {
-  border: 1px solid hsl(var(--mb-sidebar-text) / 0.25);
-  background: hsl(var(--mb-sidebar-text) / 0.12);
-  color: hsl(var(--mb-sidebar-text));
-}
-
-html:not(.dark) .mission-brief-v4__sidebar-minify:hover {
-  background: hsl(var(--mb-sidebar-text) / 0.22);
-  color: hsl(var(--mb-sidebar-text));
-}
-
-.dark .mission-brief-v4__sidebar-minify {
-  border: none;
-  background: hsl(var(--muted) / 0.35);
-  color: hsl(var(--muted-foreground));
-}
-
-.dark .mission-brief-v4__sidebar-minify:hover {
-  background: hsl(var(--muted) / 0.55);
-  color: hsl(var(--foreground));
-}
-
-@media (min-width: 961px) {
-  .mission-brief-v4__sidebar--can-minify .mission-brief-v4__sidebar-minify {
-    display: flex;
-  }
-
-  .mission-brief-v4__sidebar--collapsed .mission-brief-v4__sidebar-minify {
-    display: none;
-  }
 }
 
 @media (max-width: 960px) {
@@ -364,11 +331,6 @@ html:not(.dark) .mission-brief-v4__sidebar-minify:hover {
     display: none;
   }
 
-  .mission-brief-v4__sidebar--collapsed .mission-brief-v4__sidebar-expand {
-    display: flex;
-    margin-top: 0;
-    margin-left: auto;
-  }
 }
 
 @media (max-width: 960px) {
@@ -2853,7 +2815,7 @@ html:not(.dark) .mission-brief-v4__chip--active {
 }
 
 .mission-brief-v4__sidebar {
-  min-width: 240px;
+  min-width: 0;
 }
 
 .mission-brief-v4__steps {
@@ -2964,7 +2926,7 @@ html:not(.dark) .mission-brief-v4__chip--active {
 }
 
 .mission-brief-v4__left-panel {
-  flex-shrink: 0;
+  min-width: 0;
   height: 100%;
   overflow-y: auto;
 }
@@ -3399,7 +3361,7 @@ html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__left-
 }
 
 @media (min-width: 961px) {
-  .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__layout--eagle-output {
+  .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__layout--sidebar-collapsed {
     grid-template-columns: 3.35rem minmax(0, 1fr);
     grid-template-rows: minmax(0, 1fr);
   }
@@ -3415,23 +3377,19 @@ html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__left-
   grid-row: 1;
 }
 
-.mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__layout--eagle-output .mission-brief-v4__sidebar {
+.mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__layout--sidebar-collapsed .mission-brief-v4__sidebar {
   grid-column: 1;
   grid-row: 1;
 }
 
-.mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__layout--eagle-output .mission-brief-v4__main {
+.mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__layout--sidebar-collapsed .mission-brief-v4__main {
   grid-column: 2;
   grid-row: 1;
 }
 
-.mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__layout--no-sidebar {
-  grid-template-columns: minmax(0, 1fr);
-}
-
-.mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__layout--no-sidebar .mission-brief-v4__main {
-  grid-column: 1;
-  grid-row: 1;
+.mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__layout--sidebar-collapsed .mission-brief-v4__sidebar {
+  min-width: 0;
+  max-width: 3.35rem;
 }
 
 @media (max-width: 960px) {
@@ -3455,14 +3413,6 @@ html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__left-
     min-height: 0;
   }
 
-  .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__layout--no-sidebar {
-    grid-template-rows: minmax(0, 1fr);
-  }
-
-  .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__layout--no-sidebar .mission-brief-v4__main {
-    grid-column: 1;
-    grid-row: 1;
-  }
 }
 
 html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__layout {
@@ -3473,17 +3423,23 @@ html:not(.dark) .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__layou
 }
 
 .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__content {
-  /* Horizontal safe-area only */
-  padding: 0.85rem max(0.75rem, env(safe-area-inset-right, 0px)) max(1rem, env(safe-area-inset-bottom, 0px))
-    0;
+  padding: 0.85rem max(1.5rem, env(safe-area-inset-right, 0px)) max(1rem, env(safe-area-inset-bottom, 0px))
+    max(1.5rem, env(safe-area-inset-left, 0px));
   scroll-behavior: smooth;
   overflow-x: hidden;
   overscroll-behavior: contain;
 }
 
+/* Content shell owns horizontal inset in v52 — avoid double padding from inner screens */
+.mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__screen,
+.mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__wizard-pane,
+.mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__progress-strip {
+  padding-left: 0;
+}
+
 @media (max-width: 960px) {
   .mission-brief-v4.mission-brief-v4--v52 .mission-brief-v4__content {
-    padding: 0.75rem max(0.65rem, env(safe-area-inset-right, 0px)) 0.85rem 0;
+    padding: 0.75rem max(1rem, env(safe-area-inset-right, 0px)) 0.85rem max(1rem, env(safe-area-inset-left, 0px));
   }
 }
 
