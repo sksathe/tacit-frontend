@@ -1,9 +1,8 @@
-# Render static site for tacit-frontend (monorepo: set Root Directory to tacit-frontend in dashboard if not using Blueprint).
+# Render static site — repo root is tacit-frontend (no Root Directory override needed).
 services:
   - type: web
     name: tacit-frontend
     runtime: static
-    rootDir: tacit-frontend
     buildCommand: npm install && npm run build
     staticPublishPath: dist
     envVars:

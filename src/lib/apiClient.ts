@@ -80,7 +80,7 @@ export function createApiClient(opts: ApiClientOptions = {}) {
 
   function apiConfigHint(requestUrl: string): string {
     if (!baseUrl) {
-      return " No API base URL in this build. Set VITE_API_BASE_URL on the frontend service, clear build cache, redeploy, OR add a /api/* rewrite to your backend on the static host (see tacit-frontend/render.yaml). Check /config.json on the deployed site to verify what was baked in.";
+      return " No API base URL in this build. Set VITE_API_BASE_URL on the frontend service, clear build cache, redeploy, OR add a /api/* rewrite to your backend on the static host (see render.yaml). Check /config.json on the deployed site to verify what was baked in.";
     }
     if (baseUrl.includes("localhost")) {
       return ` This build points at ${baseUrl} (localhost). Set VITE_API_BASE_URL to your deployed backend URL and rebuild.`;
