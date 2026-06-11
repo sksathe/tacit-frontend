@@ -120,6 +120,8 @@ function shouldFallbackToLocalStorage(err: unknown): boolean {
   const message = err instanceof Error ? err.message : asString(err);
   if (isSupabaseTableMissingError(message)) return true;
   if (/request failed \(5\d\d\)/i.test(message)) return true;
+  if (/request failed \(404\)/i.test(message)) return true;
+  if (/default project not found/i.test(message)) return true;
   if (/failed to create run/i.test(message)) return true;
   if (/network|fetch failed|failed to fetch/i.test(message)) return true;
   return false;
@@ -199,7 +201,7 @@ export async function postManuRun(payload: {
     });
 
   if (!payload.projectId) {
-    const local = generateLocal();
+    const local = await generateLocal();
     return { ...local, storage: "local" };
   }
 
@@ -233,7 +235,7 @@ export async function postManuRun(payload: {
     };
   } catch (err) {
     if (shouldFallbackToLocalStorage(err)) {
-      const local = generateLocal();
+      const local = await generateLocal();
       return { ...local, storage: "local" };
     }
     throw err;
@@ -304,6 +306,7 @@ export async function generateManuTranslationQA(run: ManuRun): Promise<ManuRun["
       missionId: run.missionId,
       manualConfig: run.manualConfig,
       sections: run.generatedSections,
+      documents: run.uploadedDocuments,
     }),
     token,
   });

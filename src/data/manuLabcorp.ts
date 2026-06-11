@@ -120,6 +120,16 @@ export const MANU_DEMO_BUNDLES: Record<ManuDemoBundleKey, ManuDemoBundle> = {
   },
 };
 
+/** Extra translation files loaded for Translation Accuracy QA demos */
+export const MANU_TRANSLATION_DEMO_DOCS: Partial<
+  Record<ManuDemoBundleKey, ManuDemoBundle["documents"]>
+> = {
+  "cs-ultra": [
+    { fileName: "05_IFU_Spanish_Translation.txt", category: "translation", parseStatus: "complete", confidence: 91 },
+    { fileName: "06_IFU_French_Translation.txt", category: "translation", parseStatus: "complete", confidence: 90 },
+  ],
+};
+
 export type ManuProductContentKey = "CS-ULTRA-24R" | "HCP-5000" | "DEFAULT";
 
 export interface ManuProductContent {
@@ -387,7 +397,7 @@ export function getMissionFocus(missionId: string): {
     case MANU_MISSION_IDS.translationQa:
       return {
         title: "Translation Accuracy QA",
-        description: "Approve English source sections first, then validate translated manuals section by section.",
+        description: "Approve English source sections first, then review AI-generated translations in each target language.",
         emphasizeRisk: false,
         emphasizeRegulatory: false,
         emphasizeTranslation: true,

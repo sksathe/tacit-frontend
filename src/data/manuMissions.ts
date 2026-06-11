@@ -57,7 +57,7 @@ export const MANU_MISSIONS: ManuMission[] = [
     id: MANU_MISSION_IDS.translationQa,
     title: "Translation Accuracy QA",
     description:
-      "Compare translated manuals against the approved English source and score translation accuracy section by section.",
+      "Generate translated manual sections in your chosen languages from approved English source, then review accuracy section by section.",
     outputs: [
       "Translation Accuracy Score",
       "Flagged Paragraphs",

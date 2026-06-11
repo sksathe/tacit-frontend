@@ -77,7 +77,9 @@ export async function prepareWorkspaceRun(params: {
   bundleKey: ManuDemoBundleKey;
   preApprove?: boolean;
 }): Promise<{ run: ManuRun; documents: ManuUploadedDocument[]; manualConfig: ManuManualConfig; mode: ManuMode }> {
-  const documents = await loadLabCorpDemoBundle(params.bundleKey);
+  const documents = await loadLabCorpDemoBundle(params.bundleKey, {
+    includeTranslationDocs: params.missionId === MANU_MISSION_IDS.translationQa,
+  });
   const metadata = getDefaultMetadataForBundle(params.bundleKey);
   const manualConfig: ManuManualConfig = {
     selectedSectionIds: getDefaultSectionsForMission(

@@ -32,9 +32,14 @@ export function getApiBaseUrl(): string {
     }
   }
 
-  // 3. Fallback to Render backend URL
-  const fallback = "https://tacit-backend-puvm.onrender.com";
-  return normalizeBaseUrl(fallback);
+  // 3. Production must set VITE_API_BASE_URL at build time (see .env.example).
+  // Do not fall back to a stale backend — that causes 404s for newer routes (e.g. MANU).
+  if (typeof window !== "undefined") {
+    console.warn(
+      "[apiClient] VITE_API_BASE_URL is not set. Set it to your deployed backend URL and rebuild the frontend.",
+    );
+  }
+  return "";
 }
 
 export function createApiClient(opts: ApiClientOptions = {}) {

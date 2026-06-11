@@ -1,8 +1,9 @@
 import { getDefaultSectionsForMission } from "@/data/manuLabcorp";
+import { defaultSectionIdsForMission, getMissionUiProfile } from "@/data/manuMissionUi";
 import { MANU_MISSION_IDS } from "@/data/manuLabcorp";
 import { MANU_MISSIONS } from "@/data/manuMissions";
 import { MANU_DEFAULT_SECTIONS } from "@/data/manuSections";
-import { getDefaultProjectId, isLocalManuRunId, postManuRun } from "@/lib/manuApi";
+import { getDefaultProjectId, getManuRun, getManuRunStatus, isLocalManuRunId, postManuRun } from "@/lib/manuApi";
 import { patchLocalManuRunResult } from "@/lib/manuLocalStore";
 import { simulateManuRun } from "@/lib/manuSimulator";
 import type { ManuFlowStep, ManuManualConfig, ManuMode, ManuRun, ManuUploadedDocument } from "@/types/manu";
@@ -61,6 +62,9 @@ export function useManuFlow(entry: ManuFlowEntry = "full") {
   }, [missionId]);
 
   const stepLabel = useMemo(() => {
+    if (step === "config" && missionId) {
+      return getMissionUiProfile(missionId).configTitle;
+    }
     const labels: Record<ManuFlowStep, string> = {
       landing: "LabCorp MANU Studio",
       mode: "Select mode",
@@ -74,7 +78,7 @@ export function useManuFlow(entry: ManuFlowEntry = "full") {
       export: "Export package",
     };
     return labels[step];
-  }, [step]);
+  }, [step, missionId]);
 
   const fallbackToSimulation = useCallback(() => {
     const mission = MANU_MISSIONS.find((m) => m.id === missionId);
@@ -115,7 +119,7 @@ export function useManuFlow(entry: ManuFlowEntry = "full") {
     } catch (err) {
       const message = err instanceof Error ? err.message : "Backend launch failed";
       setLaunchError(message);
-      fallbackToSimulation();
+      // Stay on review — user can retry or explicitly choose offline simulation from processing if a runId exists
     } finally {
       setIsLaunching(false);
     }
@@ -173,9 +177,13 @@ export function useManuFlow(entry: ManuFlowEntry = "full") {
 
   const handleMissionSelect = useCallback((id: string) => {
     setMissionId(id);
+    const profile = getMissionUiProfile(id);
     setManualConfig((c) => ({
       ...c,
-      selectedSectionIds: getDefaultSectionsForMission(id, c.selectedSectionIds),
+      selectedSectionIds:
+        profile.sectionMode === "locked"
+          ? defaultSectionIdsForMission(id)
+          : getDefaultSectionsForMission(id, c.selectedSectionIds),
     }));
     if (entry === "embedded") {
       setStep("documents");
@@ -196,6 +204,37 @@ export function useManuFlow(entry: ManuFlowEntry = "full") {
 
   const handleBundleMetadata = useCallback((meta: Partial<ManuManualConfig["metadata"]>) => {
     setManualConfig((c) => ({ ...c, metadata: { ...c.metadata, ...meta } }));
+  }, []);
+
+  const resumeRun = useCallback(async (runId: string, mission: string) => {
+    setMissionId(mission);
+    setManualConfig((c) => ({
+      ...c,
+      selectedSectionIds: getDefaultSectionsForMission(mission, c.selectedSectionIds),
+    }));
+    setRunId(runId);
+    setRunStorage("remote");
+    setUsedSimulationFallback(false);
+    setLaunchError(null);
+
+    try {
+      const status = await getManuRunStatus(runId);
+      if (status.status === "ready") {
+        const completed = await getManuRun(runId);
+        setRun(completed);
+        setStep("workspace");
+        return;
+      }
+      if (status.status === "failed") {
+        setLaunchError(status.error || "MANU run failed");
+        setStep("documents");
+        return;
+      }
+      setStep("processing");
+    } catch (err) {
+      setLaunchError(err instanceof Error ? err.message : "Failed to resume MANU run");
+      setStep("documents");
+    }
   }, []);
 
   return {
@@ -230,6 +269,7 @@ export function useManuFlow(entry: ManuFlowEntry = "full") {
     handleMissionSelect,
     clearMission,
     handleBundleMetadata,
+    resumeRun,
   };
 }
 

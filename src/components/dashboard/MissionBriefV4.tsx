@@ -1,10 +1,8 @@
 import "./mission-brief-v4.css";
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { Dispatch, SetStateAction } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   AlertCircle,
-  Calendar,
   ChevronLeft,
   ChevronRight,
   Loader2,
@@ -15,8 +13,6 @@ import {
   Search,
   Zap,
   Upload,
-  User,
-  Video,
   X,
 } from "lucide-react";
 import { TACIT_AGENTS, type TacitAgent } from "@/data/agents";
@@ -29,8 +25,10 @@ import {
   type DispatchAction,
   type DispatchState,
   type DispatchStepId,
-  type MissionLaunchRecord,
 } from "@/features/dispatch/model";
+import { RecentActivityPanel } from "@/components/dashboard/RecentActivityPanel";
+import type { useRecentAgentActivity } from "@/hooks/useRecentAgentActivity";
+import type { RecentAgentActivity } from "@/types/recentActivity";
 import { AgentAvatar } from "@/components/dashboard/AgentAvatar";
 import { ClaraContractMissionPanel } from "@/components/dashboard/ClaraContractMissionPanel";
 import { EagleLogisticsMissionPanel } from "@/components/dashboard/EagleLogisticsMissionPanel";
@@ -48,49 +46,6 @@ function modeBadgeModifier(m: DispatchMode, index: number): string {
   if (s === "D" || index % 3 === 0) return "mission-brief-v4__mode-badge--d";
   if (s === "E" || index % 3 === 1) return "mission-brief-v4__mode-badge--e";
   return "mission-brief-v4__mode-badge--h";
-}
-
-function formatRelativeTime(ts: number): string {
-  const diffMs = Date.now() - ts;
-  const sec = Math.floor(diffMs / 1000);
-  if (sec < 45) return "Just now";
-  const min = Math.floor(sec / 60);
-  const hr = Math.floor(min / 60);
-  const d = Math.floor(hr / 24);
-  if (d > 0) return d === 1 ? "1 day ago" : `${d} days ago`;
-  if (hr > 0) return hr === 1 ? "1 hour ago" : `${hr} hours ago`;
-  if (min > 0) return min === 1 ? "1 min ago" : `${min} min ago`;
-  return "Just now";
-}
-
-function pickupBadgeModifier(agentId: string): string {
-  const map: Record<string, string> = {
-    sage: "mission-brief-v4__pickup-badge--sage",
-    aria: "mission-brief-v4__pickup-badge--aria",
-    mason: "mission-brief-v4__pickup-badge--mason",
-    lexa: "mission-brief-v4__pickup-badge--lexa",
-    eagle: "mission-brief-v4__pickup-badge--eagle",
-    manu: "mission-brief-v4__pickup-badge--manu",
-    ross: "mission-brief-v4__pickup-badge--ross",
-    monica: "mission-brief-v4__pickup-badge--monica",
-    chandler: "mission-brief-v4__pickup-badge--chandler",
-  };
-  return map[agentId] ?? "mission-brief-v4__pickup-badge--default";
-}
-
-function agentPickupBadgeText(agent: TacitAgent | undefined, agentId: string): string {
-  const raw = agent?.name ?? agentId;
-  return raw.replace(/\s/g, "").toUpperCase().slice(0, 5);
-}
-
-function formatPickupDateTime(ts: number): string {
-  return new Date(ts).toLocaleString(undefined, {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-  });
 }
 
 type MissionTemplate = {
@@ -242,25 +197,41 @@ function isLightConfigureStep(step: DispatchStepId): boolean {
   return LIGHT_CONFIGURE_STEPS.has(step);
 }
 
+type RecentActivityApi = ReturnType<typeof useRecentAgentActivity>;
+
 export type MissionBriefV4Props = {
   dispatchState: DispatchState;
   dispatchAction: (a: DispatchAction) => void;
-  recentLaunches: MissionLaunchRecord[];
-  setRecentLaunches: Dispatch<SetStateAction<MissionLaunchRecord[]>>;
+  recentActivity: RecentActivityApi;
   activeRecentId: string | null;
   setActiveRecentId: (id: string | null) => void;
+  onActivitySelect: (activity: RecentAgentActivity) => void;
+  pendingManuResume: { runId: string; missionId: string } | null;
+  onClearManuResume: () => void;
   onOpenMeetingFlow: (flow: "start" | "schedule") => void;
 };
 
 export function MissionBriefV4({
   dispatchState,
   dispatchAction,
-  recentLaunches,
-  setRecentLaunches,
+  recentActivity,
   activeRecentId,
   setActiveRecentId,
+  onActivitySelect,
+  pendingManuResume,
+  onClearManuResume,
   onOpenMeetingFlow,
 }: MissionBriefV4Props) {
+  const {
+    activities,
+    loading: activitiesLoading,
+    error: activitiesError,
+    agentFilter,
+    setAgentFilter,
+    searchQuery,
+    setSearchQuery,
+    recordWorkspaceLaunch,
+  } = recentActivity;
   const navigate = useNavigate();
   const [eagleFileLabel, setEagleFileLabel] = useState<string | null>(null);
   const [eagleHasExtraction, setEagleHasExtraction] = useState(false);
@@ -283,14 +254,6 @@ export function MissionBriefV4({
   const [missionMenuOpen, setMissionMenuOpen] = useState(false);
   const [missionMenuQuery, setMissionMenuQuery] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const tabScrollRef = useRef<HTMLDivElement>(null);
-  const [dismissedRecentTabIds, setDismissedRecentTabIds] = useState(() => new Set<string>());
-
-  const tabBarRecents = useMemo(
-    () => recentLaunches.filter((r) => !dismissedRecentTabIds.has(r.id)),
-    [recentLaunches, dismissedRecentTabIds],
-  );
-
   const isLightWorkspace =
     isLightConfigureStep(dispatchState.currentStep) ||
     dispatchState.currentStep === "claraWorkspace";
@@ -394,9 +357,16 @@ export function MissionBriefV4({
     setActiveRecentId(null);
   };
 
-  const handleRecentClick = (rec: MissionLaunchRecord) => {
-    setActiveRecentId(rec.id);
-    dispatchAction({ type: "APPLY_RECENT", payload: rec });
+  const handleContinue = () => {
+    if (dispatchState.currentStep === "review" && dispatchState.agentId) {
+      void recordWorkspaceLaunch({
+        agentId: dispatchState.agentId,
+        modeId: dispatchState.modeId,
+        missionTitle: dispatchState.missionTitle.trim() || "Mission",
+        workspaceStep: "review",
+      });
+    }
+    dispatchAction({ type: "GO_FORWARD" });
   };
 
   const showConfigProgressStrip = isLightWorkspace;
@@ -428,19 +398,6 @@ export function MissionBriefV4({
       </button>
     );
   });
-
-  const selectedRecentTabId =
-    activeRecentId && tabBarRecents.some((r) => r.id === activeRecentId) ? activeRecentId : null;
-  const newMissionTabSelected = selectedRecentTabId === null;
-
-  const dismissRecentFromTabBar = (e: React.MouseEvent, rec: MissionLaunchRecord) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDismissedRecentTabIds((s) => new Set(s).add(rec.id));
-    if (activeRecentId === rec.id) {
-      setActiveRecentId(null);
-    }
-  };
 
   return (
     <div className="mission-brief-v4 mission-brief-v4--v52">
@@ -632,99 +589,19 @@ export function MissionBriefV4({
                     </p>
                   </div>
 
-                  {recentLaunches.length > 0 && (
-                    <section className="mission-brief-v4__landing-zone" aria-label="Pick up where you left off">
-                      <h2 className="mission-brief-v4__landing-heading">Pick up where you left off</h2>
-                      <p className="mission-brief-v4__landing-sub">
-                        Reopen a run with agent, mode, and title prefilled.
-                      </p>
-                      <div className="mission-brief-v4__pickup-strip">
-                        {recentLaunches.map((rec, index) => {
-                          const a = agentById(rec.agentId);
-                          const profile = getDispatchProfile(rec.agentId);
-                          const modeLabel =
-                            profile?.modes.find((m) => m.id === rec.modeId)?.label ??
-                            (rec.modeId ? String(rec.modeId) : "Mission");
-                          const badge = agentPickupBadgeText(a, rec.agentId);
-                          const featured = recentLaunches.length >= 2 ? index < 2 : index === 0;
-                          const active = activeRecentId === rec.id;
-                          return (
-                            <button
-                              key={rec.id}
-                              type="button"
-                              className={cn(
-                                "mission-brief-v4__pickup-card",
-                                featured
-                                  ? "mission-brief-v4__pickup-card--featured"
-                                  : "mission-brief-v4__pickup-card--secondary",
-                                active && "mission-brief-v4__pickup-card--active",
-                              )}
-                              onClick={() => handleRecentClick(rec)}
-                            >
-                              {featured ? (
-                                <div className="mission-brief-v4__pickup-ribbon">
-                                  ✦ Ready to continue — Mission saved
-                                </div>
-                              ) : null}
-                              <div className="mission-brief-v4__pickup-body">
-                                <span
-                                  className={cn(
-                                    "mission-brief-v4__pickup-badge",
-                                    pickupBadgeModifier(rec.agentId),
-                                  )}
-                                >
-                                  {badge}
-                                </span>
-                                <h3 className="mission-brief-v4__pickup-title">{rec.missionTitle}</h3>
-                                <p className="mission-brief-v4__pickup-sub">
-                                  {badge} · {modeLabel}
-                                </p>
-                                {featured ? (
-                                  <>
-                                    <div className="mission-brief-v4__pickup-meta">
-                                      <div className="mission-brief-v4__pickup-meta-row">
-                                        <Calendar className="mission-brief-v4__pickup-meta-icon" aria-hidden />
-                                        <span>{formatPickupDateTime(rec.createdAt)}</span>
-                                      </div>
-                                      <div className="mission-brief-v4__pickup-meta-row">
-                                        <User className="mission-brief-v4__pickup-meta-icon" aria-hidden />
-                                        <span>{a?.role ?? "Specialist"}</span>
-                                      </div>
-                                      <div className="mission-brief-v4__pickup-meta-row">
-                                        <Video className="mission-brief-v4__pickup-meta-icon" aria-hidden />
-                                        <span>Mission Studio</span>
-                                      </div>
-                                    </div>
-                                    <div
-                                      className="mission-brief-v4__pickup-cta mission-brief-v4__pickup-cta--primary"
-                                      aria-hidden
-                                    >
-                                      Continue in workspace →
-                                    </div>
-                                  </>
-                                ) : (
-                                  <>
-                                    <p className="mission-brief-v4__pickup-ago">
-                                      {formatRelativeTime(rec.createdAt)}
-                                    </p>
-                                    <span className="mission-brief-v4__pickup-status">Output ready</span>
-                                    <div
-                                      className="mission-brief-v4__pickup-cta mission-brief-v4__pickup-cta--ghost"
-                                      aria-hidden
-                                    >
-                                      → Open workspace
-                                    </div>
-                                  </>
-                                )}
-                              </div>
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </section>
-                  )}
+                  <RecentActivityPanel
+                    activities={activities}
+                    loading={activitiesLoading}
+                    error={activitiesError}
+                    agentFilter={agentFilter}
+                    onAgentFilterChange={setAgentFilter}
+                    searchQuery={searchQuery}
+                    onSearchQueryChange={setSearchQuery}
+                    activeId={activeRecentId}
+                    onSelect={onActivitySelect}
+                  />
 
-                  {recentLaunches.length > 0 ? <div className="mission-brief-v4__landing-divider" role="separator" /> : null}
+                  <div className="mission-brief-v4__landing-divider" role="separator" />
 
                   <section className="mission-brief-v4__landing-zone" aria-label="Choose an agent">
                     <h2 className="mission-brief-v4__landing-heading">Start a new mission</h2>
@@ -802,6 +679,17 @@ export function MissionBriefV4({
                             e.preventDefault();
                             e.stopPropagation();
                             dispatchAction({ type: "SELECT_AGENT", agentId: a.id });
+                            void recordWorkspaceLaunch({
+                              agentId: a.id,
+                              modeId:
+                                a.id === "manu"
+                                  ? "execute"
+                                  : a.id === "lexa"
+                                    ? "parse-order"
+                                    : null,
+                              missionTitle: `${a.name} workspace`,
+                              workspaceStep: "launch",
+                            });
                             if (a.id !== "eagle" && a.id !== "manu" && a.id !== "lexa") {
                               dispatchAction({ type: "SET_STEP", step: "mode" });
                             }
@@ -826,7 +714,21 @@ export function MissionBriefV4({
             )}
 
             {dispatchState.currentStep === "manuWorkspace" && (
-              <ManuMissionBriefPanel onMissionTitleChange={setManuMissionLabel} />
+              <ManuMissionBriefPanel
+                onMissionTitleChange={setManuMissionLabel}
+                resumeRunId={pendingManuResume?.runId}
+                resumeMissionId={pendingManuResume?.missionId}
+                onResumeComplete={onClearManuResume}
+                onMissionSelect={(missionId, title) => {
+                  void recordWorkspaceLaunch({
+                    agentId: "manu",
+                    modeId: "execute",
+                    missionTitle: title,
+                    workspaceStep: "manu-mission",
+                    metadata: { missionId },
+                  });
+                }}
+              />
             )}
 
             {dispatchState.currentStep === "claraWorkspace" && (
@@ -1440,7 +1342,7 @@ export function MissionBriefV4({
                   <button
                     type="button"
                     className="mission-brief-v4__btn mission-brief-v4__btn--primary"
-                    onClick={() => dispatchAction({ type: "GO_FORWARD" })}
+                    onClick={handleContinue}
                   >
                     Continue
                   </button>

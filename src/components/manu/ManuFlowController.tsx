@@ -9,6 +9,7 @@ import { ManuReviewStep } from "@/components/manu/ManuReviewStep";
 import { ManuStepNav } from "@/components/manu/ManuStepNav";
 import { ManuTranslationStep } from "@/components/manu/ManuTranslationStep";
 import type { ManuFlowApi } from "@/components/manu/useManuFlow";
+import { MANU_MISSION_IDS } from "@/data/manuLabcorp";
 import type { ManuFlowStep } from "@/types/manu";
 import { useToast } from "@/components/ui/use-toast";
 import { useEffect, useRef } from "react";
@@ -63,6 +64,7 @@ export function ManuFlowController({ flow, showStepNav = true }: ManuFlowControl
     goBack,
     handleMissionSelect,
     handleBundleMetadata,
+    fallbackToSimulation,
   } = flow;
 
   useEffect(() => {
@@ -118,6 +120,7 @@ export function ManuFlowController({ flow, showStepNav = true }: ManuFlowControl
 
       {step === "documents" && missionId && (
         <ManuDocumentBundleStep
+          missionId={missionId}
           documents={documents}
           onDocumentsChange={setDocuments}
           onMetadataFromBundle={handleBundleMetadata}
@@ -126,8 +129,9 @@ export function ManuFlowController({ flow, showStepNav = true }: ManuFlowControl
         />
       )}
 
-      {step === "config" && (
+      {step === "config" && missionId && (
         <ManuConfigStep
+          missionId={missionId}
           metadata={manualConfig.metadata}
           selectedSectionIds={manualConfig.selectedSectionIds}
           onMetadataChange={(metadata) => setManualConfig((c) => ({ ...c, metadata }))}
@@ -145,6 +149,11 @@ export function ManuFlowController({ flow, showStepNav = true }: ManuFlowControl
           onLaunch={handleLaunch}
           onBack={goBack}
           isLaunching={isLaunching}
+          launchError={launchError}
+          onUseOfflineSimulation={() => {
+            fallbackToSimulation();
+            setStep("processing");
+          }}
         />
       )}
 
@@ -169,7 +178,12 @@ export function ManuFlowController({ flow, showStepNav = true }: ManuFlowControl
           onRunChange={setRun}
           traceabilityOpen={traceabilityOpen}
           onTraceabilityOpenChange={setTraceabilityOpen}
-          onContinueToTranslation={() => setStep("translation")}
+          onContinueToTranslation={() => {
+            const skipTranslation =
+              run.missionId === MANU_MISSION_IDS.riskCoverageQa ||
+              run.missionId === MANU_MISSION_IDS.regulatoryQa;
+            setStep(skipTranslation ? "export" : "translation");
+          }}
         />
       )}
 

@@ -154,27 +154,44 @@ function sectionSources(sectionId: string, docs: ManuUploadedDocument[]): ManuUp
 
 function buildGaps(docs: ManuUploadedDocument[], missionId: string): string[] {
   const gaps: string[] = [];
-  if (!hasCategory(docs, "fmea")) {
-    gaps.push("No FMEA — risk-to-warning mapping limited");
+
+  switch (missionId) {
+    case MANU_MISSION_IDS.translationQa: {
+      if (!hasCategory(docs, "existing_manual") && !hasCategory(docs, "prd")) {
+        gaps.push("No English source manual or PRD — English sections generated from available evidence");
+      }
+      break;
+    }
+    case MANU_MISSION_IDS.riskCoverageQa: {
+      if (!hasCategory(docs, "fmea")) {
+        gaps.push("No FMEA — risk coverage QA requires a risk assessment document");
+      }
+      break;
+    }
+    case MANU_MISSION_IDS.regulatoryQa: {
+      if (!hasCategory(docs, "regulatory")) {
+        gaps.push("No regulatory notes — compliance checklist incomplete");
+      }
+      break;
+    }
+    case MANU_MISSION_IDS.manualUpdate: {
+      if (!hasCategory(docs, "existing_manual")) {
+        gaps.push("No existing manual uploaded — running as new manual generation with revision baseline");
+      }
+      if (!hasCategory(docs, "fmea")) gaps.push("No FMEA — risk-to-warning mapping limited");
+      if (!hasCategory(docs, "regulatory")) gaps.push("No regulatory notes — compliance checklist incomplete");
+      break;
+    }
+    default: {
+      if (!hasCategory(docs, "fmea")) gaps.push("No FMEA — risk-to-warning mapping limited");
+      if (!hasCategory(docs, "regulatory")) gaps.push("No regulatory notes — compliance checklist incomplete");
+      if (!hasCategory(docs, "engineering_test")) gaps.push("No engineering report — technical specs may be incomplete");
+      if (!hasCategory(docs, "prd")) gaps.push("No PRD — intended use requires verification");
+      if (!hasCategory(docs, "existing_manual")) gaps.push("No existing manual — treated as new manual generation");
+      break;
+    }
   }
-  if (!hasCategory(docs, "regulatory")) {
-    gaps.push("No regulatory notes — compliance checklist incomplete");
-  }
-  if (!hasCategory(docs, "engineering_test")) {
-    gaps.push("No engineering report — technical specs may be incomplete");
-  }
-  if (!hasCategory(docs, "prd")) {
-    gaps.push("No PRD — intended use requires verification");
-  }
-  if (!hasCategory(docs, "existing_manual")) {
-    gaps.push("No existing manual — treated as new manual generation");
-  }
-  if (missionId === MANU_MISSION_IDS.manualUpdate && !hasCategory(docs, "existing_manual")) {
-    gaps.push("No existing manual uploaded — running as new manual generation with revision baseline");
-  }
-  if (missionId === MANU_MISSION_IDS.translationQa && !hasCategory(docs, "translation")) {
-    gaps.push("No translation files uploaded — translation QA will use simulated translated content");
-  }
+
   return gaps;
 }
 

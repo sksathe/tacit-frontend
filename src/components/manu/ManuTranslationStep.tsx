@@ -36,7 +36,7 @@ import type { ManuRun, ManuSectionStatus } from "@/types/manu";
 
 import { AlertTriangle, CheckCircle2, Flag } from "lucide-react";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 
 
@@ -95,108 +95,59 @@ export function ManuTranslationStep({ run, onRunChange, onContinue, onBack }: Ma
   const [isGenerating, setIsGenerating] = useState(false);
 
   const [genError, setGenError] = useState<string | null>(null);
-
-
+  const generationStartedRef = useRef(false);
 
   useEffect(() => {
-
     let cancelled = false;
 
+    const applyRows = (translationQA: ManuRun["translationQA"]) => {
+      onRunChange({
+        ...run,
+        translationQA,
+        updatedAt: new Date().toISOString(),
+        translationApprovalStatus: {
+          allRequiredApproved: false,
+          approvedCount: translationQA.filter((r) => r.status === "approved").length,
+          flaggedCount: translationQA.filter((r) => r.status === "flagged").length,
+          requiredCount: translationQA.length,
+        },
+      });
+    };
 
+    if (run.translationQA.length > 0) {
+      const enriched = enrichTranslationQA(run.translationQA, run.translationQA, run, langCodes);
+      const needsEnrichment = enriched.length !== run.translationQA.length;
+      if (needsEnrichment) {
+        applyRows(enriched);
+      }
+      return;
+    }
+
+    if (generationStartedRef.current) return;
+    generationStartedRef.current = true;
 
     const generate = async () => {
-
       setIsGenerating(true);
-
       setGenError(null);
-
       try {
-
         const fromApi = await generateManuTranslationQA(run);
-
         if (cancelled) return;
-
-        const translationQA = enrichTranslationQA(fromApi, run.translationQA, run, langCodes);
-
-        onRunChange({
-
-          ...run,
-
-          translationQA,
-
-          updatedAt: new Date().toISOString(),
-
-          translationApprovalStatus: {
-
-            allRequiredApproved: false,
-
-            approvedCount: translationQA.filter((r) => r.status === "approved").length,
-
-            flaggedCount: translationQA.filter((r) => r.status === "flagged").length,
-
-            requiredCount: translationQA.length,
-
-          },
-
-        });
-
+        applyRows(enrichTranslationQA(fromApi, run.translationQA, run, langCodes));
       } catch (err) {
-
         if (cancelled) return;
-
         const message = err instanceof Error ? err.message : "Failed to generate translation QA";
-
         setGenError(message);
-
-        const translationQA =
-
-          run.translationQA.length > 0
-
-            ? enrichTranslationQA(run.translationQA, run.translationQA, run, langCodes)
-
-            : buildFallbackTranslationQA(run, langCodes);
-
-        onRunChange({
-
-          ...run,
-
-          translationQA,
-
-          updatedAt: new Date().toISOString(),
-
-          translationApprovalStatus: {
-
-            allRequiredApproved: false,
-
-            approvedCount: translationQA.filter((r) => r.status === "approved").length,
-
-            flaggedCount: translationQA.filter((r) => r.status === "flagged").length,
-
-            requiredCount: translationQA.length,
-
-          },
-
-        });
-
+        applyRows(buildFallbackTranslationQA(run, langCodes));
       } finally {
-
         if (!cancelled) setIsGenerating(false);
-
       }
-
     };
 
-
-
-    generate();
-
+    void generate();
     return () => {
-
       cancelled = true;
-
     };
-
-  }, [run.generatedSections, run.manualConfig, run.missionId]);
+  }, [run.runId, run.missionId, run.translationQA.length, langCodes.join(",")]);
 
 
 
@@ -248,9 +199,7 @@ export function ManuTranslationStep({ run, onRunChange, onContinue, onBack }: Ma
 
           <p className="mt-2 text-muted-foreground">
 
-            Review each translated section, add approver comments, and approve before export. Every language requires
-
-            sign-off.
+            Review AI-generated translations for each target language. Approve section-by-section before export.
 
           </p>
 
@@ -288,7 +237,7 @@ export function ManuTranslationStep({ run, onRunChange, onContinue, onBack }: Ma
 
           <CardContent className="py-3 text-sm text-muted-foreground">
 
-            Generating translation QA with OpenAI...
+            Generating translated manual sections with OpenAI…
 
           </CardContent>
 

@@ -1,4 +1,5 @@
 import { MANU_MISSIONS } from "@/data/manuMissions";
+import { getMissionUiProfile } from "@/data/manuMissionUi";
 import { MANU_ALL_SECTIONS } from "@/data/manuSections";
 import { getCategoryLabel } from "@/lib/manuSimulator";
 import { Button } from "@/components/ui/button";
@@ -14,17 +15,32 @@ interface ManuReviewStepProps {
   onLaunch: () => void | Promise<void>;
   onBack: () => void;
   isLaunching?: boolean;
+  launchError?: string | null;
+  onUseOfflineSimulation?: () => void;
 }
 
-export function ManuReviewStep({ missionId, documents, manualConfig, onLaunch, onBack, isLaunching }: ManuReviewStepProps) {
+export function ManuReviewStep({
+  missionId,
+  documents,
+  manualConfig,
+  onLaunch,
+  onBack,
+  isLaunching,
+  launchError,
+  onUseOfflineSimulation,
+}: ManuReviewStepProps) {
   const mission = MANU_MISSIONS.find((m) => m.id === missionId);
+  const profile = getMissionUiProfile(missionId);
   const sectionTitles = MANU_ALL_SECTIONS.filter((s) => manualConfig.selectedSectionIds.includes(s.id)).map((s) => s.title);
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
       <div>
         <h2 className="text-2xl font-bold">Review and launch</h2>
-        <p className="mt-2 text-muted-foreground">Confirm mission, source bundle, and manual configuration before MANU executes the pipeline.</p>
+        <p className="mt-2 text-muted-foreground">
+          Confirm mission, source bundle, and configuration before MANU runs the{" "}
+          <span className="font-medium text-foreground">{profile.configTitle.toLowerCase()}</span> pipeline.
+        </p>
       </div>
 
       <Card>
@@ -61,6 +77,20 @@ export function ManuReviewStep({ missionId, documents, manualConfig, onLaunch, o
           </div>
         </CardContent>
       </Card>
+
+      {launchError ? (
+        <div className="rounded-lg border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-destructive space-y-3">
+          <p>{launchError}</p>
+          <p className="text-muted-foreground text-xs">
+            Check that you are signed in, the backend has OPENAI_API_KEY set, and Supabase migrations (manu_runs) are applied.
+          </p>
+          {onUseOfflineSimulation ? (
+            <Button type="button" variant="outline" size="sm" onClick={onUseOfflineSimulation}>
+              Use offline demo simulation (fallback)
+            </Button>
+          ) : null}
+        </div>
+      ) : null}
 
       <div className="flex justify-between">
         <Button type="button" variant="outline" onClick={onBack}>Back</Button>

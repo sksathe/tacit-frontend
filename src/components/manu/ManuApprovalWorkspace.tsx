@@ -1,3 +1,4 @@
+import { filterGapsForMission, getMissionUiProfile } from "@/data/manuMissionUi";
 import { getCategoryLabel } from "@/lib/manuSimulator";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -53,6 +54,22 @@ export function ManuApprovalWorkspace({
     totalSections > 0 && run.generatedSections.every((s) => s.status === "approved");
   const approvedCount = run.generatedSections.filter((s) => s.status === "approved").length;
   const focus = run.missionFocus;
+  const ui = getMissionUiProfile(run.missionId);
+  const displayGaps = filterGapsForMission(run.missionId, run.gaps);
+  const showRiskPanel = ui.showRiskPanel && (focus?.emphasizeRisk || run.riskCoverage.length > 0);
+  const showRegulatoryPanel =
+    ui.showRegulatoryPanel && (focus?.emphasizeRegulatory || run.regulatoryChecklist.length > 0);
+
+  if (!run.generatedSections.length) {
+    return (
+      <div className="rounded-lg border border-amber-500/40 bg-amber-500/10 px-4 py-8 text-center">
+        <p className="font-medium text-amber-700 dark:text-amber-400">No sections were generated for this run.</p>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Check that the backend is running and OPENAI_API_KEY is set, then relaunch the mission.
+        </p>
+      </div>
+    );
+  }
 
   const updateSection = (id: string, patch: Partial<(typeof run.generatedSections)[0]>) => {
     const generatedSections = run.generatedSections.map((s) => (s.id === id ? { ...s, ...patch } : s));
@@ -93,12 +110,11 @@ export function ManuApprovalWorkspace({
     <div className="space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold">Manual approval workspace</h2>
-          <p className="mt-1 text-muted-foreground">
-            Review source intelligence and approve generated sections before translation or export.
-          </p>
+          <h2 className="text-2xl font-bold">{ui.workspaceTitle}</h2>
+          <p className="mt-1 text-muted-foreground">{ui.workspaceDescription}</p>
         </div>
         <div className="flex flex-wrap gap-2">
+          {ui.showTraceability && (
           <Dialog open={traceabilityOpen} onOpenChange={onTraceabilityOpenChange}>
             <DialogTrigger asChild>
               <Button variant="outline" className="gap-2">
@@ -136,13 +152,14 @@ export function ManuApprovalWorkspace({
               </ScrollArea>
             </DialogContent>
           </Dialog>
+          )}
           <Button variant="outline" onClick={approveAll}>Approve all sections</Button>
           <Button
             className="bg-gradient-primary"
             disabled={!allSectionsApproved}
             onClick={onContinueToTranslation}
           >
-            Continue to translation QA
+            {ui.continueButtonLabel}
           </Button>
         </div>
       </div>
@@ -154,9 +171,9 @@ export function ManuApprovalWorkspace({
         </div>
       )}
 
-      {run.gaps.length > 0 && (
+      {displayGaps.length > 0 && (
         <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm">
-          {run.gaps.map((g) => (
+          {displayGaps.map((g) => (
             <p key={g} className="flex items-start gap-2">
               <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
               {g}
@@ -167,13 +184,13 @@ export function ManuApprovalWorkspace({
 
       <p className="text-sm text-muted-foreground">
         Approval progress: {approvedCount} of {totalSections} sections approved
-        {!allSectionsApproved && " — approve all sections before translation or export (LabCorp workflow)."}
+        {!allSectionsApproved && ` — ${ui.approvalProgressHint}.`}
       </p>
 
       <div className="grid gap-6 xl:grid-cols-2">
         {/* Left: source intelligence */}
         <div className="space-y-4">
-          <h3 className="text-sm font-bold uppercase tracking-wide text-primary">Source intelligence</h3>
+          <h3 className="text-sm font-bold uppercase tracking-wide text-primary">{ui.sourceColumnTitle}</h3>
           {run.extractedFacts.map((fact) => (
             <Card key={fact.id} className={fact.uncertain ? "border-amber-500/40" : "border-border/60"}>
               <CardHeader className="pb-2">
@@ -187,7 +204,7 @@ export function ManuApprovalWorkspace({
             </Card>
           ))}
 
-          {(focus?.emphasizeRisk || run.riskCoverage.length > 0) && (
+          {showRiskPanel && (
             <Card className={`border-border/60 ${focus?.emphasizeRisk ? "ring-1 ring-primary/40" : ""}`}>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-base">
@@ -224,7 +241,7 @@ export function ManuApprovalWorkspace({
             </Card>
           )}
 
-          {(focus?.emphasizeRegulatory || run.regulatoryChecklist.length > 0) && (
+          {showRegulatoryPanel && (
             <Card className={`border-border/60 ${focus?.emphasizeRegulatory ? "ring-1 ring-primary/40" : ""}`}>
               <CardHeader>
                 <CardTitle className="text-base">Regulatory mapping</CardTitle>
@@ -249,7 +266,7 @@ export function ManuApprovalWorkspace({
 
         {/* Right: generated sections */}
         <div className="space-y-4">
-          <h3 className="text-sm font-bold uppercase tracking-wide text-primary">Generated manual sections</h3>
+          <h3 className="text-sm font-bold uppercase tracking-wide text-primary">{ui.sectionsColumnTitle}</h3>
           {run.generatedSections.map((section, index) => {
             const palette = manuSectionCardPalette[index % manuSectionCardPalette.length];
             return (

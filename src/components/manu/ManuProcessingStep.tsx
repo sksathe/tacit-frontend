@@ -118,10 +118,15 @@ export function ManuProcessingStep({
       : Math.min(100, (activeIndex / MANU_PROCESSING_STAGES.length) * 100);
 
   const pipelineLabel = localRun
-    ? "Transient localStorage mode — Supabase manu_runs table not available"
+    ? "Local dev — run stored in browser; OpenAI generation uses tacit-backend on port 3001"
     : runId && !usedSimulationFallback
       ? "Enterprise documentation pipeline — powered by backend LLM"
       : "Offline simulation — backend unavailable or not configured";
+
+  const errorHint =
+    error && /failed to fetch|network|fetch failed/i.test(error)
+      ? "Start the API server: cd tacit-backend && npm run dev (should listen on http://localhost:3001)"
+      : null;
 
   return (
     <div className="mx-auto max-w-xl space-y-8 py-12 text-center">
@@ -154,6 +159,7 @@ export function ManuProcessingStep({
       {error && (
         <div className="space-y-3 rounded-lg border border-destructive/40 bg-destructive/10 px-4 py-3 text-left text-sm text-destructive">
           <p>{error}</p>
+          {errorHint && <p className="text-destructive/90">{errorHint}</p>}
           {onUseSimulationFallback && (
             <Button type="button" variant="outline" size="sm" onClick={onUseSimulationFallback}>
               Use offline simulation

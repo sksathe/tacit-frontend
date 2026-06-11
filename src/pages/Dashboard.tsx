@@ -2,12 +2,9 @@ import { useReducer, useState } from "react";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { DashboardView } from "@/components/dashboard/DashboardView";
 import { MissionBriefV4 } from "@/components/dashboard/MissionBriefV4";
-import {
-  dispatchReducer,
-  initialDispatchState,
-  loadRecentLaunches,
-  type MissionLaunchRecord,
-} from "@/features/dispatch/model";
+import { dispatchReducer, initialDispatchState } from "@/features/dispatch/model";
+import { useRecentAgentActivity } from "@/hooks/useRecentAgentActivity";
+import type { RecentAgentActivity } from "@/types/recentActivity";
 import { AutomateAgentPicker } from "@/components/dashboard/AutomateAgentPicker";
 import { AutomateSessionsList } from "@/components/dashboard/AutomateSessionsList";
 import { SessionDetailView } from "@/components/dashboard/SessionDetailView";
@@ -23,8 +20,12 @@ const hybridDispatchEnabled = import.meta.env.VITE_ENABLE_HYBRID_DISPATCH !== "f
 
 const Dashboard = () => {
   const [dispatchState, dispatchMission] = useReducer(dispatchReducer, initialDispatchState);
-  const [recentLaunches, setRecentLaunches] = useState<MissionLaunchRecord[]>(() => loadRecentLaunches());
+  const recentActivity = useRecentAgentActivity();
   const [activeRecentId, setActiveRecentId] = useState<string | null>(null);
+  const [pendingManuResume, setPendingManuResume] = useState<{
+    runId: string;
+    missionId: string;
+  } | null>(null);
   const [currentView, setCurrentView] = useState<"dashboard" | "automate-agents" | "automate-sessions" | "session">("dashboard");
   const [selectedAgent, setSelectedAgent] = useState<TacitAgent | null>(null);
   const [sessionsForAgent, setSessionsForAgent] = useState<SessionItem[]>([]);
@@ -113,6 +114,41 @@ const Dashboard = () => {
     setCurrentAutomation(null);
   };
 
+  const handleResumeCallSession = (sessionId: string, agentName: string, title: string) => {
+    const session: SessionItem = {
+      sessionId,
+      sessionName: title,
+      agentName,
+    };
+    setSessionsForAgent([session]);
+    setSelectedSession(session);
+    setCurrentView("session");
+  };
+
+  const handleActivitySelect = (activity: RecentAgentActivity) => {
+    setActiveRecentId(activity.id);
+    const resume = activity.resume;
+    if (resume.kind === "call_session") {
+      handleResumeCallSession(resume.sessionId, resume.agentName, activity.title);
+      return;
+    }
+    if (resume.kind === "manu_run") {
+      setPendingManuResume({ runId: resume.runId, missionId: resume.missionId });
+      dispatchMission({ type: "SELECT_AGENT", agentId: "manu" });
+      return;
+    }
+    dispatchMission({
+      type: "APPLY_RECENT",
+      payload: {
+        id: activity.id,
+        agentId: resume.agentId,
+        modeId: resume.modeId,
+        missionTitle: resume.missionTitle,
+        createdAt: new Date(activity.createdAt).getTime(),
+      },
+    });
+  };
+
   const missionBriefActive = currentView === "dashboard" && hybridDispatchEnabled;
 
   return (
@@ -141,10 +177,12 @@ const Dashboard = () => {
           <MissionBriefV4
             dispatchState={dispatchState}
             dispatchAction={dispatchMission}
-            recentLaunches={recentLaunches}
-            setRecentLaunches={setRecentLaunches}
+            recentActivity={recentActivity}
             activeRecentId={activeRecentId}
             setActiveRecentId={setActiveRecentId}
+            onActivitySelect={handleActivitySelect}
+            pendingManuResume={pendingManuResume}
+            onClearManuResume={() => setPendingManuResume(null)}
             onOpenMeetingFlow={(flow) => setMeetingTypeFlow(flow)}
           />
         )}

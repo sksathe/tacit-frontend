@@ -1,9 +1,9 @@
-import { MANU_DEMO_BUNDLES, type ManuDemoBundleKey } from "@/data/manuLabcorp";
+import { countDocumentsByCategory, getMissionUiProfile } from "@/data/manuMissionUi";
+import { MANU_DEMO_BUNDLES, MANU_MISSION_IDS, getDefaultMetadataForBundle, type ManuDemoBundleKey } from "@/data/manuLabcorp";
 import { MANU_DOCUMENT_CATEGORY_OPTIONS } from "@/data/manuSections";
 import { getCategoryLabel } from "@/lib/manuSimulator";
 import { postManuDocumentExtract } from "@/lib/manuApi";
 import { buildUploadedDocumentFromFile, loadLabCorpDemoBundle } from "@/lib/manuSampleLoader";
-import { getDefaultMetadataForBundle } from "@/data/manuLabcorp";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -16,6 +16,7 @@ import { AlertTriangle, CloudUpload, FileText, Trash2 } from "lucide-react";
 import { useRef, useState } from "react";
 
 interface ManuDocumentBundleStepProps {
+  missionId: string;
   documents: ManuUploadedDocument[];
   onDocumentsChange: (docs: ManuUploadedDocument[]) => void;
   onMetadataFromBundle?: (meta: ReturnType<typeof getDefaultMetadataForBundle>) => void;
@@ -24,6 +25,7 @@ interface ManuDocumentBundleStepProps {
 }
 
 export function ManuDocumentBundleStep({
+  missionId,
   documents,
   onDocumentsChange,
   onMetadataFromBundle,
@@ -62,16 +64,38 @@ export function ManuDocumentBundleStep({
     onDocumentsChange(documents.filter((d) => d.id !== id));
   };
 
-  const hasFmea = documents.some((d) => d.category === "fmea");
-  const hasRegulatory = documents.some((d) => d.category === "regulatory");
+  const profile = getMissionUiProfile(missionId);
+  const categoryCounts = countDocumentsByCategory(documents);
+  const activeWarnings = profile.bundleWarnings.filter((w) => w.when(categoryCounts));
 
   return (
     <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-bold">Source document bundle</h2>
-        <p className="mt-2 max-w-3xl text-muted-foreground">
-          Upload or select multiple files for this run. Classify each document so MANU can map evidence to manual sections, risks, and regulatory requirements.
-        </p>
+        <p className="mt-2 max-w-3xl text-muted-foreground">{profile.bundleDescription}</p>
+        {profile.requiredDocCategories.length > 0 && (
+          <ul className="mt-3 flex flex-wrap gap-2">
+            {profile.requiredDocCategories.map((req) => {
+              const has = (categoryCounts[req.category] ?? 0) > 0;
+              return (
+                <Badge
+                  key={req.category}
+                  variant="outline"
+                  className={
+                    has
+                      ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400"
+                      : req.required
+                        ? "border-destructive/40 bg-destructive/10 text-destructive"
+                        : "border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-400"
+                  }
+                >
+                  {req.label}
+                  {has ? " ✓" : req.required ? " (required)" : " (recommended)"}
+                </Badge>
+              );
+            })}
+          </ul>
+        )}
       </div>
 
       <Card
@@ -123,7 +147,9 @@ export function ManuDocumentBundleStep({
             onClick={async () => {
               setIsAdding(true);
               try {
-                const docs = await loadLabCorpDemoBundle(demoKey);
+                const docs = await loadLabCorpDemoBundle(demoKey, {
+                  includeTranslationDocs: missionId === MANU_MISSION_IDS.translationQa,
+                });
                 onDocumentsChange(docs);
                 onMetadataFromBundle?.(getDefaultMetadataForBundle(demoKey));
               } finally {
@@ -136,12 +162,13 @@ export function ManuDocumentBundleStep({
         </CardContent>
       </Card>
 
-      {( !hasFmea || !hasRegulatory ) && documents.length > 0 && (
+      {activeWarnings.length > 0 && documents.length > 0 && (
         <div className="flex items-start gap-2 rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm">
           <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-500" />
           <div>
-            {!hasFmea && <p>Risk-to-warning mapping will be limited without a Risk Assessment / FMEA file.</p>}
-            {!hasRegulatory && <p>Regulatory checklist may be incomplete without certification notes.</p>}
+            {activeWarnings.map((w) => (
+              <p key={w.message}>{w.message}</p>
+            ))}
             <p className="mt-1 text-muted-foreground">You can continue — MANU will surface gaps in the approval workspace.</p>
           </div>
         </div>
@@ -241,7 +268,7 @@ export function ManuDocumentBundleStep({
           disabled={documents.length === 0}
           onClick={onContinue}
         >
-          Continue to manual configuration
+          {profile.bundleContinueLabel}
         </Button>
       </div>
     </div>

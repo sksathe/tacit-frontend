@@ -90,6 +90,21 @@ export function persistRecentLaunches(list: MissionLaunchRecord[]) {
   }
 }
 
+export function recordLocalWorkspaceLaunch(input: {
+  agentId: string;
+  modeId?: string | null;
+  missionTitle: string;
+}): void {
+  const record: MissionLaunchRecord = {
+    id: crypto.randomUUID(),
+    agentId: input.agentId,
+    modeId: input.modeId ?? null,
+    missionTitle: input.missionTitle,
+    createdAt: Date.now(),
+  };
+  persistRecentLaunches([record, ...loadRecentLaunches()]);
+}
+
 export type DispatchState = {
   currentStep: DispatchStepId;
   agentId: string | null;

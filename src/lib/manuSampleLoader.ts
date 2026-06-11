@@ -1,5 +1,6 @@
 import {
   MANU_DEMO_BUNDLES,
+  MANU_TRANSLATION_DEMO_DOCS,
   type ManuDemoBundleKey,
 } from "@/data/manuLabcorp";
 import type { ManuExtractionStatus, ManuUploadedDocument } from "@/types/manu";
@@ -29,10 +30,16 @@ async function fetchSampleText(folder: string, fileName: string): Promise<string
 
 export async function loadLabCorpDemoBundle(
   bundleKey: ManuDemoBundleKey,
+  options?: { includeTranslationDocs?: boolean },
 ): Promise<ManuUploadedDocument[]> {
   const bundle = MANU_DEMO_BUNDLES[bundleKey];
+  const extraDocs =
+    options?.includeTranslationDocs && MANU_TRANSLATION_DEMO_DOCS[bundleKey]
+      ? MANU_TRANSLATION_DEMO_DOCS[bundleKey]!
+      : [];
+  const allDocs = [...bundle.documents, ...extraDocs];
   const docs = await Promise.all(
-    bundle.documents.map(async (d) => {
+    allDocs.map(async (d) => {
       const extractedText = await fetchSampleText(bundle.folder, d.fileName);
       return {
         id: `doc-${crypto.randomUUID()}`,

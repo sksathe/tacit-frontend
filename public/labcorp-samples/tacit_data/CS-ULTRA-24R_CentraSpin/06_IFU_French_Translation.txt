@@ -1,0 +1,19 @@
+CentraSpin Ultra 24R — Manuel d'instructions (Français)
+Section : Usage prévu
+Cet équipement est destiné uniquement au personnel de laboratoire qualifié. Il sert à la séparation d'échantillons biologiques par centrifugation réfrigérée en environnement de laboratoire clinique.
+
+Section : Avertissements et précautions de sécurité
+AVERTISSEMENT : Risque d'exposition biologique. Portez un équipement de protection individuelle (EPI) approprié, y compris des gants, une blouse de laboratoire et une protection oculaire, lors de la manipulation d'échantillons biologiques.
+
+ATTENTION : Déséquilibre du rotor. Vérifiez que les tubes sont équilibrés par poids avant de démarrer la centrifugation. Un déséquilibre peut provoquer des vibrations excessives ou endommager l'équipement.
+
+AVERTISSEMENT : Rotor en mouvement. N'ouvrez pas le couvercle tant que le rotor est en rotation. Attendez l'arrêt complet du rotor avant d'ouvrir la chambre.
+
+Section : Conformité réglementaire
+Cet appareil est conforme aux exigences applicables de la FDA (21 CFR Part 862) pour les équipements de laboratoire clinique. Consultez la documentation de certification CE pour la distribution dans l'Union européenne.
+
+Section : Instructions de fonctionnement
+1. Mettez l'appareil sous tension et vérifiez que la température de la chambre atteint la valeur programmée.
+2. Chargez les tubes dans le rotor de manière symétrique et équilibrée.
+3. Fermez le couvercle avec verrouillage et sélectionnez le programme de centrifugation approprié.
+4. À la fin du cycle, attendez l'arrêt complet du rotor avant d'ouvrir le couvercle.
