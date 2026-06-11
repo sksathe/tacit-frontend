@@ -14,7 +14,7 @@ const defaultMetadata = (): ManuManualConfig["metadata"] => ({
   modelCode: "",
   manualType: "Equipment / Product Manual (IFU)",
   targetMarkets: ["USA", "EU", "Canada"],
-  targetLanguages: ["es", "fr", "de"],
+  targetLanguages: [],
   intendedAudience: "Trained laboratory personnel",
   templateType: "LabCorp Equipment Manual Template v2.0",
   revision: "1.0",

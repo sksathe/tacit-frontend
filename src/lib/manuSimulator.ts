@@ -447,10 +447,7 @@ export function simulateManuRun(params: {
     };
   });
 
-  const langCodes =
-    meta.targetLanguages.length > 0
-      ? meta.targetLanguages
-      : ["es", "fr", "de"];
+  const langCodes = meta.targetLanguages;
 
   const translationSections =
     mission.id === MANU_MISSION_IDS.translationQa

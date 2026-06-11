@@ -201,7 +201,7 @@ const PROFILES: Record<string, ManuMissionUiProfile> = {
   [MANU_MISSION_IDS.translationQa]: {
     configTitle: "Configure translation QA",
     configDescription:
-      "Set product identity, target languages, and English source sections. MANU generates translated manual sections in each language you select.",
+      "Set product identity and English source sections. Optionally select target languages ó if none are chosen, the workflow stays English-only with no translation step.",
     bundleDescription:
       "Upload source documents (PRD, existing English manual, regulatory notes). Translated output is generated from approved English sections ù reference translation files are optional.",
     bundleContinueLabel: "Continue to translation QA configuration",

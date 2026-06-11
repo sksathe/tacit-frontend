@@ -69,9 +69,7 @@ export function ManuConfigStep({
   };
 
   const canContinue =
-    metadata.productName.trim().length > 0 &&
-    selectedSectionIds.length > 0 &&
-    (!profile.languagesPrimary || metadata.targetLanguages.length > 0);
+    metadata.productName.trim().length > 0 && selectedSectionIds.length > 0;
 
   return (
     <div className="space-y-8">
@@ -85,7 +83,7 @@ export function ManuConfigStep({
           <CardTitle>{profile.languagesPrimary ? "Product & languages" : "Manual metadata"}</CardTitle>
           <CardDescription>
             {profile.languagesPrimary
-              ? "Identify the product and select languages — MANU will generate translated manual sections for each."
+              ? "Identify the product and optionally select languages to translate into."
               : "Product identity and publication context"}
           </CardDescription>
         </CardHeader>
@@ -192,11 +190,11 @@ export function ManuConfigStep({
           )}
           {profile.showLanguages && (
             <div className={`sm:col-span-2 ${profile.languagesPrimary ? "rounded-lg border border-primary/35 bg-primary/5 p-4" : ""}`}>
-              <Label>{profile.languagesPrimary ? "Target languages to generate *" : "Target languages"}</Label>
+              <Label>{profile.languagesPrimary ? "Target languages (optional)" : "Target languages"}</Label>
               <p className="mt-1 text-xs text-muted-foreground">
                 {profile.languagesPrimary
-                  ? "OpenAI generates a full translated section for each language you select."
-                  : "Post-approval translation targets"}
+                  ? "Select languages to translate into. Leave unselected for an English-only manual with no translation step."
+                  : "Post-approval translation targets — leave unselected for English only."}
               </p>
               <div className="mt-2 flex flex-wrap gap-2">
                 {MANU_LANGUAGES.map((l) => (

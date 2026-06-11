@@ -84,7 +84,11 @@ export function getRunTargetLanguageCodes(run: ManuRun): string[] {
         .filter(Boolean),
     ),
   ];
-  return fromQA.length ? fromQA : ["es", "fr", "de"];
+  return fromQA;
+}
+
+export function needsTranslationQA(run: ManuRun): boolean {
+  return getRunTargetLanguageCodes(run).length > 0;
 }
 
 export function getTranslationTargetSections(run: ManuRun) {

@@ -1,5 +1,6 @@
 import { filterGapsForMission, getMissionUiProfile } from "@/data/manuMissionUi";
 import { getCategoryLabel } from "@/lib/manuSimulator";
+import { needsTranslationQA } from "@/lib/manuTranslationUtils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -55,6 +56,7 @@ export function ManuApprovalWorkspace({
   const approvedCount = run.generatedSections.filter((s) => s.status === "approved").length;
   const focus = run.missionFocus;
   const ui = getMissionUiProfile(run.missionId);
+  const continueLabel = needsTranslationQA(run) ? ui.continueButtonLabel : "Continue to export";
   const displayGaps = filterGapsForMission(run.missionId, run.gaps);
   const showRiskPanel = ui.showRiskPanel && (focus?.emphasizeRisk || run.riskCoverage.length > 0);
   const showRegulatoryPanel =
@@ -159,7 +161,7 @@ export function ManuApprovalWorkspace({
             disabled={!allSectionsApproved}
             onClick={onContinueToTranslation}
           >
-            {ui.continueButtonLabel}
+            {continueLabel}
           </Button>
         </div>
       </div>

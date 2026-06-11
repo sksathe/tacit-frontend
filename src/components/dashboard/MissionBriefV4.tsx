@@ -370,6 +370,7 @@ export function MissionBriefV4({
   };
 
   const showConfigProgressStrip = isLightWorkspace;
+  const showSidebar = dispatchState.agentId !== null;
   const progressStepLabel = ord[curIdx] ? STEP_LABELS[ord[curIdx]] : "";
   const progressPct = ord.length > 0 ? Math.round(((curIdx + 1) / ord.length) * 100) : 0;
 
@@ -406,8 +407,13 @@ export function MissionBriefV4({
       </p>
 
       <div
-        className={`mission-brief-v4__layout${eagleOutputFocus ? " mission-brief-v4__layout--eagle-output" : ""}`}
+        className={cn(
+          "mission-brief-v4__layout",
+          eagleOutputFocus && "mission-brief-v4__layout--eagle-output",
+          !showSidebar && "mission-brief-v4__layout--no-sidebar",
+        )}
       >
+        {showSidebar && (
         <aside
           className={[
             "mission-brief-v4__sidebar",
@@ -543,6 +549,7 @@ export function MissionBriefV4({
             <PanelLeftOpen className="h-4 w-4" strokeWidth={2} />
           </button>
         </aside>
+        )}
 
         <div
           className={cn(
@@ -585,7 +592,7 @@ export function MissionBriefV4({
                     <h1 className="mission-brief-v4__screen-title">Design your next mission</h1>
                     <p className="mission-brief-v4__screen-desc mission-brief-v4__screen-desc--hero">
                       Pair the right specialist with your workflow—live facilitation, document extraction, or
-                      policy-heavy review. Everything you choose here feeds the launch checklist on the left.
+                      policy-heavy review. Resume a recent run or start a new mission below.
                     </p>
                   </div>
 

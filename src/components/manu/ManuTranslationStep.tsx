@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 
 import { manuSectionCardPalette } from "@/components/manu/manuTheme";
 
-import { generateManuTranslationQA } from "@/lib/manuApi";
+import { generateManuTranslationQAForLanguages } from "@/lib/manuApi";
 
 import {
 
@@ -90,7 +90,7 @@ export function ManuTranslationStep({ run, onRunChange, onContinue, onBack }: Ma
 
   const langCodes = useMemo(() => getRunTargetLanguageCodes(run), [run]);
 
-  const [activeLang, setActiveLang] = useState(langCodes[0] ?? "es");
+  const [activeLang, setActiveLang] = useState(langCodes[0] ?? "");
 
   const [isGenerating, setIsGenerating] = useState(false);
 
@@ -114,6 +114,8 @@ export function ManuTranslationStep({ run, onRunChange, onContinue, onBack }: Ma
       });
     };
 
+    if (!langCodes.length) return;
+
     if (run.translationQA.length > 0) {
       const enriched = enrichTranslationQA(run.translationQA, run.translationQA, run, langCodes);
       const needsEnrichment = enriched.length !== run.translationQA.length;
@@ -130,7 +132,7 @@ export function ManuTranslationStep({ run, onRunChange, onContinue, onBack }: Ma
       setIsGenerating(true);
       setGenError(null);
       try {
-        const fromApi = await generateManuTranslationQA(run);
+        const fromApi = await generateManuTranslationQAForLanguages(run, langCodes);
         if (cancelled) return;
         applyRows(enrichTranslationQA(fromApi, run.translationQA, run, langCodes));
       } catch (err) {
@@ -151,6 +153,27 @@ export function ManuTranslationStep({ run, onRunChange, onContinue, onBack }: Ma
 
 
 
+  if (!langCodes.length) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h2 className="text-2xl font-bold">Translation accuracy QA</h2>
+          <p className="mt-2 text-muted-foreground">
+            No target languages were selected — this run is English-only. Continue to export your manual package.
+          </p>
+        </div>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={onBack}>
+            Back
+          </Button>
+          <Button className="bg-gradient-primary" onClick={onContinue}>
+            Continue to export
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   const activeLabel = getLangLabel(activeLang);
 
   const activeScore = (MANU_TRANSLATION_SCORES[activeLang] ?? 90) / 100;
@@ -169,7 +192,12 @@ export function ManuTranslationStep({ run, onRunChange, onContinue, onBack }: Ma
 
 
 
-  const approval = run.translationApprovalStatus;
+  const approval = run.translationApprovalStatus ?? {
+    allRequiredApproved: false,
+    approvedCount: 0,
+    flaggedCount: 0,
+    requiredCount: 0,
+  };
 
   const langApprovedCount = rowsForLang.filter((r) => r.status === "approved").length;
 

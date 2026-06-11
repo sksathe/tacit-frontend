@@ -17,7 +17,11 @@ import type {
   ManuTranslationQARow,
   ManuUploadedDocument,
 } from "@/types/manu";
-import { computeTranslationApprovalStatus, normalizeTranslationRow } from "@/lib/manuTranslationUtils";
+import {
+  buildFallbackTranslationQA,
+  computeTranslationApprovalStatus,
+  normalizeTranslationRow,
+} from "@/lib/manuTranslationUtils";
 
 export { isLocalManuRunId } from "@/lib/manuLocalStore";
 
@@ -293,7 +297,10 @@ export async function patchManuRun(runId: string, resultJson: ManuRun): Promise<
   return run;
 }
 
-export async function generateManuTranslationQA(run: ManuRun): Promise<ManuRun["translationQA"]> {
+export async function generateManuTranslationQA(
+  run: ManuRun,
+  language: string,
+): Promise<ManuRun["translationQA"]> {
   const token = await getAuthToken();
   if (!token) {
     throw new Error("Sign in required for translation QA generation");
@@ -307,6 +314,7 @@ export async function generateManuTranslationQA(run: ManuRun): Promise<ManuRun["
       manualConfig: run.manualConfig,
       sections: run.generatedSections,
       documents: run.uploadedDocuments,
+      language,
     }),
     token,
   });
@@ -323,6 +331,22 @@ export async function generateManuTranslationQA(run: ManuRun): Promise<ManuRun["
   const rows = (body as { translationQA?: unknown })?.translationQA;
   if (!Array.isArray(rows)) return [];
   return rows.map((row) => normalizeTranslationRow(row as Partial<ManuTranslationQARow>));
+}
+
+export async function generateManuTranslationQAForLanguages(
+  run: ManuRun,
+  langCodes: string[],
+): Promise<ManuRun["translationQA"]> {
+  if (!langCodes.length) return [];
+
+  const settled = await Promise.allSettled(
+    langCodes.map((code) => generateManuTranslationQA(run, code)),
+  );
+
+  return settled.flatMap((result, index) => {
+    if (result.status === "fulfilled") return result.value;
+    return buildFallbackTranslationQA(run, [langCodes[index]]);
+  });
 }
 
 export async function pollManuRunUntilReady(

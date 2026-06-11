@@ -10,6 +10,7 @@ import { ManuStepNav } from "@/components/manu/ManuStepNav";
 import { ManuTranslationStep } from "@/components/manu/ManuTranslationStep";
 import type { ManuFlowApi } from "@/components/manu/useManuFlow";
 import { MANU_MISSION_IDS } from "@/data/manuLabcorp";
+import { needsTranslationQA } from "@/lib/manuTranslationUtils";
 import type { ManuFlowStep } from "@/types/manu";
 import { useToast } from "@/components/ui/use-toast";
 import { useEffect, useRef } from "react";
@@ -181,7 +182,8 @@ export function ManuFlowController({ flow, showStepNav = true }: ManuFlowControl
           onContinueToTranslation={() => {
             const skipTranslation =
               run.missionId === MANU_MISSION_IDS.riskCoverageQa ||
-              run.missionId === MANU_MISSION_IDS.regulatoryQa;
+              run.missionId === MANU_MISSION_IDS.regulatoryQa ||
+              !needsTranslationQA(run);
             setStep(skipTranslation ? "export" : "translation");
           }}
         />
