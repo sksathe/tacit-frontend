@@ -24,11 +24,11 @@ const FALLBACK_TRANSLATION_MAP: Record<string, Array<[RegExp, string]>> = {
     [/\blaboratory\b/gi, "labor"],
   ],
   hi: [
-    [/\bwarning\b/gi, "???????"],
-    [/\bcaution\b/gi, "???????"],
-    [/\bsafety\b/gi, "???????"],
-    [/\bdevice\b/gi, "?????"],
-    [/\blaboratory\b/gi, "??????????"],
+    [/\bwarning\b/gi, "चेतावनी"],
+    [/\bcaution\b/gi, "सावधानी"],
+    [/\bsafety\b/gi, "सुरक्षा"],
+    [/\bdevice\b/gi, "उपकरण"],
+    [/\blaboratory\b/gi, "प्रयोगशाला"],
   ],
 };
 
@@ -102,9 +102,9 @@ export function getTranslationTargetSections(run: ManuRun) {
 
 export function fallbackTranslate(source: string, langCode: string, langLabel: string): string {
   const dictionary = FALLBACK_TRANSLATION_MAP[langCode];
-  if (!dictionary) return `[${langLabel}] ${source.slice(0, 220)}${source.length > 220 ? "�" : ""}`;
+  if (!dictionary) return `[${langLabel}] ${source.slice(0, 220)}${source.length > 220 ? "…" : ""}`;
   const translated = dictionary.reduce((text, [pattern, replacement]) => text.replace(pattern, replacement), source);
-  return `[${langLabel}] ${translated.slice(0, 220)}${translated.length > 220 ? "�" : ""}`;
+  return `[${langLabel}] ${translated.slice(0, 220)}${translated.length > 220 ? "…" : ""}`;
 }
 
 function buildFallbackRow(

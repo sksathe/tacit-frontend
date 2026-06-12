@@ -51,7 +51,7 @@ export function ManuExportStep({ run, onRunChange, onRestart }: ManuExportStepPr
     });
   };
 
-  const exportTranslatedManual = (langCode: string) => {
+  const exportTranslatedManual = async (langCode: string) => {
     const label = getLangLabel(langCode);
     const rows = getTranslationRowsForLanguage(run.translationQA, langCode);
     const approvedRows = rows.filter((r) => r.status === "approved");
@@ -74,31 +74,49 @@ export function ManuExportStep({ run, onRunChange, onRestart }: ManuExportStepPr
       return;
     }
 
-    downloadTranslatedManualPdf(run, langCode);
-    toast({
-      title: "PDF ready",
-      description: `${label} manual downloaded (${approvedRows.length} approved sections).`,
-    });
+    try {
+      await downloadTranslatedManualPdf(run, langCode);
+      toast({
+        title: "PDF ready",
+        description: `${label} manual downloaded (${approvedRows.length} approved sections).`,
+      });
+    } catch (err) {
+      toast({
+        title: "PDF export failed",
+        description: err instanceof Error ? err.message : "Could not generate translated manual PDF.",
+        variant: "destructive",
+      });
+    }
   };
 
-  const exportOne = (kind: ManuExportKind) => {
+  const exportOne = async (kind: ManuExportKind) => {
     if (kind === "approved_manual") {
       exportApprovedManualPdf();
       return;
     }
-    downloadManuExportPdf(kind, run);
-    markExported(kind);
-    toast({ title: "PDF ready", description: `${kind.replaceAll("_", " ")} downloaded as PDF.` });
+    try {
+      await Promise.resolve(downloadManuExportPdf(kind, run));
+      markExported(kind);
+      toast({ title: "PDF ready", description: `${kind.replaceAll("_", " ")} downloaded as PDF.` });
+    } catch (err) {
+      toast({
+        title: "PDF export failed",
+        description: err instanceof Error ? err.message : "Could not generate PDF.",
+        variant: "destructive",
+      });
+    }
   };
 
-  const exportAll = () => {
-    EXPORT_OPTIONS.forEach((o) => exportOne(o.kind));
-    langCodes.forEach((code) => {
+  const exportAll = async () => {
+    for (const o of EXPORT_OPTIONS) {
+      await exportOne(o.kind);
+    }
+    for (const code of langCodes) {
       const rows = getTranslationRowsForLanguage(run.translationQA, code);
       if (rows.length > 0 && rows.every((r) => r.status === "approved")) {
-        downloadTranslatedManualPdf(run, code);
+        await exportTranslatedManual(code);
       }
-    });
+    }
   };
 
   return (
@@ -140,7 +158,7 @@ export function ManuExportStep({ run, onRunChange, onRestart }: ManuExportStepPr
                     variant="outline"
                     className="w-full gap-2"
                     disabled={!allApproved}
-                    onClick={() => exportTranslatedManual(code)}
+                    onClick={() => void exportTranslatedManual(code)}
                   >
                     <FileText className="h-4 w-4" />
                     Download {label} PDF
@@ -162,7 +180,7 @@ export function ManuExportStep({ run, onRunChange, onRestart }: ManuExportStepPr
                 <CardDescription>{opt.description}</CardDescription>
               </CardHeader>
               <CardContent>
-                <Button variant="outline" className="w-full gap-2" onClick={() => exportOne(opt.kind)}>
+                <Button variant="outline" className="w-full gap-2" onClick={() => void exportOne(opt.kind)}>
                   {opt.kind === "approved_manual" ? (
                     <FileText className="h-4 w-4" />
                   ) : (
@@ -180,7 +198,7 @@ export function ManuExportStep({ run, onRunChange, onRestart }: ManuExportStepPr
       </div>
 
       <div className="flex flex-wrap gap-3">
-        <Button className="gap-2 bg-gradient-primary" onClick={exportAll}>
+        <Button className="gap-2 bg-gradient-primary" onClick={() => void exportAll()}>
           <Package className="h-4 w-4" />
           Export full audit package
         </Button>
