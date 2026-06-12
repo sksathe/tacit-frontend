@@ -23,28 +23,6 @@ const COLORS = {
   white: rgb(1, 1, 1),
 };
 
-const fontBytesCache = new Map<string, Uint8Array>();
-
-async function loadFontBytes(url: string): Promise<Uint8Array> {
-  const cached = fontBytesCache.get(url);
-  if (cached) return cached;
-  const res = await fetch(url);
-  if (!res.ok) {
-    throw new Error(`Failed to load PDF font (${res.status})`);
-  }
-  const bytes = new Uint8Array(await res.arrayBuffer());
-  fontBytesCache.set(url, bytes);
-  return bytes;
-}
-
-async function embedBodyFont(pdfDoc: PDFDocument, langCode: string): Promise<PDFFont> {
-  const config = getUnicodeFontForLang(langCode);
-  if (config) {
-    return pdfDoc.embedFont(await loadFontBytes(config.url));
-  }
-  return pdfDoc.embedFont(StandardFonts.Helvetica);
-}
-
 function safeName(value: string): string {
   return value.replace(/[^\w.-]+/g, "_").slice(0, 48);
 }
@@ -59,6 +37,48 @@ function downloadPdfBytes(bytes: Uint8Array, filename: string): void {
   anchor.download = filename;
   anchor.click();
   URL.revokeObjectURL(url);
+}
+
+const LATIN_STANDARD_NAMES = new Set([
+  "Helvetica",
+  "Helvetica-Bold",
+  "Helvetica-Oblique",
+  "Helvetica-BoldOblique",
+]);
+
+function isLatinStandardFont(font: PDFFont): boolean {
+  return LATIN_STANDARD_NAMES.has(font.name);
+}
+
+/** Strip chars that crash pdf-lib StandardFonts (WinAnsi encoding). */
+function toLatinPdfText(text: string): string {
+  return text
+    .replace(/\uFFFD/g, "")
+    .replace(/[\u2013\u2014]/g, "-")
+    .replace(/[\u2018\u2019]/g, "'")
+    .replace(/[\u201C\u201D]/g, '"')
+    .replace(/\u2026/g, "...")
+    .replace(/[^\t\n\r\x20-\x7E\xA0-\xFF]/g, "");
+}
+
+function sanitizeUnicodePdfText(text: string): string {
+  return text.replace(/\uFFFD/g, "");
+}
+
+function inferLangFromScript(text: string): string | null {
+  if (/[\u3040-\u30FF]/.test(text)) return "ja";
+  if (/[\u0900-\u097F]/.test(text)) return "hi";
+  if (/[\u4E00-\u9FFF]/.test(text)) return "zh";
+  if (/[\u0600-\u06FF]/.test(text)) return "ar";
+  return null;
+}
+
+export function rowHasNonLatinScript(text: string): boolean {
+  return /[\u0900-\u097F\u3040-\u30FF\u4E00-\u9FFF\u0600-\u06FF]/.test(text);
+}
+
+function valueNeedsUnicodeRendering(value: string, langCode?: string | null): boolean {
+  return Boolean(langCode && getUnicodeFontForLang(langCode)) || rowHasNonLatinScript(value);
 }
 
 function wrapLines(text: string, font: PDFFont, fontSize: number, maxWidth: number): string[] {
@@ -112,8 +132,10 @@ function drawTextLine(
   color = COLORS.black,
   lineHeight = fontSize * 1.45,
 ): void {
+  const safeText = isLatinStandardFont(font) ? toLatinPdfText(text) : text;
+  if (!safeText) return;
   ensureSpace(state, lineHeight);
-  state.page.drawText(text, {
+  state.page.drawText(safeText, {
     x: MARGIN,
     y: PAGE_H - state.yTop - fontSize,
     size: fontSize,
@@ -131,7 +153,8 @@ function drawWrappedText(
   color = COLORS.black,
   lineHeight = fontSize * 1.45,
 ): void {
-  for (const line of wrapLines(text, font, fontSize, CONTENT_W)) {
+  const safeText = isLatinStandardFont(font) ? toLatinPdfText(text) : sanitizeUnicodePdfText(text);
+  for (const line of wrapLines(safeText, font, fontSize, CONTENT_W)) {
     if (!line) {
       state.yTop += lineHeight * 0.5;
       continue;
@@ -147,14 +170,17 @@ async function drawUnicodeTextBlockImage(
   color = COLORS.black,
   langCode?: string | null,
 ): Promise<void> {
-  const resolvedLang = langCode ?? state.langCode;
+  const cleaned = sanitizeUnicodePdfText(text);
+  if (!cleaned.trim()) return;
+
+  const resolvedLang = langCode ?? inferLangFromScript(cleaned) ?? state.langCode;
   const fontConfig = getUnicodeFontForLang(resolvedLang);
   if (!fontConfig) {
-    drawWrappedText(state, text, state.bodyFont, fontSize, color);
+    drawWrappedText(state, cleaned, state.latinFont, fontSize, color);
     return;
   }
 
-  const block = await renderUnicodeTextBlockPng(text, fontConfig, {
+  const block = await renderUnicodeTextBlockPng(cleaned, fontConfig, {
     maxWidthPt: CONTENT_W,
     fontSizePt: fontSize,
     lineHeightPt: fontSize * 1.45,
@@ -179,19 +205,20 @@ async function drawWrappedUnicodeSafe(
   fontSize: number,
   color = COLORS.black,
 ): Promise<void> {
-  if (prefersCanvasUnicodeRendering(state.langCode)) {
-    await drawUnicodeTextBlockImage(state, text, fontSize, color);
+  const cleaned = sanitizeUnicodePdfText(text);
+  if (!cleaned.trim()) return;
+
+  if (prefersCanvasUnicodeRendering(state.langCode) || rowHasNonLatinScript(cleaned)) {
+    await drawUnicodeTextBlockImage(state, cleaned, fontSize, color, state.langCode);
     return;
   }
 
-  try {
-    drawWrappedText(state, text, state.bodyFont, fontSize, color);
-  } catch {
-    await drawUnicodeTextBlockImage(state, text, fontSize, color);
-  }
+  drawWrappedText(state, cleaned, state.latinFont, fontSize, color);
 }
 
 function drawReportHeader(state: LayoutState, title: string, subtitle: string): void {
+  const safeTitle = toLatinPdfText(title);
+  const safeSubtitle = toLatinPdfText(subtitle);
   state.page.drawRectangle({
     x: 0,
     y: PAGE_H - HEADER_H,
@@ -199,14 +226,14 @@ function drawReportHeader(state: LayoutState, title: string, subtitle: string): 
     height: HEADER_H,
     color: COLORS.primary,
   });
-  state.page.drawText(title, {
+  state.page.drawText(safeTitle, {
     x: MARGIN,
     y: PAGE_H - 10 * PT_PER_MM,
     size: 14,
     font: state.latinBold,
     color: COLORS.white,
   });
-  state.page.drawText(subtitle, {
+  state.page.drawText(safeSubtitle, {
     x: MARGIN,
     y: PAGE_H - 16 * PT_PER_MM,
     size: 9,
@@ -244,17 +271,18 @@ function drawKeyValueRows(
 async function drawKeyValueRowsAsync(
   state: LayoutState,
   rows: Array<{ key: string; value: string; langCode?: string | null }>,
-  fonts: Map<string, PDFFont>,
 ): Promise<void> {
   for (const row of rows) {
-    if (row.langCode && prefersCanvasUnicodeRendering(row.langCode)) {
-      drawTextLine(state, `${row.key}:`, state.latinFont, 9.5);
-      await drawUnicodeTextBlockImage(state, row.value || "-", 9.5, COLORS.black, row.langCode);
+    const value = row.value || "-";
+    drawTextLine(state, `${row.key}:`, state.latinFont, 9.5);
+
+    if (valueNeedsUnicodeRendering(value, row.langCode)) {
+      const langCode = row.langCode ?? inferLangFromScript(value) ?? state.langCode;
+      await drawUnicodeTextBlockImage(state, value, 9.5, COLORS.black, langCode);
       continue;
     }
-    const fontKey = row.langCode ?? "latin";
-    const font = fonts.get(fontKey) ?? state.latinFont;
-    drawWrappedText(state, `${row.key}: ${row.value || "-"}`, font, 9.5);
+
+    drawWrappedText(state, value, state.latinFont, 9.5);
   }
   state.yTop += 4;
 }
@@ -265,13 +293,12 @@ async function createLayoutState(langCode: string): Promise<LayoutState> {
 
   const latinFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
   const latinBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
-  const bodyFont = await embedBodyFont(pdfDoc, langCode);
 
   return {
     pdfDoc,
     page: pdfDoc.addPage([PAGE_W, PAGE_H]),
     yTop: MARGIN,
-    bodyFont,
+    bodyFont: latinFont,
     latinFont,
     latinBold,
     langCode,
@@ -296,7 +323,7 @@ export async function buildTranslatedManualPdfLib(run: ManuRun, langCode: string
 
   drawReportHeader(
     state,
-    `Approved Manual ù ${langLabel}`,
+    `Approved Manual - ${langLabel}`,
     `${metadata.productName || "Product"} | Revision ${metadata.revision} | Exported ${new Date().toLocaleString()}`,
   );
 
@@ -341,62 +368,30 @@ export async function buildTranslatedManualPdfLib(run: ManuRun, langCode: string
 }
 
 export async function buildTranslationQAPdfLib(run: ManuRun): Promise<void> {
-  const pdfDoc = await PDFDocument.create();
-  pdfDoc.registerFontkit(fontkit);
-
-  const latinFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
-  const latinBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
-
-  const fontByLang = new Map<string, PDFFont>();
-  fontByLang.set("latin", latinFont);
-
-  for (const row of run.translationQA) {
-    const langCode = resolveLangCodeFromLabel(row.language);
-    if (langCode && getUnicodeFontForLang(langCode) && !fontByLang.has(langCode)) {
-      fontByLang.set(langCode, await embedBodyFont(pdfDoc, langCode));
-    }
-  }
-
-  const state: LayoutState = {
-    pdfDoc,
-    page: pdfDoc.addPage([PAGE_W, PAGE_H]),
-    yTop: MARGIN,
-    bodyFont: latinFont,
-    latinFont,
-    latinBold,
-    langCode: "en",
-  };
+  const state = await createLayoutState("en");
 
   drawReportHeader(state, "Translation QA Report", `${run.client} | Run ${run.runId.slice(0, 8)}`);
 
   for (const [index, row] of run.translationQA.entries()) {
     const langCode = resolveLangCodeFromLabel(row.language);
-    drawSectionTitle(state, `${index + 1}. ${row.sectionTitle} (${row.language})`);
-    await drawKeyValueRowsAsync(
-      state,
-      [
-        { key: "Approval Status", value: row.status ?? "draft" },
-        { key: "Accuracy Score", value: `${Math.round(row.accuracyScore * 100)}%` },
-        { key: "Source Text", value: row.sourceText },
-        { key: "Translated Text", value: row.translatedText, langCode },
-        { key: "Terminology Flags", value: row.terminologyFlags.join(" | ") || "-" },
-        { key: "Missing Warnings", value: row.missingWarnings.join(" | ") || "-" },
-        { key: "Approver Notes", value: row.approverNotes?.trim() || "-" },
-        { key: "Flag Reason", value: row.flagReason?.trim() || "-" },
-      ],
-      fontByLang,
-    );
+    drawSectionTitle(state, `${index + 1}. ${toLatinPdfText(row.sectionTitle)} (${toLatinPdfText(row.language)})`);
+    await drawKeyValueRowsAsync(state, [
+      { key: "Approval Status", value: row.status ?? "draft" },
+      { key: "Accuracy Score", value: `${Math.round(row.accuracyScore * 100)}%` },
+      { key: "Source Text", value: row.sourceText },
+      { key: "Translated Text", value: row.translatedText, langCode },
+      { key: "Terminology Flags", value: row.terminologyFlags.join(" | ") || "-" },
+      { key: "Missing Warnings", value: row.missingWarnings.join(" | ") || "-" },
+      { key: "Approver Notes", value: row.approverNotes?.trim() || "-", langCode },
+      { key: "Flag Reason", value: row.flagReason?.trim() || "-" },
+    ]);
   }
 
-  const bytes = await pdfDoc.save();
+  const bytes = await state.pdfDoc.save();
   downloadPdfBytes(
     bytes,
     `manu-${run.runId.slice(0, 8)}-translation_qa-${safeName(run.manualConfig.metadata.modelCode || run.manualConfig.metadata.productName)}.pdf`,
   );
-}
-
-export function rowHasNonLatinScript(text: string): boolean {
-  return /[\u0900-\u097F\u3040-\u30FF\u4E00-\u9FFF\u0600-\u06FF]/.test(text);
 }
 
 export function translationRowNeedsUnicodeFont(row: ManuTranslationQARow): boolean {

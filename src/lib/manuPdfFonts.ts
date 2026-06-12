@@ -109,9 +109,9 @@ export async function renderUnicodeTextBlockPng(
   };
 }
 
-/** Devanagari shaping is unreliable in fontkit outside browsers — rasterize instead. */
+/** Rasterize all non-Latin scripts — avoids WinAnsi / fontkit shaping errors in pdf-lib. */
 export function prefersCanvasUnicodeRendering(langCode: string): boolean {
-  return langCode === "hi";
+  return Boolean(UNICODE_PDF_FONTS[langCode]);
 }
 
 function wrapTextCanvas(ctx: CanvasRenderingContext2D, text: string, maxWidthPx: number): string[] {
